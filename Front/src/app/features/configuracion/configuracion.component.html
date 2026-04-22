@@ -1,0 +1,451 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <mat-icon class="header-icon">settings</mat-icon>
+    <div>
+      <h1>Configuración</h1>
+      <p>Perfil, usuarios y preferencias del sistema</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tabs ───────────────────────────────────────────────────────────────── -->
+<mat-tab-group animationDuration="200ms" class="config-tabs">
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1 — MI PERFIL                                                      -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">person</mat-icon>
+      Mi Perfil
+    </ng-template>
+
+    <div class="tab-content">
+      <div class="two-cols">
+
+        <!-- Avatar card -->
+        <mat-card class="profile-card">
+          <mat-card-content>
+            <div class="avatar-section">
+              <div class="avatar">{{ iniciales() }}</div>
+              <div class="avatar-info">
+                <div class="profile-name">{{ usuario()?.nombre }} {{ usuario()?.apellido }}</div>
+                <div class="profile-email">{{ usuario()?.email }}</div>
+                <span class="rol-badge" [style.background]="rolColor(usuario()?.rol ?? '')">
+                  {{ usuario()?.rol }}
+                </span>
+              </div>
+            </div>
+
+            <mat-divider class="card-divider" />
+
+            <div class="info-row">
+              <mat-icon>church</mat-icon>
+              <span>{{ usuario()?.sedeNombre }}</span>
+            </div>
+            <div class="info-row">
+              <mat-icon>email</mat-icon>
+              <span>{{ usuario()?.email }}</span>
+            </div>
+            <div class="info-row">
+              <mat-icon>shield</mat-icon>
+              <span>{{ usuario()?.rol }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Datos personales -->
+        <mat-card class="form-card">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="card-avatar-icon">edit</mat-icon>
+            <mat-card-title>Datos personales</mat-card-title>
+            <mat-card-subtitle>Actualiza tu nombre</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="perfilForm" class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Nombre</mat-label>
+                <input matInput formControlName="nombre">
+                <mat-icon matPrefix>badge</mat-icon>
+                @if (perfilForm.get('nombre')?.hasError('required')) {
+                  <mat-error>Requerido</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Apellido</mat-label>
+                <input matInput formControlName="apellido">
+                <mat-icon matPrefix>badge</mat-icon>
+                @if (perfilForm.get('apellido')?.hasError('required')) {
+                  <mat-error>Requerido</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Correo electrónico</mat-label>
+                <input matInput [value]="usuario()?.email" readonly>
+                <mat-icon matPrefix>email</mat-icon>
+                <mat-hint>El email no se puede modificar</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Sede asignada</mat-label>
+                <input matInput [value]="usuario()?.sedeNombre" readonly>
+                <mat-icon matPrefix>church</mat-icon>
+                <mat-hint>Asignada por el administrador</mat-hint>
+              </mat-form-field>
+            </form>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-flat-button color="primary"
+                    (click)="guardarPerfil()"
+                    [disabled]="perfilForm.invalid || guardandoPerfil()">
+              @if (guardandoPerfil()) { <mat-spinner diameter="18" /> }
+              @else { <mat-icon>save</mat-icon> }
+              Guardar cambios
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+
+      <!-- Cambiar contraseña -->
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-avatar-icon">lock</mat-icon>
+          <mat-card-title>Cambiar contraseña</mat-card-title>
+          <mat-card-subtitle>Mínimo 8 caracteres</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="passwordForm" class="password-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Contraseña actual</mat-label>
+              <input matInput type="password" formControlName="actual">
+              <mat-icon matPrefix>lock_outline</mat-icon>
+              @if (passwordForm.get('actual')?.hasError('required') && passwordForm.get('actual')?.touched) {
+                <mat-error>Requerido</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nueva contraseña</mat-label>
+              <input matInput type="password" formControlName="nueva">
+              <mat-icon matPrefix>lock_reset</mat-icon>
+              @if (passwordForm.get('nueva')?.hasError('minlength')) {
+                <mat-error>Mínimo 8 caracteres</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Confirmar contraseña</mat-label>
+              <input matInput type="password" formControlName="confirmar">
+              <mat-icon matPrefix>check_circle</mat-icon>
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-flat-button color="primary"
+                  (click)="cambiarPassword()"
+                  [disabled]="passwordForm.invalid || guardandoPassword()">
+            @if (guardandoPassword()) { <mat-spinner diameter="18" /> }
+            @else { <mat-icon>key</mat-icon> }
+            Cambiar contraseña
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2 — USUARIOS                                                       -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">manage_accounts</mat-icon>
+      Usuarios
+    </ng-template>
+
+    <div class="tab-content">
+      @if (!esAdminOSuperAdmin()) {
+        <div class="no-access">
+          <mat-icon>lock</mat-icon>
+          <p>Necesitas permisos de <strong>Admin</strong> o <strong>SuperAdmin</strong> para gestionar usuarios.</p>
+        </div>
+      } @else {
+        <mat-card>
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="card-avatar-icon">group</mat-icon>
+            <mat-card-title>Gestión de usuarios</mat-card-title>
+            <mat-card-subtitle>{{ usuarios().length }} usuarios registrados en el sistema</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @if (cargandoUsuarios()) {
+              <div class="loading-center"><mat-spinner diameter="40" /></div>
+            } @else {
+              <div class="table-wrapper">
+                <table mat-table [dataSource]="usuarios()" class="users-table">
+
+                  <!-- Nombre -->
+                  <ng-container matColumnDef="nombre">
+                    <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                    <td mat-cell *matCellDef="let u">
+                      <div class="user-cell">
+                        <div class="user-avatar-sm"
+                             [style.background]="rolColor(u.rol)"
+                             [class.inactivo]="!u.activo">
+                          {{ u.nombre[0] }}{{ u.apellido[0] }}
+                        </div>
+                        <div>
+                          <div class="user-nombre" [class.text-inactivo]="!u.activo">
+                            {{ u.nombre }} {{ u.apellido }}
+                          </div>
+                          <div class="user-email">{{ u.email }}</div>
+                        </div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <!-- Rol -->
+                  <ng-container matColumnDef="rol">
+                    <th mat-header-cell *matHeaderCellDef>Rol</th>
+                    <td mat-cell *matCellDef="let u">
+                      <mat-select [value]="u.rol"
+                                  (selectionChange)="cambiarRol(u, $event.value)"
+                                  class="rol-select"
+                                  [style.color]="rolColor(u.rol)">
+                        @for (r of roles; track r) {
+                          <mat-option [value]="r">{{ r }}</mat-option>
+                        }
+                      </mat-select>
+                    </td>
+                  </ng-container>
+
+                  <!-- Sede -->
+                  <ng-container matColumnDef="sede">
+                    <th mat-header-cell *matHeaderCellDef>Sede</th>
+                    <td mat-cell *matCellDef="let u" class="sede-cell">{{ u.sedeNombre }}</td>
+                  </ng-container>
+
+                  <!-- Último acceso -->
+                  <ng-container matColumnDef="ultimoAcceso">
+                    <th mat-header-cell *matHeaderCellDef>Último acceso</th>
+                    <td mat-cell *matCellDef="let u" class="fecha-cell">
+                      {{ formatFecha(u.ultimoAcceso) }}
+                    </td>
+                  </ng-container>
+
+                  <!-- Activo -->
+                  <ng-container matColumnDef="activo">
+                    <th mat-header-cell *matHeaderCellDef>Activo</th>
+                    <td mat-cell *matCellDef="let u">
+                      <mat-slide-toggle
+                        [checked]="u.activo"
+                        (change)="toggleActivo(u)"
+                        color="primary" />
+                    </td>
+                  </ng-container>
+
+                  <!-- Acciones -->
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let u">
+                      <button mat-icon-button
+                              matTooltip="Enviar email de acceso"
+                              (click)="enviarAcceso(u)">
+                        <mat-icon>mail_outline</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnas;"
+                      [class.row-inactivo]="!row.activo"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 3 — MI SEDE                                                        -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">church</mat-icon>
+      Mi Sede
+    </ng-template>
+
+    <div class="tab-content">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-avatar-icon">schedule</mat-icon>
+          <mat-card-title>Horarios y contacto</mat-card-title>
+          <mat-card-subtitle>{{ usuario()?.sedeNombre }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="sedeForm">
+
+            <div class="section-label">
+              <mat-icon>wb_sunny</mat-icon>
+              Horarios de culto
+            </div>
+            <div class="sede-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Domingo AM</mat-label>
+                <input matInput formControlName="horarioDomingoAM" placeholder="9:00 AM">
+                <mat-icon matPrefix>wb_sunny</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Domingo PM</mat-label>
+                <input matInput formControlName="horarioDomingoPM" placeholder="6:00 PM">
+                <mat-icon matPrefix>nights_stay</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Miércoles</mat-label>
+                <input matInput formControlName="horarioMiercoles" placeholder="7:00 PM">
+                <mat-icon matPrefix>event</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="section-label" style="margin-top:24px">
+              <mat-icon>contact_phone</mat-icon>
+              Información de contacto
+            </div>
+            <div class="contacto-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Teléfono</mat-label>
+                <input matInput formControlName="telefono">
+                <mat-icon matPrefix>phone</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="span-2">
+                <mat-label>Email de la sede</mat-label>
+                <input matInput formControlName="email">
+                <mat-icon matPrefix>email</mat-icon>
+                @if (sedeForm.get('email')?.hasError('email')) {
+                  <mat-error>Email inválido</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+          </form>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-flat-button color="primary"
+                  (click)="guardarSede()"
+                  [disabled]="sedeForm.invalid || guardandoSede()">
+            @if (guardandoSede()) { <mat-spinner diameter="18" /> }
+            @else { <mat-icon>save</mat-icon> }
+            Guardar cambios
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 4 — SISTEMA                                                        -->
+  <!-- ══════════════════════════════════════════════════════════════════════ -->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon class="tab-icon">tune</mat-icon>
+      Sistema
+    </ng-template>
+
+    <div class="tab-content">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-avatar-icon">tune</mat-icon>
+          <mat-card-title>Preferencias del sistema</mat-card-title>
+          <mat-card-subtitle>Configura el comportamiento de la aplicación</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="sistema-content">
+
+          <div class="pref-row">
+            <div class="pref-info">
+              <div class="pref-icon-wrap" style="background:#ede9fe">
+                <mat-icon style="color:#7c3aed">notifications</mat-icon>
+              </div>
+              <div>
+                <div class="pref-label">Notificaciones</div>
+                <div class="pref-desc">Alertas de nuevos miembros, eventos próximos y actividad</div>
+              </div>
+            </div>
+            <mat-slide-toggle
+              [checked]="notificaciones()"
+              (change)="notificaciones.set($event.checked)"
+              color="primary" />
+          </div>
+
+          <mat-divider />
+
+          <div class="pref-row">
+            <div class="pref-info">
+              <div class="pref-icon-wrap" style="background:#dbeafe">
+                <mat-icon style="color:#0284c7">language</mat-icon>
+              </div>
+              <div>
+                <div class="pref-label">Idioma</div>
+                <div class="pref-desc">Español (Colombia) — otros idiomas próximamente</div>
+              </div>
+            </div>
+            <span class="idioma-badge">🇨🇴 Español</span>
+          </div>
+
+          <mat-divider />
+
+          <div class="pref-row">
+            <div class="pref-info">
+              <div class="pref-icon-wrap" style="background:#f1f5f9">
+                <mat-icon style="color:#64748b">info_outline</mat-icon>
+              </div>
+              <div>
+                <div class="pref-label">Versión</div>
+                <div class="pref-desc">CRM Torreón Fuerte v1.0.0 · Angular 20 · .NET 8 · SQL Server</div>
+              </div>
+            </div>
+          </div>
+
+          <mat-divider />
+
+          <div class="pref-row">
+            <div class="pref-info">
+              <div class="pref-icon-wrap" style="background:#fee2e2">
+                <mat-icon style="color:#ef4444">logout</mat-icon>
+              </div>
+              <div>
+                <div class="pref-label">Cerrar sesión</div>
+                <div class="pref-desc">Salir del sistema en este dispositivo</div>
+              </div>
+            </div>
+            <button mat-stroked-button color="warn" (click)="auth.logout()">
+              <mat-icon>logout</mat-icon>
+              Cerrar sesión
+            </button>
+          </div>
+
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-flat-button color="primary"
+                  (click)="guardarSistema()"
+                  [disabled]="guardandoSistema()">
+            @if (guardandoSistema()) { <mat-spinner diameter="18" /> }
+            @else { <mat-icon>save</mat-icon> }
+            Guardar preferencias
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <div class="version-footer">
+        <mat-icon>castle</mat-icon>
+        Torreón Fuerte CRM — Desarrollado para la familia de fe
+      </div>
+    </div>
+  </mat-tab>
+
+</mat-tab-group>

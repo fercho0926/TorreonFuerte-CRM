@@ -1,0 +1,262 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <mat-icon class="header-icon">route</mat-icon>
+    <div>
+      <h1>Plan de Preparación</h1>
+      <p>Camino de formación espiritual · {{ totalEnFormacion() }} miembros en proceso</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Loading ────────────────────────────────────────────────────────────── -->
+@if (cargando()) {
+  <div class="loading-center"><mat-spinner diameter="52" /></div>
+} @else {
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- JOURNEY PATH                                                             -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<div class="journey-section">
+  <div class="journey-wrapper">
+
+    <!-- SVG road -->
+    <svg class="journey-svg"
+         [attr.viewBox]="'0 0 ' + svgW + ' ' + svgH"
+         preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Road gradient follows the path direction -->
+        <linearGradient id="roadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          @for (etapa of etapas(); track etapa.etapaId; let i = $index) {
+            <stop [attr.offset]="(i / (etapas().length - 1) * 100) + '%'"
+                  [attr.stop-color]="etapa.color" />
+          }
+        </linearGradient>
+        <!-- Glow filter -->
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Road outer shadow -->
+      <path [attr.d]="pathD()" stroke="#d1d5db" stroke-width="32"
+            fill="none" stroke-linecap="round" opacity="0.5" />
+      <!-- Road base (white fill) -->
+      <path [attr.d]="pathD()" stroke="#f8fafc" stroke-width="26"
+            fill="none" stroke-linecap="round" />
+      <!-- Road gradient fill -->
+      <path [attr.d]="pathD()" stroke="url(#roadGrad)" stroke-width="18"
+            fill="none" stroke-linecap="round" opacity="0.25" />
+      <!-- Road center dashes -->
+      <path [attr.d]="pathD()" stroke="white" stroke-width="3"
+            fill="none" stroke-linecap="round"
+            stroke-dasharray="18 14" />
+    </svg>
+
+    <!-- Stage nodes (absolutely positioned on the SVG) -->
+    @for (etapa of etapas(); track etapa.etapaId; let i = $index) {
+      <div class="journey-node"
+           [class.node-selected]="etapaSeleccionada()?.etapaId === etapa.etapaId"
+           [style.left]="nodePositions()[i].xPct + '%'"
+           [style.top.px]="nodePositions()[i].y"
+           (click)="seleccionar(etapa)">
+
+        <!-- Member badge -->
+        @if (etapa.totalMiembros > 0) {
+          <div class="node-badge" [style.background]="etapa.color">
+            {{ etapa.totalMiembros }}
+          </div>
+        }
+
+        <!-- Circle -->
+        <div class="node-circle"
+             [style.background]="etapaSeleccionada()?.etapaId === etapa.etapaId ? etapa.color : etapa.colorClaro"
+             [style.border-color]="etapa.color"
+             [style.color]="etapaSeleccionada()?.etapaId === etapa.etapaId ? 'white' : etapa.color">
+          <mat-icon>{{ etapa.icono }}</mat-icon>
+        </div>
+
+        <!-- Label -->
+        <div class="node-label-wrap">
+          <span class="node-order" [style.color]="etapa.color">Etapa {{ etapa.orden }}</span>
+          <span class="node-name">{{ etapa.nombre }}</span>
+        </div>
+
+      </div>
+    }
+
+  </div><!-- /journey-wrapper -->
+</div><!-- /journey-section -->
+
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- STAGE DETAIL                                                             -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+@if (etapaSeleccionada(); as etapa) {
+  <div class="detail-section">
+
+    <!-- Stage header card -->
+    <div class="detail-header" [style.border-left-color]="etapa.color">
+      <div class="detail-icon-wrap" [style.background]="etapa.colorClaro">
+        <mat-icon [style.color]="etapa.color">{{ etapa.icono }}</mat-icon>
+      </div>
+      <div class="detail-meta">
+        <div class="detail-title-row">
+          <h2>{{ etapa.nombre }}</h2>
+          <span class="etapa-badge"
+                [style.background]="etapa.colorClaro"
+                [style.color]="etapa.color">
+            Etapa {{ etapa.orden }}
+          </span>
+        </div>
+        <p class="detail-desc">{{ etapa.descripcion }}</p>
+      </div>
+      <div class="detail-stats">
+        <div class="dstat">
+          <span class="dstat-num" [style.color]="etapa.color">{{ etapa.totalMiembros }}</span>
+          <span class="dstat-lbl">en esta etapa</span>
+        </div>
+        @if (etapaSiguiente()) {
+          <div class="dstat">
+            <span class="dstat-num">→</span>
+            <span class="dstat-lbl">{{ etapaSiguiente()!.nombre }}</span>
+          </div>
+        } @else {
+          <div class="dstat">
+            <span class="dstat-num" [style.color]="etapa.color">✓</span>
+            <span class="dstat-lbl">Etapa final</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Members table -->
+    <mat-card class="members-card">
+      <div class="card-header-row">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon [style.color]="etapa.color">people</mat-icon>
+            Miembros en esta etapa
+          </mat-card-title>
+          <mat-card-subtitle>
+            {{ miembros().length }} persona{{ miembros().length !== 1 ? 's' : '' }}
+            @if (etapaSiguiente()) {
+              · Puedes avanzarlos a "{{ etapaSiguiente()!.nombre }}"
+            }
+          </mat-card-subtitle>
+        </mat-card-header>
+        <button mat-stroked-button class="add-miembro-btn"
+                [style.border-color]="etapa.color" [style.color]="etapa.color"
+                (click)="mostrarPicker.set(!mostrarPicker())">
+          <mat-icon>person_add</mat-icon> Añadir miembro
+        </button>
+      </div>
+
+      <!-- Picker inline -->
+      @if (mostrarPicker()) {
+        <div class="picker-panel">
+          <input class="picker-search" placeholder="Buscar miembro..."
+                 [ngModel]="busquedaPicker()"
+                 (ngModelChange)="busquedaPicker.set($event)">
+          <div class="picker-list">
+            @for (m of miembrosFiltrados(); track m.miembroId) {
+              <div class="picker-row" (click)="agregarMiembro(m)">
+                <div class="picker-avatar" [style.background]="etapa.colorClaro" [style.color]="etapa.color">
+                  {{ m.nombre[0] }}{{ m.apellido[0] }}
+                </div>
+                <div class="picker-info">
+                  <span class="picker-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+                  <span class="picker-estado">{{ m.estado }}</span>
+                </div>
+                <mat-icon class="picker-add-icon">add_circle_outline</mat-icon>
+              </div>
+            }
+            @if (miembrosFiltrados().length === 0) {
+              <div class="picker-empty">Sin resultados</div>
+            }
+          </div>
+        </div>
+      }
+
+      <mat-card-content>
+        @if (cargandoMiembros()) {
+          <div class="loading-center small"><mat-spinner diameter="36" /></div>
+        } @else if (miembros().length === 0) {
+          <div class="empty-members">
+            <mat-icon>person_search</mat-icon>
+            <p>No hay miembros en esta etapa aún.</p>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="miembros()" class="members-table">
+
+            <!-- Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Miembro</th>
+              <td mat-cell *matCellDef="let m">
+                <div class="cell-member">
+                  <div class="member-avatar" [style.background]="etapa.colorClaro" [style.color]="etapa.color">
+                    {{ m.nombre[0] }}{{ m.apellido[0] }}
+                  </div>
+                  <div>
+                    <span class="member-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+                    @if (m.telefono) {
+                      <span class="member-tel">{{ m.telefono }}</span>
+                    }
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Líder -->
+            <ng-container matColumnDef="lider">
+              <th mat-header-cell *matHeaderCellDef>Líder de célula</th>
+              <td mat-cell *matCellDef="let m">
+                <span class="cell-lider">{{ m.liderNombre ?? '—' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Días en etapa -->
+            <ng-container matColumnDef="dias">
+              <th mat-header-cell *matHeaderCellDef>Tiempo en etapa</th>
+              <td mat-cell *matCellDef="let m">
+                <span class="dias-chip" [ngClass]="diasClass(m.diasEnEtapa)">
+                  <mat-icon class="dias-icon">schedule</mat-icon>
+                  {{ diasLabel(m.diasEnEtapa) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let m">
+                <button mat-stroked-button
+                        [style.border-color]="etapa.color"
+                        [style.color]="etapa.color"
+                        [disabled]="avanzando() === m.miembroId"
+                        (click)="avanzar(m)"
+                        [matTooltip]="etapaSiguiente() ? 'Avanzar a ' + etapaSiguiente()!.nombre : 'Marcar como completado'">
+                  @if (avanzando() === m.miembroId) {
+                    <mat-spinner diameter="16" />
+                  } @else {
+                    <mat-icon>arrow_forward</mat-icon>
+                  }
+                  {{ etapaSiguiente() ? 'Avanzar' : 'Completar' }}
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+          </table>
+        }
+      </mat-card-content>
+    </mat-card>
+
+  </div><!-- /detail-section -->
+}
+
+<!-- Fin @if (cargando) -->
+}

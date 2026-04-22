@@ -1,0 +1,291 @@
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <mat-icon class="header-icon">people</mat-icon>
+    <div>
+      <h1>Miembros</h1>
+      <p>Gestión de la congregación · {{ miembros().length }} registros</p>
+    </div>
+  </div>
+  <a mat-flat-button color="primary" routerLink="nuevo">
+    <mat-icon>person_add</mat-icon> Nuevo Miembro
+  </a>
+</div>
+
+<!-- ── Stats clickeables ────────────────────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat-card s-total" [class.active]="filtro() === 'Todos'" (click)="filtro.set('Todos')">
+    <mat-icon>groups</mat-icon>
+    <div><span class="sn">{{ miembros().length }}</span><span class="sl">Total</span></div>
+  </div>
+  <div class="stat-card s-activo" [class.active]="filtro() === 'Activo'" (click)="filtro.set('Activo')">
+    <mat-icon>how_to_reg</mat-icon>
+    <div><span class="sn">{{ totalActivos() }}</span><span class="sl">Activos</span></div>
+  </div>
+  <div class="stat-card s-lider" [class.active]="filtro() === 'Lider'" (click)="filtro.set('Lider')">
+    <mat-icon>star</mat-icon>
+    <div><span class="sn">{{ totalLideres() }}</span><span class="sl">Líderes</span></div>
+  </div>
+  <div class="stat-card s-visitante" [class.active]="filtro() === 'Visitante'" (click)="filtro.set('Visitante')">
+    <mat-icon>person_search</mat-icon>
+    <div><span class="sn">{{ totalVisitantes() }}</span><span class="sl">Visitantes</span></div>
+  </div>
+  <div class="stat-card s-inactivo" [class.active]="filtro() === 'Inactivo'" (click)="filtro.set('Inactivo')">
+    <mat-icon>person_off</mat-icon>
+    <div><span class="sn">{{ totalInactivos() }}</span><span class="sl">Inactivos</span></div>
+  </div>
+</div>
+
+<!-- ── Buscador ─────────────────────────────────────────────────────────── -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <mat-icon class="search-icon">search</mat-icon>
+    <input class="search-input" type="text"
+           placeholder="Buscar nombre, email, teléfono o líder…"
+           [ngModel]="busqueda()"
+           (ngModelChange)="busqueda.set($event)" />
+    @if (busqueda()) {
+      <button class="clear-btn" mat-icon-button (click)="busqueda.set('')">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </div>
+  <span class="result-count">{{ filtrados().length }} resultado{{ filtrados().length !== 1 ? 's' : '' }}</span>
+</div>
+
+<!-- ── Loading ───────────────────────────────────────────────────────────── -->
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48" /></div>
+} @else if (filtrados().length === 0) {
+  <div class="empty-state">
+    <mat-icon>manage_search</mat-icon>
+    <p>No hay miembros que coincidan.</p>
+    @if (busqueda() || filtro() !== 'Todos') {
+      <button mat-stroked-button (click)="busqueda.set(''); filtro.set('Todos')">
+        Limpiar filtros
+      </button>
+    }
+  </div>
+} @else {
+
+  <!-- ══════════════ DESKTOP — tabla ══════════════ -->
+  <div class="table-view">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-expand"></th>
+          <th class="col-miembro">Miembro</th>
+          <th class="col-estado">Estado</th>
+          <th class="col-contacto">Contacto</th>
+          <th class="col-lider">Líder de célula</th>
+          <th class="col-acciones"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of filtrados(); track m.miembroId) {
+
+          <!-- Fila principal -->
+          <tr [class.row-inactivo]="m.estado === 'Inactivo'"
+              [class.row-lider]="m.estado === 'Lider'"
+              [class.row-expanded]="expandidoId() === m.miembroId">
+
+            <!-- Toggle expand (solo líderes) -->
+            <td class="col-expand">
+              @if (m.estado === 'Lider') {
+                <button mat-icon-button class="expand-btn"
+                        [class.expanded]="expandidoId() === m.miembroId"
+                        (click)="toggleExpand(m)"
+                        [matTooltip]="expandidoId() === m.miembroId ? 'Ocultar célula' : 'Ver célula'">
+                  <mat-icon>expand_more</mat-icon>
+                </button>
+              }
+            </td>
+
+            <!-- Miembro: avatar + nombre + email -->
+            <td class="col-miembro">
+              <div class="cell-miembro">
+                <div class="avatar" [ngClass]="'av-' + m.estado.toLowerCase()">
+                  {{ initials(m.nombre, m.apellido) }}
+                </div>
+                <div class="miembro-info">
+                  <span class="miembro-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+                  @if (m.email) {
+                    <span class="miembro-email">{{ m.email }}</span>
+                  }
+                </div>
+              </div>
+            </td>
+
+            <!-- Estado -->
+            <td class="col-estado">
+              <span class="estado-chip" [ngClass]="estadoClass(m.estado)">{{ m.estado }}</span>
+            </td>
+
+            <!-- Contacto -->
+            <td class="col-contacto">
+              @if (m.telefono) {
+                <div class="cell-icon-row">
+                  <mat-icon>phone</mat-icon>{{ m.telefono }}
+                </div>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+
+            <!-- Líder -->
+            <td class="col-lider">
+              @if (m.liderNombre) {
+                <div class="cell-icon-row lider-cell">
+                  <mat-icon>person</mat-icon>{{ m.liderNombre }}
+                </div>
+              } @else if (m.estado === 'Lider') {
+                <div class="cell-icon-row lider-badge-cell">
+                  <mat-icon>stars</mat-icon>
+                  {{ miembrosACargo(m).length }} miembro{{ miembrosACargo(m).length !== 1 ? 's' : '' }} a cargo
+                </div>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+
+            <!-- Acciones -->
+            <td class="col-acciones">
+              <div class="acciones-row">
+                <a mat-icon-button [routerLink]="[m.miembroId]" matTooltip="Ver detalle" class="btn-ver">
+                  <mat-icon>visibility</mat-icon>
+                </a>
+                <a mat-icon-button [routerLink]="[m.miembroId, 'editar']" matTooltip="Editar" class="btn-edit">
+                  <mat-icon>edit</mat-icon>
+                </a>
+                <button mat-icon-button (click)="eliminar(m)" matTooltip="Eliminar" class="btn-del">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Fila expandida: miembros a cargo del líder -->
+          @if (m.estado === 'Lider' && expandidoId() === m.miembroId) {
+            <tr class="expand-detail-row">
+              <td colspan="6" class="expand-detail-cell">
+                <div class="celula-panel">
+                  <div class="celula-header">
+                    <mat-icon>group</mat-icon>
+                    <span>Célula de {{ m.nombre }} {{ m.apellido }}</span>
+                    <span class="celula-count">{{ miembrosACargo(m).length }} integrante{{ miembrosACargo(m).length !== 1 ? 's' : '' }}</span>
+                  </div>
+
+                  @if (miembrosACargo(m).length === 0) {
+                    <div class="celula-empty">
+                      <mat-icon>people_outline</mat-icon>
+                      <span>Sin miembros asignados aún</span>
+                    </div>
+                  } @else {
+                    <div class="celula-grid">
+                      @for (c of miembrosACargo(m); track c.miembroId) {
+                        <a class="celula-member" [routerLink]="[c.miembroId]">
+                          <div class="celula-avatar" [ngClass]="'av-' + c.estado.toLowerCase()">
+                            {{ initials(c.nombre, c.apellido) }}
+                          </div>
+                          <div class="celula-info">
+                            <span class="celula-nombre">{{ c.nombre }} {{ c.apellido }}</span>
+                            <span class="celula-estado" [ngClass]="estadoClass(c.estado)">{{ c.estado }}</span>
+                          </div>
+                          @if (c.etapaActual) {
+                            <span class="celula-etapa" [style.background]="etapaColor(c.etapaActual) + '22'"
+                                  [style.color]="etapaColor(c.etapaActual)">
+                              {{ c.etapaActual }}
+                            </span>
+                          }
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══════════════ MOBILE — cards ══════════════ -->
+  <div class="cards-view">
+    @for (m of filtrados(); track m.miembroId) {
+      <div class="miembro-card" [class.card-inactivo]="m.estado === 'Inactivo'">
+
+        <div class="card-header">
+          <div class="avatar" [ngClass]="'av-' + m.estado.toLowerCase()">
+            {{ initials(m.nombre, m.apellido) }}
+          </div>
+          <div class="card-header-info">
+            <span class="card-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+            <span class="estado-chip" [ngClass]="estadoClass(m.estado)">{{ m.estado }}</span>
+          </div>
+          @if (m.estado === 'Lider') {
+            <button mat-icon-button class="expand-btn" [class.expanded]="expandidoId() === m.miembroId"
+                    (click)="toggleExpand(m)">
+              <mat-icon>expand_more</mat-icon>
+            </button>
+          }
+        </div>
+
+        <div class="card-body">
+          @if (m.email) {
+            <div class="info-row"><mat-icon>email</mat-icon><span>{{ m.email }}</span></div>
+          }
+          @if (m.telefono) {
+            <div class="info-row"><mat-icon>phone</mat-icon><span>{{ m.telefono }}</span></div>
+          }
+          @if (m.liderNombre) {
+            <div class="info-row"><mat-icon>person</mat-icon>
+              <span class="lider-val">{{ m.liderNombre }}</span>
+            </div>
+          } @else if (m.estado === 'Lider') {
+            <div class="info-row"><mat-icon>stars</mat-icon>
+              <span class="lider-val">{{ miembrosACargo(m).length }} miembro{{ miembrosACargo(m).length !== 1 ? 's' : '' }} a cargo</span>
+            </div>
+          }
+        </div>
+
+        <!-- Panel célula expandida (mobile) -->
+        @if (m.estado === 'Lider' && expandidoId() === m.miembroId) {
+          <div class="celula-panel">
+            <div class="celula-header">
+              <mat-icon>group</mat-icon>
+              <span>Célula · {{ miembrosACargo(m).length }} integrante{{ miembrosACargo(m).length !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="celula-grid">
+              @for (c of miembrosACargo(m); track c.miembroId) {
+                <a class="celula-member" [routerLink]="[c.miembroId]">
+                  <div class="celula-avatar" [ngClass]="'av-' + c.estado.toLowerCase()">
+                    {{ initials(c.nombre, c.apellido) }}
+                  </div>
+                  <div class="celula-info">
+                    <span class="celula-nombre">{{ c.nombre }} {{ c.apellido }}</span>
+                    <span class="celula-estado" [ngClass]="estadoClass(c.estado)">{{ c.estado }}</span>
+                  </div>
+                </a>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="card-actions">
+          <a mat-stroked-button [routerLink]="[m.miembroId]" class="btn-ver">
+            <mat-icon>visibility</mat-icon> Ver
+          </a>
+          <a mat-stroked-button [routerLink]="[m.miembroId, 'editar']" class="btn-edit">
+            <mat-icon>edit</mat-icon> Editar
+          </a>
+          <button mat-icon-button class="btn-del" (click)="eliminar(m)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+
+      </div>
+    }
+  </div>
+
+}

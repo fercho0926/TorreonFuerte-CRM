@@ -1,0 +1,175 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <mat-icon class="header-icon">volunteer_activism</mat-icon>
+    <div>
+      <h1>Ministerios</h1>
+      <p>Alabanza · Danza · Ujieres · Intercesión · Media</p>
+    </div>
+  </div>
+  <button mat-flat-button color="primary" (click)="abrirForm()">
+    <mat-icon>add</mat-icon> Nuevo ministerio
+  </button>
+</div>
+
+<!-- ── Stats ───────────────────────────────────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat-card s-total">
+    <mat-icon>groups</mat-icon>
+    <div><span class="sn">{{ ministerios().length }}</span><span class="sl">Ministerios</span></div>
+  </div>
+  <div class="stat-card s-integrantes">
+    <mat-icon>people</mat-icon>
+    <div><span class="sn">{{ totalIntegrantes() }}</span><span class="sl">Integrantes activos</span></div>
+  </div>
+  <div class="stat-card s-activos">
+    <mat-icon>check_circle</mat-icon>
+    <div><span class="sn">{{ ministeriosActivos() }}</span><span class="sl">Ministerios activos</span></div>
+  </div>
+  <div class="stat-card s-tipos">
+    <mat-icon>category</mat-icon>
+    <div><span class="sn">{{ totalTipos() }}</span><span class="sl">Tipos distintos</span></div>
+  </div>
+</div>
+
+<!-- ── Loading ─────────────────────────────────────────────────────────────── -->
+@if (cargando()) {
+  <div class="loading-center"><mat-spinner diameter="48" /></div>
+} @else if (ministerios().length === 0) {
+  <div class="empty-state">
+    <mat-icon>volunteer_activism</mat-icon>
+    <p>No hay ministerios registrados.</p>
+    <button mat-flat-button color="primary" (click)="abrirForm()">Crear primer ministerio</button>
+  </div>
+} @else {
+
+<!-- ── Grid ────────────────────────────────────────────────────────────────── -->
+<div class="ministerios-grid">
+  @for (m of ministerios(); track m.ministerioId) {
+    <div class="min-card" [class.min-expanded]="expandido() === m.ministerioId">
+
+      <!-- Header con color -->
+      <div class="min-header" [style.background]="tipoMeta(m).color">
+        <mat-icon class="min-tipo-icon">{{ tipoMeta(m).icono }}</mat-icon>
+        <div class="min-header-info">
+          <span class="min-tipo-label">{{ tipoMeta(m).label }}</span>
+          <span class="min-nombre">{{ m.nombre }}</span>
+        </div>
+        <!-- Acciones -->
+        <div class="min-header-actions">
+          <button mat-icon-button class="icon-white" matTooltip="Editar"
+                  (click)="$event.stopPropagation(); abrirForm(m)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button class="icon-white" matTooltip="Eliminar"
+                  (click)="$event.stopPropagation(); eliminar(m)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="min-body" (click)="toggleExpand(m.ministerioId)">
+        <p class="min-desc">{{ m.descripcion }}</p>
+        <div class="min-meta-row">
+          <span class="min-meta-item">
+            <mat-icon>person</mat-icon>{{ m.liderNombre }}
+          </span>
+          <span class="min-meta-item">
+            <mat-icon>group</mat-icon>{{ m.totalIntegrantes }} integrantes
+          </span>
+        </div>
+        <div class="min-footer">
+          <span class="tipo-chip" [style.background]="tipoMeta(m).colorClaro" [style.color]="tipoMeta(m).color">
+            {{ tipoMeta(m).label }}
+          </span>
+          <button mat-stroked-button class="ver-btn"
+                  [style.border-color]="tipoMeta(m).color" [style.color]="tipoMeta(m).color"
+                  (click)="$event.stopPropagation(); toggleExpand(m.ministerioId)">
+            <mat-icon>{{ expandido() === m.ministerioId ? 'expand_less' : 'people' }}</mat-icon>
+            {{ expandido() === m.ministerioId ? 'Cerrar' : 'Ver integrantes' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Sección expandida: integrantes -->
+      @if (expandido() === m.ministerioId) {
+        <div class="min-integrantes-section" (click)="$event.stopPropagation()">
+
+          <div class="integrantes-toolbar">
+            <span class="integrantes-title">Integrantes</span>
+            <button mat-stroked-button class="add-btn"
+                    [style.border-color]="tipoMeta(m).color" [style.color]="tipoMeta(m).color"
+                    (click)="togglePicker(m.ministerioId)">
+              <mat-icon>person_add</mat-icon> Añadir
+            </button>
+          </div>
+
+          <!-- Picker para añadir -->
+          @if (mostrarPicker() === m.ministerioId) {
+            <div class="picker-box">
+              <input class="picker-input" placeholder="Buscar miembro..."
+                     [value]="busqueda()"
+                     (input)="busqueda.set($any($event.target).value)">
+              <div class="picker-list">
+                @for (mb of miembrosFiltrados(); track mb.miembroId) {
+                  @if (!integrantesYaMiembro(m).has(mb.miembroId)) {
+                    <div class="picker-row" (click)="agregarIntegrante(m, mb)">
+                      <div class="p-avatar" [style.background]="tipoMeta(m).colorClaro" [style.color]="tipoMeta(m).color">
+                        {{ mb.nombre[0] }}{{ mb.apellido[0] }}
+                      </div>
+                      <div class="p-info">
+                        <span class="p-nombre">{{ mb.nombre }} {{ mb.apellido }}</span>
+                        <span class="p-estado">{{ mb.estado }}</span>
+                      </div>
+                      <mat-icon class="p-add">add_circle_outline</mat-icon>
+                    </div>
+                  }
+                }
+                @if (miembrosFiltrados().length === 0) {
+                  <div class="picker-empty">Sin resultados</div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Lista de integrantes -->
+          @if (!m.integrantes || m.integrantes.length === 0) {
+            <div class="empty-integrantes">
+              <mat-icon>person_search</mat-icon>
+              <span>Sin integrantes aún.</span>
+            </div>
+          } @else {
+            <div class="integrantes-list">
+              @for (int of m.integrantes; track int.integranteId) {
+                <div class="integrante-row" [class.row-inactivo]="!int.activo">
+                  <div class="int-avatar" [style.background]="tipoMeta(m).colorClaro" [style.color]="tipoMeta(m).color">
+                    {{ int.nombre[0] }}{{ int.apellido[0] }}
+                  </div>
+                  <div class="int-info">
+                    <span class="int-nombre">{{ int.nombre }} {{ int.apellido }}</span>
+                    <span class="int-rol">{{ int.rol }}</span>
+                  </div>
+                  <mat-slide-toggle
+                    [checked]="int.activo"
+                    color="primary"
+                    [matTooltip]="int.activo ? 'Activo' : 'Inactivo'"
+                    (change)="toggleIntegrante(m.ministerioId, int, $event.checked)">
+                  </mat-slide-toggle>
+                  <button mat-icon-button matTooltip="Remover" color="warn"
+                          (click)="removerIntegrante(m.ministerioId, int)">
+                    <mat-icon>remove_circle_outline</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+    </div>
+  }
+</div>
+
+}

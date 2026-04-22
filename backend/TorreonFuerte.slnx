@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TorreonFuerte.API/TorreonFuerte.API.csproj" />
+  <Project Path="TorreonFuerte.Application/TorreonFuerte.Application.csproj" />
+  <Project Path="TorreonFuerte.Domain/TorreonFuerte.Domain.csproj" />
+  <Project Path="TorreonFuerte.Infrastructure/TorreonFuerte.Infrastructure.csproj" />
+</Solution>

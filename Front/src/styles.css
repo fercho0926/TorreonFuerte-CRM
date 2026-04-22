@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Infant:wght@400;500;600;700&family=Karla:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+:root {
+  --tf-blue:     #0077bd;
+  --tf-blue-dk:  #005a8e;
+  --tf-blue-lt:  #e8f4fb;
+  --tf-yellow:   #f8c300;
+  --tf-yellow-lt:#fff8e1;
+  --tf-dark:     #201c15;
+  --tf-gray:     #6b7280;
+  --tf-border:   #e5e7eb;
+  --tf-bg:       #f4f6fa;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Karla', 'Helvetica Neue', sans-serif;
+  background: var(--tf-bg);
+  color: var(--tf-dark);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Infant', Georgia, serif;
+}
+
+.page-container { padding: 24px; }
+.spacer { flex: 1 1 auto; }
+
+/* ── Estado badges ─────────────────────────────────────────── */
+.chip-visitante { background: #dbeafe !important; color: #1d4ed8 !important; }
+.chip-activo    { background: #dcfce7 !important; color: #15803d !important; }
+.chip-inactivo  { background: #fee2e2 !important; color: #b91c1c !important; }
+.chip-lider     { background: #fef9c3 !important; color: #a16207 !important; }

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;9e215009cb5622055a29db7c50b9fa7ba2b61c0dd388f2a5668fa50b7d4309d0;c:/WorkSpace/TorreonFuerte-CRM/src/app/features/sedes/sedes.component.ts"],
+  "sourcesContent": [".placeholder { display:flex; flex-direction:column; align-items:center; padding:48px; color:#999; } mat-icon { font-size:48px; width:48px; height:48px; }"],
+  "mappings": ";AAAA,CAAC;AAAc,WAAQ;AAAM,kBAAe;AAAQ,eAAY;AAAQ,WAAQ;AAAM,SAAM;AAAM;AAAE;AAAW,aAAU;AAAM,SAAM;AAAM,UAAO;AAAM;",
+  "names": []
+}

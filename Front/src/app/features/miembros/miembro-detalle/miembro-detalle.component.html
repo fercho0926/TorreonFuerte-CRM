@@ -1,0 +1,207 @@
+<!-- Loading / Error -->
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48" /></div>
+} @else if (error()) {
+  <div class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>No se pudo cargar el miembro.</p>
+    <a mat-button routerLink="/miembros">Volver</a>
+  </div>
+} @else if (miembro(); as m) {
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────── -->
+  <div class="hero-card">
+    <a mat-icon-button routerLink="/miembros" class="back-btn" matTooltip="Volver">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+
+    <div class="hero-avatar">{{ initials(m.nombre, m.apellido) }}</div>
+
+    <div class="hero-info">
+      <h1 class="hero-name">{{ m.nombre }} {{ m.apellido }}</h1>
+      <div class="hero-meta">
+        <span class="estado-chip" [ngClass]="estadoClass(m.estado)">{{ m.estado }}</span>
+        @if (m.sedeNombre) {
+          <span class="hero-meta-item"><mat-icon>church</mat-icon>{{ m.sedeNombre }}</span>
+        }
+        @if (m.redNombre) {
+          <span class="hero-meta-item"><mat-icon>hub</mat-icon>{{ m.redNombre }}</span>
+        }
+        @if (tiempoEnIglesia()) {
+          <span class="hero-meta-item"><mat-icon>calendar_today</mat-icon>{{ tiempoEnIglesia() }} en la iglesia</span>
+        }
+        @if (m.liderNombre) {
+          <span class="hero-meta-item"><mat-icon>person</mat-icon>Líder: {{ m.liderNombre }}</span>
+        }
+      </div>
+    </div>
+
+    <a mat-flat-button color="primary" [routerLink]="['/miembros', m.miembroId, 'editar']" class="edit-btn">
+      <mat-icon>edit</mat-icon> Editar
+    </a>
+  </div>
+
+  <!-- ── Candy Crush Path ───────────────────────────────────────────────── -->
+  <div class="section-title">
+    <mat-icon>stairs</mat-icon>
+    <span>Plan de Preparación</span>
+    @if (m.etapaActualOrden) {
+      <span class="progreso-label">Etapa {{ m.etapaActualOrden }} de 5</span>
+    }
+  </div>
+
+  <div class="crush-wrapper">
+    <div class="crush-track">
+      @for (node of etapaPath(); track node.orden; let i = $index) {
+        <!-- Connector before each node (except first) -->
+        @if (i > 0) {
+          <div class="crush-connector"
+               [class.conn-done]="node.estado === 'done' || node.estado === 'active'"
+               [style.background]="(node.estado === 'done' || node.estado === 'active') ? node.color : '#e2e8f0'">
+          </div>
+        }
+
+        <!-- Node bubble -->
+        <div class="crush-node"
+             [class.node-done]="node.estado === 'done'"
+             [class.node-active]="node.estado === 'active'"
+             [class.node-locked]="node.estado === 'locked'"
+             [class.node-offset]="i % 2 === 1"
+             [style.--node-color]="node.color"
+             [style.--node-light]="node.colorClaro"
+             [matTooltip]="node.nombre">
+
+          @if (node.estado === 'done') {
+            <mat-icon class="node-icon">{{ node.icono }}</mat-icon>
+            <span class="node-star">⭐</span>
+          } @else if (node.estado === 'active') {
+            <mat-icon class="node-icon">{{ node.icono }}</mat-icon>
+            <div class="pulse-ring"></div>
+          } @else {
+            <mat-icon class="node-icon lock-icon">lock</mat-icon>
+          }
+
+          <span class="node-label">{{ node.nombre }}</span>
+
+          @if (node.estado === 'active') {
+            <span class="node-here">¡Aquí estás!</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Progress bar below -->
+    <div class="crush-progress-bar">
+      <div class="crush-progress-fill" [style.width.%]="progresoPorc()"></div>
+    </div>
+  </div>
+
+  <!-- ── Info Grid ──────────────────────────────────────────────────────── -->
+  <div class="info-grid-3">
+
+    <!-- Personal -->
+    <div class="info-card">
+      <div class="info-card-title"><mat-icon>badge</mat-icon> Datos Personales</div>
+      <div class="info-row"><span class="info-lbl">Cédula</span><span>{{ m.cedula ?? '—' }}</span></div>
+      @if (edad()) {
+        <div class="info-row"><span class="info-lbl">Edad</span><span>{{ edad() }} años</span></div>
+      }
+      <div class="info-row">
+        <span class="info-lbl">Nacimiento</span>
+        <span>{{ m.fechaNacimiento ? (m.fechaNacimiento | date:'dd MMM yyyy':'':'es') : '—' }}</span>
+      </div>
+      <div class="info-row"><span class="info-lbl">Teléfono</span><span>{{ m.telefono ?? '—' }}</span></div>
+      <div class="info-row"><span class="info-lbl">Email</span><span class="email-text">{{ m.email ?? '—' }}</span></div>
+      <div class="info-row"><span class="info-lbl">Dirección</span><span>{{ m.direccion ?? '—' }}</span></div>
+      <div class="info-row">
+        <span class="info-lbl">Ingreso</span>
+        <span>{{ m.fechaIngreso | date:'dd MMM yyyy':'':'es' }}</span>
+      </div>
+      @if (m.notas) {
+        <div class="info-row info-row-col">
+          <span class="info-lbl">Notas</span>
+          <span class="notas-text">{{ m.notas }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Red y Liderazgo -->
+    <div class="info-card">
+      <div class="info-card-title"><mat-icon>hub</mat-icon> Red y Liderazgo</div>
+      <div class="info-row"><span class="info-lbl">Red</span><span>{{ m.redNombre ?? 'Sin red asignada' }}</span></div>
+      <div class="info-row"><span class="info-lbl">Líder</span><span>{{ m.liderNombre ?? '—' }}</span></div>
+      @if (m.liderTelefono) {
+        <div class="info-row"><span class="info-lbl">Tel. Líder</span><span>{{ m.liderTelefono }}</span></div>
+      }
+      <div class="info-row"><span class="info-lbl">Sede</span><span>{{ m.sedeNombre }}</span></div>
+
+      @if (m.etapaActualOrden) {
+        <div class="etapa-actual-box" [style.background]="'var(--etapa-bg)'" style="--etapa-bg: #f5f3ff">
+          <mat-icon style="color: #6366f1">stairs</mat-icon>
+          <div>
+            <span class="info-lbl">Etapa actual</span>
+            <span class="etapa-nombre">{{ etapaPath()[m.etapaActualOrden - 1]?.nombre }}</span>
+          </div>
+        </div>
+      } @else {
+        <div class="info-row"><span class="info-lbl">Etapa</span><span>Sin etapa activa</span></div>
+      }
+    </div>
+
+    <!-- Ministerios -->
+    <div class="info-card">
+      <div class="info-card-title"><mat-icon>volunteer_activism</mat-icon> Ministerios</div>
+      @if (m.ministerios.length === 0) {
+        <div class="empty-mini">
+          <mat-icon>info_outline</mat-icon>
+          <span>Sin ministerios asignados</span>
+        </div>
+      } @else {
+        @for (min of m.ministerios; track min.ministerioId) {
+          <div class="ministerio-row" [class.min-inactivo]="!min.activo">
+            <div class="min-dot" [style.background]="min.color"></div>
+            <div class="min-info">
+              <span class="min-nombre">{{ min.ministerioNombre }}</span>
+              <span class="min-rol">{{ min.rol }}</span>
+            </div>
+            @if (!min.activo) {
+              <span class="inactivo-badge">Inactivo</span>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ── Historial de Eventos ───────────────────────────────────────────── -->
+  @if (m.asistencias.length > 0) {
+    <div class="section-title">
+      <mat-icon>event</mat-icon>
+      <span>Historial de Eventos</span>
+    </div>
+    <div class="eventos-hist">
+      @for (a of m.asistencias; track a.eventoId) {
+        <div class="ev-hist-row">
+          <div class="ev-hist-icon">
+            <mat-icon>event</mat-icon>
+          </div>
+          <div class="ev-hist-info">
+            <span class="ev-hist-nombre">{{ a.eventoNombre }}</span>
+            <span class="ev-hist-fecha">{{ a.fecha | date:'dd MMM yyyy':'':'es' }}</span>
+          </div>
+          <div class="ev-hist-chips">
+            @if (a.inscrito) {
+              <span class="ev-badge badge-inscrito">Inscrito</span>
+            }
+            @if (a.asistio === true) {
+              <span class="ev-badge badge-asistio">Asistió</span>
+            } @else if (a.asistio === false) {
+              <span class="ev-badge badge-no-asistio">No asistió</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+}

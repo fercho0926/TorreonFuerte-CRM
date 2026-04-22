@@ -1,0 +1,165 @@
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <mat-icon class="header-icon">public</mat-icon>
+    <div>
+      <h1>Sedes Mundiales</h1>
+      <p>Presencia global de Torreón Fuerte</p>
+    </div>
+  </div>
+  @if (sedeSeleccionada()) {
+    <button mat-stroked-button (click)="resetView()">
+      <mat-icon>zoom_out_map</mat-icon> Ver todas
+    </button>
+  }
+</div>
+
+<!-- ── Stats ──────────────────────────────────────────────────────────────── -->
+@if (stats(); as s) {
+  <div class="stats-row">
+    <div class="stat-pill"><mat-icon>church</mat-icon><span class="sn">{{ s.totalSedes }}</span><span class="sl">Sedes</span></div>
+    <div class="stat-pill"><mat-icon>people</mat-icon><span class="sn">{{ s.totalMiembros }}</span><span class="sl">Miembros</span></div>
+    <div class="stat-pill"><mat-icon>flag</mat-icon><span class="sn">{{ s.totalPaises }}</span><span class="sl">Países</span></div>
+    <div class="stat-pill"><mat-icon>language</mat-icon><span class="sn">{{ s.totalContinentes }}</span><span class="sl">Continentes</span></div>
+  </div>
+}
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- MAPA INTERACTIVO                                                         -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<div class="map-section">
+  <div #mapEl class="map-container">
+    @if (!mapListo()) {
+      <div class="map-loading">
+        <mat-spinner diameter="48" />
+        <p>Cargando mapa...</p>
+      </div>
+    }
+  </div>
+
+  <!-- Leyenda flotante -->
+  <div class="map-legend">
+    <span class="legend-title">Leyenda</span>
+    <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span>Colombia</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Estados Unidos</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- LISTADO DE SEDES                                                         -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+@if (cargando()) {
+  <div class="loading-center"><mat-spinner diameter="40" /></div>
+} @else {
+
+  <!-- Colombia -->
+  <section class="region-section">
+    <h2 class="region-title"><span>🇨🇴</span> Colombia · {{ sedesColombia().length }} sedes</h2>
+    <div class="sedes-grid">
+      @for (sede of sedesColombia(); track sede.sedeId) {
+        <mat-card class="sede-card"
+                  [class.card-selected]="sedeSeleccionada()?.sedeId === sede.sedeId"
+                  [style.--sc]="sede.color"
+                  (click)="flyTo(sede)">
+          <div class="card-stripe" [style.background]="sede.color"></div>
+          <mat-card-content>
+            <div class="card-top">
+              <div class="card-flag">{{ sede.bandera }}</div>
+              <div class="card-header-info">
+                <span class="card-nombre">{{ sede.nombre }}</span>
+                <span class="card-lugar">{{ sede.ciudad }}, {{ sede.departamento }}</span>
+              </div>
+              <mat-icon class="card-fly" matTooltip="Ir al mapa">my_location</mat-icon>
+            </div>
+
+            <mat-divider class="card-divider" />
+
+            <div class="card-stats">
+              <div class="cstat" [style.color]="sede.color">
+                <mat-icon>people</mat-icon>
+                <span>{{ sede.totalMiembros }}</span>
+                <span class="cstat-lbl">miembros</span>
+              </div>
+              <div class="cstat">
+                <mat-icon>group</mat-icon>
+                <span>{{ sede.totalCelulas }}</span>
+                <span class="cstat-lbl">células</span>
+              </div>
+              <div class="cstat">
+                <mat-icon>military_tech</mat-icon>
+                <span>{{ sede.totalLideres }}</span>
+                <span class="cstat-lbl">líderes</span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <span class="card-pastor"><mat-icon>church</mat-icon>{{ sede.pastor }}</span>
+              <span class="card-edad">{{ diasDesde(sede.fechaFundacion) }}</span>
+            </div>
+            <button mat-stroked-button class="card-detalle-btn"
+                    [style.color]="sede.color" [style.border-color]="sede.color"
+                    (click)="abrirDetalle(sede, $event)">
+              <mat-icon>open_in_new</mat-icon> Ver detalle
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+  <!-- Estados Unidos -->
+  <section class="region-section">
+    <h2 class="region-title"><span>🇺🇸</span> Estados Unidos · {{ sedesUSA().length }} sedes</h2>
+    <div class="sedes-grid">
+      @for (sede of sedesUSA(); track sede.sedeId) {
+        <mat-card class="sede-card"
+                  [class.card-selected]="sedeSeleccionada()?.sedeId === sede.sedeId"
+                  [style.--sc]="sede.color"
+                  (click)="flyTo(sede)">
+          <div class="card-stripe" [style.background]="sede.color"></div>
+          <mat-card-content>
+            <div class="card-top">
+              <div class="card-flag">{{ sede.bandera }}</div>
+              <div class="card-header-info">
+                <span class="card-nombre">{{ sede.nombre }}</span>
+                <span class="card-lugar">{{ sede.ciudad }}, {{ sede.departamento }}</span>
+              </div>
+              <mat-icon class="card-fly" matTooltip="Ir al mapa">my_location</mat-icon>
+            </div>
+
+            <mat-divider class="card-divider" />
+
+            <div class="card-stats">
+              <div class="cstat" [style.color]="sede.color">
+                <mat-icon>people</mat-icon>
+                <span>{{ sede.totalMiembros }}</span>
+                <span class="cstat-lbl">miembros</span>
+              </div>
+              <div class="cstat">
+                <mat-icon>group</mat-icon>
+                <span>{{ sede.totalCelulas }}</span>
+                <span class="cstat-lbl">células</span>
+              </div>
+              <div class="cstat">
+                <mat-icon>military_tech</mat-icon>
+                <span>{{ sede.totalLideres }}</span>
+                <span class="cstat-lbl">líderes</span>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <span class="card-pastor"><mat-icon>church</mat-icon>{{ sede.pastor }}</span>
+              <span class="card-edad">{{ diasDesde(sede.fechaFundacion) }}</span>
+            </div>
+            <button mat-stroked-button class="card-detalle-btn"
+                    [style.color]="sede.color" [style.border-color]="sede.color"
+                    (click)="abrirDetalle(sede, $event)">
+              <mat-icon>open_in_new</mat-icon> Ver detalle
+            </button>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </section>
+
+}

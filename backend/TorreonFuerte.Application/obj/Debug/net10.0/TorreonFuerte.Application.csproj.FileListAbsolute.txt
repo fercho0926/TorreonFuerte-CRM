@@ -1,0 +1,15 @@
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\bin\Debug\net10.0\TorreonFuerte.Application.deps.json
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\bin\Debug\net10.0\TorreonFuerte.Application.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\bin\Debug\net10.0\TorreonFuerte.Application.pdb
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\bin\Debug\net10.0\TorreonFuerte.Domain.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\bin\Debug\net10.0\TorreonFuerte.Domain.pdb
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.csproj.AssemblyReference.cache
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.AssemblyInfoInputs.cache
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.AssemblyInfo.cs
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.csproj.CoreCompileInputs.cache
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonF.7C08D229.Up2Date
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\refint\TorreonFuerte.Application.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.pdb
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\ref\TorreonFuerte.Application.dll

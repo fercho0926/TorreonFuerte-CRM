@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/sedes/sedes.component.ts"],
+  "sourcesContent": ["import { Component } from '@angular/core';\nimport { MatCardModule } from '@angular/material/card';\nimport { MatIconModule } from '@angular/material/icon';\n\n@Component({\n  selector: 'app-sedes',\n  standalone: true,\n  imports: [MatCardModule, MatIconModule],\n  template: `\n    <h2>Gestión de Sedes</h2>\n    <mat-card>\n      <mat-card-content class=\"placeholder\">\n        <mat-icon>church</mat-icon>\n        <p>Módulo de sedes — próximamente</p>\n      </mat-card-content>\n    </mat-card>\n  `,\n  styles: [`.placeholder { display:flex; flex-direction:column; align-items:center; padding:48px; color:#999; } mat-icon { font-size:48px; width:48px; height:48px; }`],\n})\nexport class SedesComponent {}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;AAmBM,IAAO,iBAAP,MAAO,gBAAc;;qCAAd,iBAAc;EAAA;yEAAd,iBAAc,WAAA,CAAA,CAAA,WAAA,CAAA,GAAA,OAAA,GAAA,MAAA,GAAA,QAAA,CAAA,CAAA,GAAA,aAAA,CAAA,GAAA,UAAA,SAAA,wBAAA,IAAA,KAAA;AAAA,QAAA,KAAA,GAAA;AAVvB,MAAA,yBAAA,GAAA,IAAA;AAAI,MAAA,iBAAA,GAAA,qBAAA;AAAgB,MAAA,uBAAA;AACpB,MAAA,yBAAA,GAAA,UAAA,EAAU,GAAA,oBAAA,CAAA,EAC8B,GAAA,UAAA;AAC1B,MAAA,iBAAA,GAAA,QAAA;AAAM,MAAA,uBAAA;AAChB,MAAA,yBAAA,GAAA,GAAA;AAAG,MAAA,iBAAA,GAAA,2CAAA;AAA8B,MAAA,uBAAA,EAAI,EACpB;;oBAPb,eAAa,SAAA,gBAAE,eAAa,OAAA,GAAA,QAAA,CAAA,yRAAA,EAAA,CAAA;;;sEAY3B,gBAAc,CAAA;UAf1B;uBACW,aAAW,YACT,MAAI,SACP,CAAC,eAAe,aAAa,GAAC,UAC7B;;;;;;;;KAQT,QAAA,CAAA,+ZAAA,EAAA,CAAA;;;;6EAGU,gBAAc,EAAA,WAAA,kBAAA,UAAA,6CAAA,YAAA,GAAA,CAAA;AAAA,GAAA;",
+  "names": []
+}

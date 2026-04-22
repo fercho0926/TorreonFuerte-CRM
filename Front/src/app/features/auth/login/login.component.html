@@ -1,0 +1,162 @@
+<div class="login-root">
+
+  <!-- ══ Panel izquierdo — Brand ═══════════════════════════════════ -->
+  <div class="brand-side">
+
+    <!-- Partículas flotantes -->
+    <div class="particles">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Orbes de luz -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="brand-inner">
+
+      <!-- Logo con anillos concéntricos -->
+      <div class="logo-wrap">
+        <div class="ring ring-3"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-1"></div>
+        <div class="logo-block">
+          <div class="logo-shimmer"></div>
+          <img
+            src="https://www.torreonfuerte.org.co/wp-content/uploads/2023/10/LOGO-TORREON-FUERTE.webp"
+            alt="Torreón Fuerte"
+            class="logo-img"
+          />
+        </div>
+      </div>
+
+      <!-- Nombre e identidad -->
+      <div class="church-identity">
+        <h1 class="church-name">Torreón Fuerte</h1>
+        <div class="gold-rule"></div>
+        <p class="church-tagline">"Restaurar las familias de la tierra"</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="brand-stats">
+        <div class="stat-item">
+          <span class="stat-num">+29</span>
+          <span class="stat-lbl">Años</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-num">6</span>
+          <span class="stat-lbl">Sedes</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-num">∞</span>
+          <span class="stat-lbl">Fe</span>
+        </div>
+      </div>
+
+      <!-- Versículo -->
+      <blockquote class="brand-verse">
+        "Porque yo sé los pensamientos que tengo acerca de vosotros,
+        pensamientos de paz y no de mal."
+        <cite>— Jeremías 29:11</cite>
+      </blockquote>
+
+    </div>
+
+    <footer class="brand-footer">
+      Pastores Walter &amp; Alba Pérez &nbsp;·&nbsp; Medellín &nbsp;·&nbsp; Est. 1991
+    </footer>
+  </div>
+
+  <!-- ══ Panel derecho — Formulario ═══════════════════════════════ -->
+  <div class="form-side">
+    <div class="form-card">
+
+      <!-- Cabecera -->
+      <div class="form-header">
+        <div class="form-brand">
+          <div class="form-icon-wrap">
+            <mat-icon>castle</mat-icon>
+          </div>
+          <span class="form-brand-name">Torreón Fuerte · CRM</span>
+        </div>
+        <h2>Bienvenido de vuelta</h2>
+        <p>Ingresa tus credenciales para acceder al sistema</p>
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="form" (ngSubmit)="submit()" class="login-form" novalidate>
+
+        <div class="field-group">
+          <label class="field-label">
+            <mat-icon class="label-icon">mail_outline</mat-icon>
+            Correo electrónico
+          </label>
+          <mat-form-field appearance="outline" class="field">
+            <input matInput type="email" formControlName="email"
+                   autocomplete="email" placeholder="usuario@iglesia.com" />
+            @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
+              <mat-error>El correo es requerido</mat-error>
+            }
+            @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
+              <mat-error>Formato de correo inválido</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">
+            <mat-icon class="label-icon">lock_outline</mat-icon>
+            Contraseña
+          </label>
+          <mat-form-field appearance="outline" class="field">
+            <input matInput [type]="hidePassword() ? 'password' : 'text'"
+                   formControlName="password" autocomplete="current-password" />
+            <button mat-icon-button matSuffix type="button"
+                    (click)="hidePassword.set(!hidePassword())">
+              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+              <mat-error>La contraseña es requerida</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (error()) {
+          <div class="error-alert">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <div class="form-divider"></div>
+
+        <button mat-raised-button type="submit" class="submit-btn" [disabled]="loading()">
+          <div class="btn-shimmer"></div>
+          <span class="btn-inner">
+            @if (loading()) {
+              <mat-spinner diameter="20" class="spin-white" />
+              Verificando...
+            } @else {
+              Ingresar al sistema
+              <mat-icon>arrow_forward</mat-icon>
+            }
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="form-footer">
+        <mat-icon>shield</mat-icon>
+        Acceso seguro &nbsp;·&nbsp; Autenticación JWT
+      </div>
+
+    </div>
+  </div>
+
+</div>

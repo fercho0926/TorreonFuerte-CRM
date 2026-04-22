@@ -1,0 +1,372 @@
+/* ── Host ─────────────────────────────────────────────────────────────────── */
+:host {
+  display: block;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.header-left { display: flex; align-items: center; gap: 16px; }
+
+.header-icon {
+  font-size: 42px; width: 42px; height: 42px;
+  color: #7c3aed;
+}
+
+.page-header h1 { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; }
+.page-header p  { margin: 2px 0 0; font-size: 13px; color: #64748b; }
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.config-tabs {
+  background: transparent;
+}
+
+.tab-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.tab-content {
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.form-card {
+  border-radius: 14px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08) !important;
+}
+
+.card-avatar-icon {
+  background: #f1f5f9 !important;
+  color: #7c3aed !important;
+  border-radius: 8px !important;
+}
+
+mat-card-header { padding-bottom: 4px; }
+
+.card-divider { margin: 16px 0 !important; }
+
+/* ── Layout: dos columnas ────────────────────────────────────────────────── */
+.two-cols {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── Perfil card ─────────────────────────────────────────────────────────── */
+.profile-card {
+  border-radius: 14px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08) !important;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #0284c7);
+  color: white;
+  font-size: 26px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(124,58,237,.35);
+}
+
+.avatar-info { min-width: 0; }
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.profile-email {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 6px;
+  word-break: break-all;
+}
+
+.rol-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #475569;
+  padding: 6px 0;
+}
+
+.info-row mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #94a3b8;
+}
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.form-grid .span-2 { grid-column: span 2; }
+
+.password-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+mat-form-field { width: 100%; }
+
+/* ── Tabla usuarios ──────────────────────────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.user-avatar-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .2s;
+}
+
+.user-avatar-sm.inactivo { opacity: .4; }
+
+.user-nombre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.user-nombre.text-inactivo { color: #94a3b8; }
+
+.user-email {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.rol-select {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 110px;
+}
+
+.sede-cell {
+  font-size: 13px;
+  color: #475569;
+}
+
+.fecha-cell {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.row-inactivo td {
+  background: #fafafa;
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+/* ── Sin acceso ──────────────────────────────────────────────────────────── */
+.no-access {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.no-access mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #cbd5e1;
+}
+
+.no-access p { font-size: 14px; color: #64748b; }
+
+/* ── Sede form ───────────────────────────────────────────────────────────── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.section-label mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.sede-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.contacto-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+
+.contacto-grid .span-2 { grid-column: span 2; }
+
+/* ── Sistema / preferencias ──────────────────────────────────────────────── */
+.sistema-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  gap: 16px;
+}
+
+.pref-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pref-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pref-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.pref-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.idioma-badge {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ── Footer versión ──────────────────────────────────────────────────────── */
+.version-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.version-footer mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .two-cols { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  :host { padding: 16px; }
+  .password-grid { grid-template-columns: 1fr; }
+  .sede-grid { grid-template-columns: 1fr 1fr; }
+  .contacto-grid { grid-template-columns: 1fr; }
+  .contacto-grid .span-2 { grid-column: span 1; }
+}
+
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .span-2 { grid-column: span 1; }
+  .sede-grid { grid-template-columns: 1fr; }
+}
