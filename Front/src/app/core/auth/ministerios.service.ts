@@ -9,7 +9,7 @@ const MOCK_MINISTERIOS: Ministerio[] = [
   {
     ministerioId: 1, sedeId: 1, tipo: 'Alabanza', nombre: 'Equipo de Alabanza Central',
     descripcion: 'Lideramos la adoración en los cultos dominicales y eventos especiales.',
-    icono: 'music_note', color: '#7c3aed', colorClaro: '#ede9fe',
+    icono: 'pi-headphones', color: '#7c3aed', colorClaro: '#ede9fe',
     liderNombre: 'Carlos Ruiz', liderMiembroId: 2, totalIntegrantes: 8, activo: true,
     integrantes: [
       { integranteId: 1, miembroId: 2,  nombre: 'Carlos',    apellido: 'Ruiz',      rol: 'Director',        fechaIngreso: '2019-06-15', activo: true },
@@ -25,7 +25,7 @@ const MOCK_MINISTERIOS: Ministerio[] = [
   {
     ministerioId: 2, sedeId: 1, tipo: 'Danza', nombre: 'Ministerio de Danza',
     descripcion: 'Expresamos la adoración a través del movimiento y la danza profética.',
-    icono: 'directions_run', color: '#db2777', colorClaro: '#fce7f3',
+    icono: 'pi-bolt', color: '#db2777', colorClaro: '#fce7f3',
     liderNombre: 'Laura Vargas', liderMiembroId: 5, totalIntegrantes: 6, activo: true,
     integrantes: [
       { integranteId: 9,  miembroId: 5,  nombre: 'Laura',     apellido: 'Vargas',    rol: 'Directora',       fechaIngreso: '2018-11-30', activo: true },
@@ -39,7 +39,7 @@ const MOCK_MINISTERIOS: Ministerio[] = [
   {
     ministerioId: 3, sedeId: 1, tipo: 'Ujieres', nombre: 'Ministerio de Ujieres',
     descripcion: 'Servimos con excelencia recibiendo y acomodando a la congregación.',
-    icono: 'door_front', color: '#0891b2', colorClaro: '#e0f2fe',
+    icono: 'pi-sign-in', color: '#0891b2', colorClaro: '#e0f2fe',
     liderNombre: 'Jorge Salazar', liderMiembroId: 10, totalIntegrantes: 7, activo: true,
     integrantes: [
       { integranteId: 15, miembroId: 10, nombre: 'Jorge',     apellido: 'Salazar',   rol: 'Coordinador',     fechaIngreso: '2017-08-09', activo: true },
@@ -54,7 +54,7 @@ const MOCK_MINISTERIOS: Ministerio[] = [
   {
     ministerioId: 4, sedeId: 1, tipo: 'Intercesion', nombre: 'Grupo de Intercesión',
     descripcion: 'Sostenemos la iglesia con oración e intercesión continua.',
-    icono: 'volunteer_activism', color: '#d97706', colorClaro: '#fef3c7',
+    icono: 'pi-heart-fill', color: '#d97706', colorClaro: '#fef3c7',
     liderNombre: 'Héctor Cano', liderMiembroId: 16, totalIntegrantes: 5, activo: true,
     integrantes: [
       { integranteId: 22, miembroId: 16, nombre: 'Héctor',    apellido: 'Cano',      rol: 'Líder',           fechaIngreso: '2016-02-20', activo: true },
@@ -67,7 +67,7 @@ const MOCK_MINISTERIOS: Ministerio[] = [
   {
     ministerioId: 5, sedeId: 1, tipo: 'Media', nombre: 'Ministerio de Medios',
     descripcion: 'Transmitimos y registramos los cultos y eventos para mayor alcance.',
-    icono: 'videocam', color: '#16a34a', colorClaro: '#dcfce7',
+    icono: 'pi-video', color: '#16a34a', colorClaro: '#dcfce7',
     liderNombre: 'Felipe Ríos', liderMiembroId: 12, totalIntegrantes: 4, activo: true,
     integrantes: [
       { integranteId: 27, miembroId: 12, nombre: 'Felipe',    apellido: 'Ríos',      rol: 'Director',        fechaIngreso: '2021-08-01', activo: true },

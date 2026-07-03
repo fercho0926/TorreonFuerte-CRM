@@ -13,14 +13,23 @@
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
+  gap: 4px 16px;
 }
 
 .full-col {
   grid-column: 1 / -1;
 }
 
-mat-form-field {
+.field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.field p-floatlabel,
+.field input,
+.field p-select,
+.field p-datepicker,
+.field textarea {
   width: 100%;
 }
 

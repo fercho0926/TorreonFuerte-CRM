@@ -1,16 +1,15 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { NgClass, DatePipe, PercentPipe } from '@angular/common';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatDialog } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { TabsModule } from 'primeng/tabs';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
+import { MenuModule } from 'primeng/menu';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { DialogService } from 'primeng/dynamicdialog';
+import type { MenuItem } from 'primeng/api';
 import { EventosService } from '../../core/auth/eventos.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { MinisteriosService } from '../../core/auth/ministerios.service';
@@ -35,10 +34,10 @@ interface DiaCal {
   selector: 'app-eventos',
   standalone: true,
   imports: [
-    NgClass, DatePipe, PercentPipe,
-    MatTabsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatProgressSpinnerModule,
-    MatTooltipModule, MatChipsModule, MatMenuModule, MatSlideToggleModule,
+    NgClass, DatePipe, PercentPipe, FormsModule,
+    TabsModule, ButtonModule,
+    ProgressBarModule, ProgressSpinnerModule,
+    TooltipModule, MenuModule, ToggleSwitchModule,
   ],
   templateUrl: './eventos.component.html',
   styleUrl:    './eventos.component.css',
@@ -47,7 +46,7 @@ export class EventosComponent implements OnInit {
   private svc    = inject(EventosService);
   private minSvc = inject(MinisteriosService);
   private auth   = inject(AuthService);
-  private dialog = inject(MatDialog);
+  private dialogService = inject(DialogService);
 
   eventos      = signal<Evento[]>([]);
   ministerios  = signal<Ministerio[]>([]);
@@ -143,20 +142,35 @@ export class EventosComponent implements OnInit {
 
   ministerioTipoMeta(m: Ministerio) { return MINISTERIO_TIPO_META[m.tipo]; }
 
+  // ── Menús de acciones ─────────────────────────────────────────────────────────
+  menuItemsEvento(e: Evento): MenuItem[] {
+    return [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.abrirForm(e) },
+      { label: 'Marcar En Curso', icon: 'pi pi-play-circle', command: () => this.cambiarEstado(e, 'EnCurso') },
+      { label: 'Marcar Finalizado', icon: 'pi pi-check-circle', command: () => this.cambiarEstado(e, 'Finalizado') },
+      { label: 'Cancelar evento', icon: 'pi pi-times-circle', command: () => this.cambiarEstado(e, 'Cancelado') },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'menu-danger', command: () => this.eliminar(e) },
+    ];
+  }
+
+  menuItemsHist(e: Evento): MenuItem[] {
+    return [
+      { label: 'Editar', icon: 'pi pi-pencil', command: () => this.abrirForm(e) },
+      { label: 'Eliminar', icon: 'pi pi-trash', styleClass: 'menu-danger', command: () => this.eliminar(e) },
+    ];
+  }
+
   // ── Dialogs ───────────────────────────────────────────────────────────────────
   abrirForm(evento?: Evento) {
-    this.dialog.open(EventoFormDialogComponent, {
-      data: { evento },
-      width: '600px',
-      disableClose: true,
-    }).afterClosed().subscribe(r => { if (r) this.cargar(); });
+    this.dialogService.open(EventoFormDialogComponent, {
+      data: { evento }, width: '600px', showHeader: false, closeOnEscape: false,
+    })!.onClose.subscribe(r => { if (r) this.cargar(); });
   }
 
   abrirDetalle(evento: Evento) {
-    this.dialog.open(EventoDetalleDialogComponent, {
-      data: { evento },
-      width: '580px',
-    }).afterClosed().subscribe(() => this.cargar());
+    this.dialogService.open(EventoDetalleDialogComponent, {
+      data: { evento }, width: '580px', showHeader: false, dismissableMask: true,
+    })!.onClose.subscribe(() => this.cargar());
   }
 
   eliminar(evento: Evento) {

@@ -1,17 +1,20 @@
-<mat-sidenav-container class="sidenav-container">
+<div class="sidenav-container">
+
+  <!-- ── Backdrop (mobile only, closes sidenav on tap) ───────────────────────── -->
+  @if (isMobile() && sidenavOpen()) {
+    <div class="sidenav-backdrop" (click)="sidenavOpen.set(false)"></div>
+  }
 
   <!-- ── Sidenav ──────────────────────────────────────────────────────────── -->
-  <mat-sidenav
-    [mode]="isMobile() ? 'over' : 'side'"
-    [opened]="sidenavOpen()"
-    (openedChange)="sidenavOpen.set($event)"
-    [class.collapsed]="sidenavCollapsed() && !isMobile()"
-    class="sidenav">
+  <aside class="sidenav"
+         [class.collapsed]="sidenavCollapsed() && !isMobile()"
+         [class.mobile]="isMobile()"
+         [class.mobile-open]="isMobile() && sidenavOpen()">
 
     <!-- Brand -->
     <div class="brand">
       <div class="brand-logo">
-        <mat-icon>castle</mat-icon>
+        <i class="pi pi-shield"></i>
       </div>
       @if (!sidenavCollapsed() || isMobile()) {
         <div class="brand-text">
@@ -28,9 +31,9 @@
            [routerLink]="item.route"
            routerLinkActive="nav-active"
            (click)="closeOnMobile()"
-           [matTooltip]="(sidenavCollapsed() && !isMobile()) ? item.label : ''"
-           matTooltipPosition="right">
-          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+           [pTooltip]="(sidenavCollapsed() && !isMobile()) ? item.label : ''"
+           tooltipPosition="right">
+          <i class="pi nav-icon" [ngClass]="item.icon"></i>
           @if (!sidenavCollapsed() || isMobile()) {
             <span class="nav-label">{{ item.label }}</span>
           }
@@ -47,31 +50,31 @@
             <span class="user-name">{{ auth.currentUser()?.nombre }} {{ auth.currentUser()?.apellido }}</span>
             <span class="user-rol">{{ auth.currentUser()?.rol }}</span>
           </div>
-          <button class="icon-btn" (click)="auth.logout()" matTooltip="Cerrar sesión" matTooltipPosition="above">
-            <mat-icon>logout</mat-icon>
+          <button class="icon-btn" (click)="auth.logout()" pTooltip="Cerrar sesión" tooltipPosition="above">
+            <i class="pi pi-sign-out"></i>
           </button>
         </div>
       } @else {
         <button class="icon-btn icon-btn-center" (click)="auth.logout()"
-                matTooltip="Cerrar sesión" matTooltipPosition="right">
-          <mat-icon>logout</mat-icon>
+                pTooltip="Cerrar sesión" tooltipPosition="right">
+          <i class="pi pi-sign-out"></i>
         </button>
       }
     </div>
 
-  </mat-sidenav>
+  </aside>
 
   <!-- ── Main content ──────────────────────────────────────────────────────── -->
-  <mat-sidenav-content class="main-content">
+  <div class="main-content">
 
     <!-- Top bar -->
     <header class="top-bar">
       <button class="icon-btn menu-btn" (click)="toggleSidenav()" [attr.aria-label]="'Menú'">
-        <mat-icon>{{ sidenavCollapsed() && !isMobile() ? 'menu_open' : 'menu' }}</mat-icon>
+        <i class="pi" [ngClass]="isMobile() ? 'pi-bars' : (sidenavCollapsed() ? 'pi-angle-double-right' : 'pi-angle-double-left')"></i>
       </button>
 
       <div class="top-bar-title">
-        <mat-icon class="title-icon">{{ currentPageIcon() }}</mat-icon>
+        <i class="pi title-icon" [ngClass]="currentPageIcon()"></i>
         <span>{{ currentPageTitle() }}</span>
       </div>
 
@@ -86,6 +89,8 @@
       <router-outlet />
     </div>
 
-  </mat-sidenav-content>
+  </div>
 
-</mat-sidenav-container>
+</div>
+
+<p-toast />

@@ -1,12 +1,13 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MinisteriosService } from '../../../core/auth/ministerios.service';
 import { MiembrosService } from '../../../core/auth/miembros.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -19,77 +20,88 @@ export interface MinisterioFormData { ministerio?: Ministerio; }
   selector: 'app-ministerio-form-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatDialogModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    ReactiveFormsModule, NgClass,
+    FloatLabelModule, InputTextModule, TextareaModule, SelectModule,
+    ButtonModule, ProgressSpinnerModule,
   ],
   template: `
-    <h2 mat-dialog-title>
-      <mat-icon>{{ data.ministerio ? 'edit' : 'add_circle' }}</mat-icon>
+    <h2>
+      <i class="pi" [class.pi-pencil]="data.ministerio" [class.pi-plus-circle]="!data.ministerio"></i>
       {{ data.ministerio ? 'Editar ministerio' : 'Nuevo ministerio' }}
     </h2>
 
-    <mat-dialog-content>
+    <div class="dialog-content">
       <form [formGroup]="form" class="form-body">
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Tipo de ministerio</mat-label>
-          <mat-select formControlName="tipo">
-            @for (t of tipos; track t.value) {
-              <mat-option [value]="t.value">
-                <mat-icon>{{ t.icono }}</mat-icon> {{ t.label }}
-              </mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>category</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-select inputId="tipo" formControlName="tipo" [options]="tipos" optionLabel="label" optionValue="value">
+              <ng-template #selectedItem let-selected>
+                @if (selected) {
+                  <span class="select-item"><i class="pi" [ngClass]="selected.icono"></i> {{ selected.label }}</span>
+                }
+              </ng-template>
+              <ng-template #item let-t>
+                <span class="select-item"><i class="pi" [ngClass]="t.icono"></i> {{ t.label }}</span>
+              </ng-template>
+            </p-select>
+            <label for="tipo">Tipo de ministerio</label>
+          </p-floatlabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Nombre del ministerio</mat-label>
-          <input matInput formControlName="nombre" placeholder="Ej: Equipo de Alabanza Central">
-          <mat-icon matPrefix>title</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="nombre" formControlName="nombre" placeholder="Ej: Equipo de Alabanza Central" />
+            <label for="nombre">Nombre del ministerio</label>
+          </p-floatlabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Líder del ministerio</mat-label>
-          <mat-select formControlName="liderMiembroId">
-            @for (m of miembros(); track m.miembroId) {
-              <mat-option [value]="m.miembroId">
-                {{ m.nombre }} {{ m.apellido }}
-                <span style="font-size:11px;color:#94a3b8"> · {{ m.estado }}</span>
-              </mat-option>
-            }
-          </mat-select>
-          <mat-icon matPrefix>person</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-select inputId="liderMiembroId" formControlName="liderMiembroId" [options]="miembros()"
+                      optionLabel="nombre" optionValue="miembroId">
+              <ng-template #selectedItem let-selected>
+                @if (selected) {
+                  <span>{{ selected.nombre }} {{ selected.apellido }}</span>
+                }
+              </ng-template>
+              <ng-template #item let-m>
+                <span>{{ m.nombre }} {{ m.apellido }} <span class="item-sub"> · {{ m.estado }}</span></span>
+              </ng-template>
+            </p-select>
+            <label for="liderMiembroId">Líder del ministerio</label>
+          </p-floatlabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="descripcion" rows="3"
-                    placeholder="¿Cuál es el propósito de este ministerio?"></textarea>
-          <mat-icon matPrefix>notes</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <textarea pTextarea id="descripcion" formControlName="descripcion" rows="3"
+                      placeholder="¿Cuál es el propósito de este ministerio?"></textarea>
+            <label for="descripcion">Descripción</label>
+          </p-floatlabel>
+        </div>
 
       </form>
-    </mat-dialog-content>
+    </div>
 
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" (click)="guardar()"
-              [disabled]="form.invalid || saving()">
-        @if (saving()) { <mat-spinner diameter="18" /> }
-        @else { <mat-icon>save</mat-icon> }
+    <div class="dialog-actions">
+      <button pButton [text]="true" (click)="ref.close()">Cancelar</button>
+      <button pButton (click)="guardar()" [disabled]="form.invalid || saving()">
+        @if (saving()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+        @else { <i class="pi pi-save"></i> }
         {{ data.ministerio ? 'Guardar cambios' : 'Crear ministerio' }}
       </button>
-    </mat-dialog-actions>
+    </div>
   `,
   styles: [`
-    h2[mat-dialog-title] { display:flex; align-items:center; gap:8px; }
-    mat-dialog-content { padding-top:16px !important; min-width:min(480px,92vw); }
-    .form-body { display:flex; flex-direction:column; gap:6px; }
-    .full { width:100%; }
-    mat-form-field { width:100%; }
-    mat-dialog-actions { gap:8px; padding:16px !important; }
+    h2 { display:flex; align-items:center; gap:8px; margin:0; padding:20px 20px 0; font-size:18px; font-weight:700; color:#0f172a; }
+    .dialog-content { padding:16px 20px 0; min-width:min(480px,92vw); }
+    .form-body { display:flex; flex-direction:column; gap:16px; }
+    .field { display:flex; flex-direction:column; }
+    .field, p-select, p-floatlabel { width:100%; }
+    .select-item { display:flex; align-items:center; gap:8px; }
+    .item-sub { font-size:11px; color:#94a3b8; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:8px; padding:16px 20px 20px; }
   `],
 })
 export class MinisterioFormDialogComponent implements OnInit {
@@ -97,8 +109,9 @@ export class MinisterioFormDialogComponent implements OnInit {
   private svc       = inject(MinisteriosService);
   private miembroSvc = inject(MiembrosService);
   private auth      = inject(AuthService);
-  readonly dialogRef = inject(MatDialogRef<MinisterioFormDialogComponent>);
-  readonly data: MinisterioFormData = inject(MAT_DIALOG_DATA);
+  readonly ref = inject(DynamicDialogRef);
+  readonly config = inject(DynamicDialogConfig<MinisterioFormData>);
+  readonly data: MinisterioFormData = this.config.data;
 
   saving   = signal(false);
   miembros = signal<MiembroList[]>([]);
@@ -138,7 +151,7 @@ export class MinisterioFormDialogComponent implements OnInit {
         });
 
     op.subscribe({
-      next: r  => { this.saving.set(false); this.dialogRef.close(r); },
+      next: r  => { this.saving.set(false); this.ref.close(r); },
       error: () => this.saving.set(false),
     });
   }

@@ -1,14 +1,13 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { NgClass, DatePipe, PercentPipe } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
 import { EventosService } from '../../../core/auth/eventos.service';
 import { Evento, EventoInscrito, EVENTO_TIPO_META } from '../../../core/models/evento.models';
 
@@ -18,44 +17,40 @@ export interface EventoDetalleData { evento: Evento; }
   selector: 'app-evento-detalle-dialog',
   standalone: true,
   imports: [
-    NgClass, DatePipe, PercentPipe,
-    MatDialogModule, MatButtonModule, MatIconModule,
-    MatProgressBarModule, MatSlideToggleModule,
-    MatProgressSpinnerModule, MatDividerModule,
-    MatChipsModule, MatTooltipModule,
+    NgClass, DatePipe, PercentPipe, FormsModule,
+    ButtonModule, ProgressBarModule, ToggleSwitchModule,
+    ProgressSpinnerModule, DividerModule, TooltipModule,
   ],
   template: `
     <!-- Header con color del tipo -->
     <div class="det-header" [style.background]="evento.color">
       <div class="det-header-top">
-        <mat-icon class="det-tipo-icon">{{ tipoMeta.icono }}</mat-icon>
+        <i class="pi det-tipo-icon" [ngClass]="tipoMeta.icono"></i>
         <div class="det-header-info">
           <span class="det-tipo-badge">{{ tipoMeta.label }}</span>
           <h2>{{ evento.nombre }}</h2>
         </div>
-        <button mat-icon-button class="det-close" mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
+        <button pButton [text]="true" [rounded]="true" class="det-close" (click)="ref.close()"><i class="pi pi-times"></i></button>
       </div>
 
       <!-- Chips de info rápida -->
       <div class="det-chips">
-        <span class="dchip"><mat-icon>calendar_today</mat-icon>
+        <span class="dchip"><i class="pi pi-calendar"></i>
           {{ evento.fecha | date:'EEE dd MMM':'':'es' }}
           @if (evento.fechaFin) { — {{ evento.fechaFin | date:'dd MMM':'':'es' }} }
         </span>
-        <span class="dchip"><mat-icon>schedule</mat-icon>{{ evento.horaInicio }} – {{ evento.horaFin }}</span>
-        <span class="dchip"><mat-icon>place</mat-icon>{{ evento.lugar }}</span>
-        <span class="dchip"><mat-icon>person</mat-icon>{{ evento.responsable }}</span>
+        <span class="dchip"><i class="pi pi-clock"></i>{{ evento.horaInicio }} – {{ evento.horaFin }}</span>
+        <span class="dchip"><i class="pi pi-map-marker"></i>{{ evento.lugar }}</span>
+        <span class="dchip"><i class="pi pi-user"></i>{{ evento.responsable }}</span>
       </div>
     </div>
 
-    <mat-dialog-content class="det-body">
+    <div class="dialog-content det-body">
 
       <!-- Descripción -->
       <p class="det-desc">{{ evento.descripcion }}</p>
 
-      <mat-divider />
+      <p-divider />
 
       <!-- Stats row -->
       <div class="det-stats">
@@ -88,33 +83,32 @@ export interface EventoDetalleData { evento: Evento; }
             <span>Inscripciones</span>
             <span>{{ evento.totalInscritos }} / {{ evento.maxInscritos }}</span>
           </div>
-          <mat-progress-bar mode="determinate"
-            [value]="(evento.totalInscritos / evento.maxInscritos) * 100"
-            [color]="evento.totalInscritos >= evento.maxInscritos ? 'warn' : 'primary'" />
+          <p-progressBar [value]="(evento.totalInscritos / evento.maxInscritos) * 100"
+            [style]="{ height: '6px' }" [showValue]="false" />
         </div>
       }
 
-      <mat-divider />
+      <p-divider />
 
       <!-- Lista de inscritos -->
       <div class="inscritos-section">
         <div class="inscritos-header">
           <h3>
-            <mat-icon [style.color]="evento.color">people</mat-icon>
+            <i class="pi pi-users" [style.color]="evento.color"></i>
             Lista de inscritos
           </h3>
           @if (evento.estado === 'Finalizado' || evento.estado === 'EnCurso') {
             <span class="asistencia-hint">
-              <mat-icon>touch_app</mat-icon> Registra la asistencia
+              <i class="pi pi-info-circle"></i> Registra la asistencia
             </span>
           }
         </div>
 
         @if (cargandoInscritos()) {
-          <div class="loading-row"><mat-spinner diameter="32" /></div>
+          <div class="loading-row"><p-progressSpinner [style]="{ width: '32px', height: '32px' }" /></div>
         } @else if (inscritos().length === 0) {
           <div class="empty-inscritos">
-            <mat-icon>person_search</mat-icon><p>Aún no hay inscritos.</p>
+            <i class="pi pi-search"></i><p>Aún no hay inscritos.</p>
           </div>
         } @else {
           <div class="inscritos-list">
@@ -134,12 +128,12 @@ export interface EventoDetalleData { evento: Evento; }
 
                 <!-- Asistencia toggle (solo para eventos activos o finalizados) -->
                 @if (evento.estado === 'Finalizado' || evento.estado === 'EnCurso') {
-                  <mat-slide-toggle
-                    [checked]="m.asistio === true"
-                    [color]="'primary'"
-                    [matTooltip]="m.asistio === true ? 'Asistió' : m.asistio === false ? 'No asistió' : 'Sin registrar'"
-                    (change)="toggleAsistencia(m, $event.checked)">
-                  </mat-slide-toggle>
+                  <div class="asistencia-toggle-wrap"
+                       [pTooltip]="m.asistio === true ? 'Asistió' : m.asistio === false ? 'No asistió' : 'Sin registrar'">
+                    <p-toggleswitch
+                      [ngModel]="m.asistio === true"
+                      (onChange)="toggleAsistencia(m, $event.checked)" />
+                  </div>
                 } @else {
                   <span class="inscrito-fecha">{{ m.inscritoEn | date:'dd/MM':'':'es' }}</span>
                 }
@@ -151,7 +145,7 @@ export interface EventoDetalleData { evento: Evento; }
           <!-- Resumen de asistencia -->
           @if (evento.estado === 'Finalizado' || evento.estado === 'EnCurso') {
             <div class="asistencia-resumen" [style.background]="evento.colorClaro">
-              <mat-icon [style.color]="evento.color">check_circle</mat-icon>
+              <i class="pi pi-check-circle" [style.color]="evento.color"></i>
               <span>
                 <strong [style.color]="evento.color">{{ conteoAsistieron() }}</strong>
                 de {{ inscritos().length }} asistieron
@@ -162,17 +156,17 @@ export interface EventoDetalleData { evento: Evento; }
         }
       </div>
 
-    </mat-dialog-content>
+    </div>
 
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cerrar</button>
-    </mat-dialog-actions>
+    <div class="dialog-actions">
+      <button pButton [text]="true" (click)="ref.close()">Cerrar</button>
+    </div>
   `,
   styles: [`
     /* Header */
     .det-header { padding: 20px 20px 16px; color: white; border-radius: 0; }
     .det-header-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:12px; }
-    .det-tipo-icon { font-size:32px; width:32px; height:32px; opacity:.9; flex-shrink:0; margin-top:2px; }
+    .det-tipo-icon { font-size:32px; opacity:.9; flex-shrink:0; margin-top:2px; }
     .det-header-info { flex:1; }
     .det-tipo-badge {
       display:inline-block; font-size:10px; font-weight:700; letter-spacing:.6px;
@@ -187,10 +181,10 @@ export interface EventoDetalleData { evento: Evento; }
       font-size:12px; background:rgba(255,255,255,.2);
       padding:3px 10px; border-radius:20px;
     }
-    .dchip mat-icon { font-size:14px!important; width:14px!important; height:14px!important; }
+    .dchip i { font-size:14px; }
 
     /* Body */
-    mat-dialog-content { padding: 16px 20px !important; min-width: min(540px, 92vw); max-height: 65vh !important; }
+    .dialog-content.det-body { padding: 16px 20px !important; min-width: min(540px, 92vw); max-height: 65vh; overflow-y: auto; }
     .det-desc { margin:0 0 16px; font-size:13px; color:#475569; line-height:1.6; }
 
     /* Stats */
@@ -207,9 +201,9 @@ export interface EventoDetalleData { evento: Evento; }
     .inscritos-section { padding-top:16px; }
     .inscritos-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
     .inscritos-header h3 { margin:0; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
-    .inscritos-header h3 mat-icon { font-size:18px!important; width:18px!important; height:18px!important; }
+    .inscritos-header h3 i { font-size:18px; }
     .asistencia-hint { display:flex; align-items:center; gap:4px; font-size:12px; color:#94a3b8; }
-    .asistencia-hint mat-icon { font-size:14px!important; width:14px!important; height:14px!important; }
+    .asistencia-hint i { font-size:14px; }
 
     .loading-row { display:flex; justify-content:center; padding:24px; }
     .empty-inscritos { display:flex; align-items:center; gap:8px; color:#94a3b8; padding:24px; justify-content:center; flex-direction:column; }
@@ -240,13 +234,14 @@ export interface EventoDetalleData { evento: Evento; }
       font-size:13px; color:#475569;
     }
 
-    mat-dialog-actions { gap:8px; padding:12px 20px !important; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:8px; padding:12px 20px; }
   `],
 })
 export class EventoDetalleDialogComponent implements OnInit {
   private svc = inject(EventosService);
-  readonly dialogRef = inject(MatDialogRef<EventoDetalleDialogComponent>);
-  readonly data: EventoDetalleData = inject(MAT_DIALOG_DATA);
+  readonly ref    = inject(DynamicDialogRef);
+  readonly config = inject(DynamicDialogConfig<EventoDetalleData>);
+  readonly data: EventoDetalleData = this.config.data;
 
   evento = this.data.evento;
   tipoMeta = EVENTO_TIPO_META[this.evento.tipo];

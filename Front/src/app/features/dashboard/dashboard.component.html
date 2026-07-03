@@ -1,7 +1,7 @@
 <!-- ══ LOADING ══════════════════════════════════════════════════ -->
 @if (loading()) {
   <div class="loading-screen">
-    <mat-spinner diameter="44" />
+    <p-progressSpinner [style]="{width:'44px',height:'44px'}" />
     <span>Cargando datos...</span>
   </div>
 } @else if (data(); as d) {
@@ -15,10 +15,10 @@
   </div>
   <div class="hero-actions">
     <a class="hero-btn btn-white" routerLink="/miembros/nuevo">
-      <mat-icon>person_add</mat-icon> Nuevo miembro
+      <i class="pi pi-user-plus"></i> Nuevo miembro
     </a>
     <a class="hero-btn btn-ghost" routerLink="/eventos">
-      <mat-icon>event</mat-icon> Ver eventos
+      <i class="pi pi-calendar"></i> Ver eventos
     </a>
   </div>
 </div>
@@ -27,7 +27,7 @@
 <div class="kpi-grid">
 
   <div class="kpi-card" style="--c:#1199c5">
-    <div class="kpi-icon"><mat-icon>groups</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-users"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalMiembros }}</div>
       <div class="kpi-label">Total congregación</div>
@@ -35,7 +35,7 @@
   </div>
 
   <div class="kpi-card" style="--c:#059669">
-    <div class="kpi-icon"><mat-icon>how_to_reg</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-user-edit"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalActivos }}</div>
       <div class="kpi-label">Miembros activos</div>
@@ -44,7 +44,7 @@
   </div>
 
   <div class="kpi-card" style="--c:#d97706">
-    <div class="kpi-icon"><mat-icon>person_search</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-search"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalVisitantes }}</div>
       <div class="kpi-label">Visitantes</div>
@@ -53,7 +53,7 @@
   </div>
 
   <div class="kpi-card" style="--c:#7c3aed">
-    <div class="kpi-icon"><mat-icon>military_tech</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-star-fill"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalLideres }}</div>
       <div class="kpi-label">Líderes activos</div>
@@ -62,7 +62,7 @@
   </div>
 
   <div class="kpi-card" style="--c:#64748b">
-    <div class="kpi-icon"><mat-icon>person_off</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-user-minus"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalInactivos }}</div>
       <div class="kpi-label">Inactivos</div>
@@ -71,7 +71,7 @@
   </div>
 
   <div class="kpi-card" style="--c:#0891b2">
-    <div class="kpi-icon"><mat-icon>hub</mat-icon></div>
+    <div class="kpi-icon"><i class="pi pi-sitemap"></i></div>
     <div class="kpi-body">
       <div class="kpi-value">{{ d.totalCelulas }}</div>
       <div class="kpi-label">Células activas</div>
@@ -87,7 +87,7 @@
   <!-- Distribución -->
   <div class="card">
     <div class="card-header">
-      <div class="ch-icon"><mat-icon>donut_large</mat-icon></div>
+      <div class="ch-icon"><i class="pi pi-chart-pie"></i></div>
       <span class="ch-title">Distribución</span>
     </div>
     <div class="donut-wrap">
@@ -125,10 +125,10 @@
   <!-- Embudo de preparación -->
   <div class="card">
     <div class="card-header">
-      <div class="ch-icon"><mat-icon>filter_alt</mat-icon></div>
+      <div class="ch-icon"><i class="pi pi-filter"></i></div>
       <span class="ch-title">Preparación espiritual</span>
       <a class="ch-link" routerLink="/etapas">
-        Ver detalle <mat-icon>chevron_right</mat-icon>
+        Ver detalle <i class="pi pi-chevron-right"></i>
       </a>
     </div>
     @if (d.miembrosPorEtapa.length === 0) {
@@ -162,17 +162,17 @@
   <!-- Ministerios -->
   <div class="card">
     <div class="card-header">
-      <div class="ch-icon"><mat-icon>volunteer_activism</mat-icon></div>
+      <div class="ch-icon"><i class="pi pi-heart-fill"></i></div>
       <span class="ch-title">Ministerios</span>
       <a class="ch-link" routerLink="/ministerios">
-        Ver todos <mat-icon>chevron_right</mat-icon>
+        Ver todos <i class="pi pi-chevron-right"></i>
       </a>
     </div>
     <div class="min-list">
       @for (m of d.ministeriosResumen; track m.ministerioId) {
         <div class="min-item">
           <div class="min-icon" [style.background]="m.colorClaro" [style.color]="m.color">
-            <mat-icon>{{ m.icono }}</mat-icon>
+            <i class="pi" [ngClass]="m.icono"></i>
           </div>
           <div class="min-body">
             <span class="min-nombre">{{ m.nombre }}</span>
@@ -189,16 +189,16 @@
   <!-- Próximos eventos -->
   <div class="card">
     <div class="card-header">
-      <div class="ch-icon"><mat-icon>upcoming</mat-icon></div>
+      <div class="ch-icon"><i class="pi pi-calendar-clock"></i></div>
       <span class="ch-title">Próximos eventos</span>
       <a class="ch-link" routerLink="/eventos">
-        Ver todos <mat-icon>chevron_right</mat-icon>
+        Ver todos <i class="pi pi-chevron-right"></i>
       </a>
     </div>
 
     @if (d.proximosEventos.length === 0) {
       <div class="empty-block">
-        <mat-icon>event_busy</mat-icon>
+        <i class="pi pi-calendar-times"></i>
         <p>No hay eventos próximos</p>
       </div>
     } @else {
@@ -206,11 +206,11 @@
         @for (ev of d.proximosEventos; track ev.eventoId) {
           <div class="event-item" [style.--ac]="ev.color">
             <div class="ev-left">
-              <div class="ev-icon"><mat-icon>{{ ev.icono }}</mat-icon></div>
+              <div class="ev-icon"><i class="pi" [ngClass]="ev.icono"></i></div>
               <div class="ev-info">
                 <span class="ev-name">{{ ev.nombre }}</span>
                 <span class="ev-date">
-                  <mat-icon>calendar_today</mat-icon>
+                  <i class="pi pi-calendar"></i>
                   {{ ev.fecha | date:'dd MMM yyyy' }}
                 </span>
               </div>

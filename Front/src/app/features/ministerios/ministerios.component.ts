@@ -1,11 +1,10 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialog } from '@angular/material/dialog';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { DialogService } from 'primeng/dynamicdialog';
 import { MinisteriosService } from '../../core/auth/ministerios.service';
 import { MiembrosService } from '../../core/auth/miembros.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -17,8 +16,8 @@ import { MinisterioFormDialogComponent } from './ministerio-form-dialog/minister
   selector: 'app-ministerios',
   standalone: true,
   imports: [
-    MatIconModule, MatButtonModule, MatProgressSpinnerModule,
-    MatTooltipModule, MatSlideToggleModule, MatChipsModule,
+    FormsModule,
+    ButtonModule, ProgressSpinnerModule, TooltipModule, ToggleSwitchModule,
   ],
   templateUrl: './ministerios.component.html',
   styleUrl: './ministerios.component.css',
@@ -27,7 +26,7 @@ export class MinisteriosComponent implements OnInit {
   private svc        = inject(MinisteriosService);
   private miembroSvc = inject(MiembrosService);
   private auth       = inject(AuthService);
-  private dialog     = inject(MatDialog);
+  private dialogService = inject(DialogService);
 
   ministerios  = signal<Ministerio[]>([]);
   miembros     = signal<MiembroList[]>([]);
@@ -76,11 +75,9 @@ export class MinisteriosComponent implements OnInit {
   }
 
   abrirForm(ministerio?: Ministerio) {
-    this.dialog.open(MinisterioFormDialogComponent, {
-      data: { ministerio },
-      width: '500px',
-      disableClose: true,
-    }).afterClosed().subscribe(r => { if (r) this.cargar(); });
+    this.dialogService.open(MinisterioFormDialogComponent, {
+      data: { ministerio }, width: '500px', showHeader: false, closeOnEscape: false,
+    })?.onClose.subscribe(r => { if (r) this.cargar(); });
   }
 
   eliminar(m: Ministerio) {

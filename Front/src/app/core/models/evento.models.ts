@@ -56,11 +56,11 @@ export interface CrearEventoRequest {
 }
 
 export const EVENTO_TIPO_META: Record<EventoTipo, { label: string; icono: string; color: string; colorClaro: string }> = {
-  Encuentro:    { label: 'Encuentro',      icono: 'diversity_3',          color: '#7c3aed', colorClaro: '#ede9fe' },
-  Retiro:       { label: 'Retiro',         icono: 'landscape',            color: '#059669', colorClaro: '#d1fae5' },
-  CultoEspecial:{ label: 'Culto Especial', icono: 'church',               color: '#0284c7', colorClaro: '#e0f2fe' },
-  Conferencia:  { label: 'Conferencia',    icono: 'record_voice_over',    color: '#d97706', colorClaro: '#fef3c7' },
-  Campana:      { label: 'Campaña',        icono: 'campaign',             color: '#dc2626', colorClaro: '#fee2e2' },
-  Capacitacion: { label: 'Capacitación',   icono: 'school',               color: '#0891b2', colorClaro: '#cffafe' },
-  Otro:         { label: 'Otro',           icono: 'event',                color: '#64748b', colorClaro: '#f1f5f9' },
+  Encuentro:    { label: 'Encuentro',      icono: 'pi-users',              color: '#7c3aed', colorClaro: '#ede9fe' },
+  Retiro:       { label: 'Retiro',         icono: 'pi-map',                color: '#059669', colorClaro: '#d1fae5' },
+  CultoEspecial:{ label: 'Culto Especial', icono: 'pi-building-columns',   color: '#0284c7', colorClaro: '#e0f2fe' },
+  Conferencia:  { label: 'Conferencia',    icono: 'pi-microphone',         color: '#d97706', colorClaro: '#fef3c7' },
+  Campana:      { label: 'Campaña',        icono: 'pi-megaphone',          color: '#dc2626', colorClaro: '#fee2e2' },
+  Capacitacion: { label: 'Capacitación',   icono: 'pi-graduation-cap',     color: '#0891b2', colorClaro: '#cffafe' },
+  Otro:         { label: 'Otro',           icono: 'pi-calendar',           color: '#64748b', colorClaro: '#f1f5f9' },
 };

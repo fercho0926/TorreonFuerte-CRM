@@ -1,10 +1,9 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgClass, DatePipe } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { MiembrosService } from '../../../core/auth/miembros.service';
 import { MiembroDetalle } from '../../../core/models/miembro.models';
 
@@ -17,11 +16,11 @@ interface PrepStep {
 }
 
 const PREP_PATH: PrepStep[] = [
-  { orden: 1, nombre: 'Encuentro con Dios',     icono: 'favorite',     color: '#f43f5e', colorClaro: '#fce7f3' },
-  { orden: 2, nombre: 'Libres para Servir',     icono: 'lock_open',    color: '#f97316', colorClaro: '#ffedd5' },
-  { orden: 3, nombre: 'Avivando el Fuego',      icono: 'local_fire_department', color: '#eab308', colorClaro: '#fef9c3' },
-  { orden: 4, nombre: 'Caminando en Santidad',  icono: 'directions_walk', color: '#22c55e', colorClaro: '#dcfce7' },
-  { orden: 5, nombre: 'En Servicio Activo',     icono: 'volunteer_activism', color: '#6366f1', colorClaro: '#ede9fe' },
+  { orden: 1, nombre: 'Encuentro con Dios',     icono: 'pi-heart-fill', color: '#f43f5e', colorClaro: '#fce7f3' },
+  { orden: 2, nombre: 'Libres para Servir',     icono: 'pi-lock-open',  color: '#f97316', colorClaro: '#ffedd5' },
+  { orden: 3, nombre: 'Avivando el Fuego',      icono: 'pi-bolt',       color: '#eab308', colorClaro: '#fef9c3' },
+  { orden: 4, nombre: 'Caminando en Santidad',  icono: 'pi-directions', color: '#22c55e', colorClaro: '#dcfce7' },
+  { orden: 5, nombre: 'En Servicio Activo',     icono: 'pi-heart',      color: '#6366f1', colorClaro: '#ede9fe' },
 ];
 
 type StepState = 'done' | 'active' | 'locked';
@@ -37,8 +36,7 @@ interface EtapaNode extends PrepStep {
   standalone: true,
   imports: [
     RouterLink, NgClass, DatePipe,
-    MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule,
+    ButtonModule, ProgressSpinnerModule, TooltipModule,
   ],
   templateUrl: './miembro-detalle.component.html',
   styleUrl: './miembro-detalle.component.css',
@@ -102,7 +100,7 @@ export class MiembroDetalleComponent implements OnInit {
 
   ngOnInit() {
     const id = +this.route.snapshot.params['id'];
-    this.svc.getMockById(id).subscribe({
+    this.svc.getById(id).subscribe({
       next: (m) => { this.miembro.set(m); this.loading.set(false); },
       error: () => { this.error.set(true); this.loading.set(false); },
     });

@@ -1,83 +1,97 @@
 <div class="form-header">
-  <a mat-icon-button routerLink="/miembros">
-    <mat-icon>arrow_back</mat-icon>
-  </a>
+  <a pButton [text]="true" [rounded]="true" routerLink="/miembros"><i class="pi pi-arrow-left"></i></a>
   <h2>{{ isEdit() ? 'Editar miembro' : 'Nuevo miembro' }}</h2>
 </div>
 
 @if (loading()) {
-  <div class="loading-center"><mat-spinner diameter="40" /></div>
+  <div class="loading-center"><p-progressSpinner [style]="{ width: '40px', height: '40px' }" /></div>
 } @else {
-  <mat-card>
-    <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="submit()">
-        <div class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nombre</mat-label>
-            <input matInput formControlName="nombre" />
-            <mat-error>Requerido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Apellido</mat-label>
-            <input matInput formControlName="apellido" />
-            <mat-error>Requerido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Cédula</mat-label>
-            <input matInput formControlName="cedula" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de nacimiento</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="fechaNacimiento" />
-            <mat-datepicker-toggle matIconSuffix [for]="picker" />
-            <mat-datepicker #picker />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Teléfono</mat-label>
-            <input matInput formControlName="telefono" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email" />
-            <mat-error>Email inválido</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-col">
-            <mat-label>Dirección</mat-label>
-            <input matInput formControlName="direccion" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Estado</mat-label>
-            <mat-select formControlName="estado">
-              @for (e of estados; track e) {
-                <mat-option [value]="e">{{ e }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-col">
-            <mat-label>Notas</mat-label>
-            <textarea matInput formControlName="notas" rows="3"></textarea>
-          </mat-form-field>
+  <p-card>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="nombre" formControlName="nombre" />
+            <label for="nombre">Nombre</label>
+          </p-floatlabel>
+          @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
+            <p-message severity="error" text="Requerido" variant="simple" size="small" />
+          }
         </div>
 
-        <div class="form-actions">
-          <a mat-button routerLink="/miembros">Cancelar</a>
-          <button mat-raised-button color="primary" type="submit" [disabled]="saving()">
-            @if (saving()) {
-              <mat-spinner diameter="18" />
-            } @else {
-              {{ isEdit() ? 'Guardar cambios' : 'Crear miembro' }}
-            }
-          </button>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="apellido" formControlName="apellido" />
+            <label for="apellido">Apellido</label>
+          </p-floatlabel>
+          @if (form.get('apellido')?.invalid && form.get('apellido')?.touched) {
+            <p-message severity="error" text="Requerido" variant="simple" size="small" />
+          }
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="cedula" formControlName="cedula" />
+            <label for="cedula">Cédula</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-datepicker inputId="fechaNacimiento" formControlName="fechaNacimiento" dateFormat="yy-mm-dd" [showIcon]="true" />
+            <label for="fechaNacimiento">Fecha de nacimiento</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="telefono" formControlName="telefono" />
+            <label for="telefono">Teléfono</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="email" type="email" formControlName="email" />
+            <label for="email">Email</label>
+          </p-floatlabel>
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p-message severity="error" text="Email inválido" variant="simple" size="small" />
+          }
+        </div>
+
+        <div class="field full-col">
+          <p-floatlabel variant="on">
+            <input pInputText id="direccion" formControlName="direccion" />
+            <label for="direccion">Dirección</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-select inputId="estado" formControlName="estado" [options]="estados" />
+            <label for="estado">Estado</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field full-col">
+          <p-floatlabel variant="on">
+            <textarea pTextarea id="notas" formControlName="notas" rows="3"></textarea>
+            <label for="notas">Notas</label>
+          </p-floatlabel>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a pButton [text]="true" routerLink="/miembros">Cancelar</a>
+        <button pButton type="submit" [disabled]="saving()">
+          @if (saving()) {
+            <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" />
+          } @else {
+            {{ isEdit() ? 'Guardar cambios' : 'Crear miembro' }}
+          }
+        </button>
+      </div>
+    </form>
+  </p-card>
 }

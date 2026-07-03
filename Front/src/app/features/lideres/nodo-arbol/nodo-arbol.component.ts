@@ -1,8 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { LiderNodo, MiembroNodo } from '../../../core/models/lider.models';
 
 export interface NodoAccion {
@@ -13,7 +12,7 @@ export interface NodoAccion {
 @Component({
   selector: 'app-nodo-arbol',
   standalone: true,
-  imports: [NgClass, MatIconModule, MatButtonModule, MatTooltipModule, NodoArbolComponent],
+  imports: [NgClass, ButtonModule, TooltipModule, NodoArbolComponent],
   template: `
     <div class="tree-wrap">
 
@@ -26,7 +25,7 @@ export interface NodoAccion {
         <button class="toggle-btn"
                 [class.hidden]="!hasChildren"
                 (click)="expandido.set(!expandido())">
-          <mat-icon>{{ expandido() ? 'expand_more' : 'chevron_right' }}</mat-icon>
+          <i class="pi" [ngClass]="expandido() ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
         </button>
 
         <!-- Avatar -->
@@ -43,26 +42,18 @@ export interface NodoAccion {
 
         <!-- Conteo -->
         <span class="count-pill">
-          <mat-icon>people</mat-icon>{{ nodo.totalMiembros }}
+          <i class="pi pi-users"></i>{{ nodo.totalMiembros }}
         </span>
 
         <!-- Acciones -->
         <div class="node-actions">
-          <button mat-icon-button matTooltip="Ver ficha" (click)="emitir('verDetalle')">
-            <mat-icon>person</mat-icon>
-          </button>
+          <button pButton [text]="true" [rounded]="true" pTooltip="Ver ficha" (click)="emitir('verDetalle')"><i class="pi pi-user"></i></button>
           @if (nodo.nivel !== 'LiderCelula') {
-            <button mat-icon-button matTooltip="Agregar sub-líder" (click)="emitir('agregar')">
-              <mat-icon>person_add</mat-icon>
-            </button>
+            <button pButton [text]="true" [rounded]="true" pTooltip="Agregar sub-líder" (click)="emitir('agregar')"><i class="pi pi-user-plus"></i></button>
           }
-          <button mat-icon-button matTooltip="Editar" (click)="emitir('editar')">
-            <mat-icon>edit</mat-icon>
-          </button>
+          <button pButton [text]="true" [rounded]="true" pTooltip="Editar" (click)="emitir('editar')"><i class="pi pi-pencil"></i></button>
           @if (nodo.nivel !== 'Pastor') {
-            <button mat-icon-button matTooltip="Eliminar" (click)="emitir('eliminar')" class="btn-del">
-              <mat-icon>delete_outline</mat-icon>
-            </button>
+            <button pButton [text]="true" [rounded]="true" pTooltip="Eliminar" (click)="emitir('eliminar')" class="btn-del"><i class="pi pi-trash"></i></button>
           }
         </div>
       </div>
@@ -134,7 +125,7 @@ export interface NodoAccion {
       padding: 0;
     }
     .toggle-btn:hover { background: #e0f2fe; color: #0284c7; }
-    .toggle-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    .toggle-btn i { font-size: 18px; width: 18px; height: 18px; }
     .toggle-btn.hidden { visibility: hidden; pointer-events: none; }
 
     /* ── Avatar ─────────────────────────────────────────────────── */
@@ -181,7 +172,7 @@ export interface NodoAccion {
       background: #f1f5f9; padding: 3px 9px; border-radius: 20px;
       flex-shrink: 0;
     }
-    .count-pill mat-icon { font-size: 13px; width: 13px; height: 13px; }
+    .count-pill i { font-size: 13px; width: 13px; height: 13px; }
 
     /* ── Actions ────────────────────────────────────────────────── */
     .node-actions {

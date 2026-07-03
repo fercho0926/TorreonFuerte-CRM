@@ -1,12 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { NgClass, DatePipe, PercentPipe } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
+import { NgClass, DatePipe } from '@angular/common';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { TabsModule } from 'primeng/tabs';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MiembrosService } from '../../../core/auth/miembros.service';
 import { MiembroList } from '../../../core/models/miembro.models';
 import { Sede } from '../../../core/models/sede.models';
@@ -25,9 +22,8 @@ interface CelulaSimulada {
   selector: 'app-sede-detalle-dialog',
   standalone: true,
   imports: [
-    NgClass, DatePipe, PercentPipe,
-    MatDialogModule, MatTabsModule, MatIconModule,
-    MatButtonModule, MatChipsModule, MatProgressSpinnerModule, MatDividerModule,
+    NgClass, DatePipe,
+    TabsModule, ButtonModule, ProgressSpinnerModule,
   ],
   template: `
     <!-- Header colorido -->
@@ -38,9 +34,7 @@ interface CelulaSimulada {
           <span class="det-pais">{{ sede.ciudad }}, {{ sede.pais }}</span>
           <h2>{{ sede.nombre }}</h2>
         </div>
-        <button mat-icon-button class="det-close" mat-dialog-close>
-          <mat-icon>close</mat-icon>
-        </button>
+        <button pButton [text]="true" [rounded]="true" class="det-close" (click)="ref.close()"><i class="pi pi-times"></i></button>
       </div>
       <!-- KPIs rápidos -->
       <div class="det-kpis">
@@ -63,155 +57,151 @@ interface CelulaSimulada {
       </div>
     </div>
 
-    <mat-dialog-content class="det-body">
-      <mat-tab-group animationDuration="200ms">
+    <div class="dialog-content det-body">
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0"><i class="pi pi-info-circle tab-icon"></i> Información</p-tab>
+          <p-tab value="1"><i class="pi pi-users tab-icon"></i> Miembros ({{ miembros().length }})</p-tab>
+          <p-tab value="2"><i class="pi pi-sitemap tab-icon"></i> Células ({{ celulas().length }})</p-tab>
+        </p-tablist>
+        <p-tabpanels>
 
-        <!-- ═══ TAB INFO ═══ -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="tab-icon">info</mat-icon> Información
-          </ng-template>
-          <div class="info-grid">
+          <!-- ═══ TAB INFO ═══ -->
+          <p-tabpanel value="0">
+            <div class="info-grid">
 
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">church</mat-icon>
-              <div>
-                <span class="info-label">Pastor(es)</span>
-                <span class="info-value">{{ sede.pastor }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">place</mat-icon>
-              <div>
-                <span class="info-label">Dirección</span>
-                <span class="info-value">{{ sede.direccion }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">location_city</mat-icon>
-              <div>
-                <span class="info-label">Ciudad / Departamento</span>
-                <span class="info-value">{{ sede.ciudad }}, {{ sede.departamento }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">phone</mat-icon>
-              <div>
-                <span class="info-label">Teléfono</span>
-                <span class="info-value">{{ sede.telefono }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">email</mat-icon>
-              <div>
-                <span class="info-label">Email</span>
-                <span class="info-value">{{ sede.email }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">calendar_today</mat-icon>
-              <div>
-                <span class="info-label">Fecha de fundación</span>
-                <span class="info-value">{{ sede.fechaFundacion | date:"d 'de' MMMM yyyy":'':'es' }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <mat-icon [style.color]="sede.color">gps_fixed</mat-icon>
-              <div>
-                <span class="info-label">Coordenadas</span>
-                <span class="info-value">{{ sede.lat }}, {{ sede.lng }}</span>
-              </div>
-            </div>
-
-          </div>
-        </mat-tab>
-
-        <!-- ═══ TAB MIEMBROS ═══ -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="tab-icon">people</mat-icon> Miembros ({{ miembros().length }})
-          </ng-template>
-
-          @if (cargandoMiembros()) {
-            <div class="loading-row"><mat-spinner diameter="36" /></div>
-          } @else if (miembros().length === 0) {
-            <div class="empty-tab">
-              <mat-icon>person_search</mat-icon>
-              <p>Sin miembros registrados en esta sede.</p>
-            </div>
-          } @else {
-            <div class="estado-resumen">
-              @for (grupo of estadoResumen(); track grupo.label) {
-                <div class="estado-pill" [style.background]="grupo.bg" [style.color]="grupo.color">
-                  <strong>{{ grupo.count }}</strong> {{ grupo.label }}
+              <div class="info-item">
+                <i class="pi pi-building" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Pastor(es)</span>
+                  <span class="info-value">{{ sede.pastor }}</span>
                 </div>
-              }
-            </div>
-            <div class="miembros-list">
-              @for (m of miembros(); track m.miembroId) {
-                <div class="miembro-row">
-                  <div class="m-avatar" [style.background]="sede.color + '22'" [style.color]="sede.color">
-                    {{ m.nombre[0] }}{{ m.apellido[0] }}
-                  </div>
-                  <div class="m-info">
-                    <span class="m-nombre">{{ m.nombre }} {{ m.apellido }}</span>
-                    <span class="m-sub">
-                      @if (m.liderNombre) { {{ m.liderNombre }} · }{{ m.etapaActual ?? 'Sin etapa' }}
-                    </span>
-                  </div>
-                  <span class="estado-badge" [ngClass]="'est-' + m.estado.toLowerCase()">{{ m.estado }}</span>
+              </div>
+
+              <div class="info-item">
+                <i class="pi pi-map-marker" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Dirección</span>
+                  <span class="info-value">{{ sede.direccion }}</span>
                 </div>
-              }
-            </div>
-          }
-        </mat-tab>
+              </div>
 
-        <!-- ═══ TAB CÉLULAS ═══ -->
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <mat-icon class="tab-icon">hub</mat-icon> Células ({{ celulas().length }})
-          </ng-template>
-
-          @if (celulas().length === 0) {
-            <div class="empty-tab">
-              <mat-icon>hub</mat-icon>
-              <p>Sin células registradas en esta sede.</p>
-            </div>
-          } @else {
-            <div class="celulas-grid">
-              @for (c of celulas(); track c.celulaId) {
-                <div class="celula-card" [style.border-left-color]="c.color">
-                  <div class="cel-icon" [style.background]="c.color + '22'" [style.color]="c.color">
-                    <mat-icon>group</mat-icon>
-                  </div>
-                  <div class="cel-info">
-                    <span class="cel-nombre">{{ c.nombre }}</span>
-                    <span class="cel-lider">
-                      <mat-icon>person</mat-icon>{{ c.lider }}
-                    </span>
-                  </div>
-                  <div class="cel-count">
-                    <span class="cel-num" [style.color]="c.color">{{ c.miembros }}</span>
-                    <span class="cel-lbl">miembros</span>
-                  </div>
+              <div class="info-item">
+                <i class="pi pi-map-marker" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Ciudad / Departamento</span>
+                  <span class="info-value">{{ sede.ciudad }}, {{ sede.departamento }}</span>
                 </div>
-              }
+              </div>
+
+              <div class="info-item">
+                <i class="pi pi-phone" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Teléfono</span>
+                  <span class="info-value">{{ sede.telefono }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="pi pi-envelope" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Email</span>
+                  <span class="info-value">{{ sede.email }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="pi pi-calendar" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Fecha de fundación</span>
+                  <span class="info-value">{{ sede.fechaFundacion | date:"d 'de' MMMM yyyy":'':'es' }}</span>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="pi pi-map" [style.color]="sede.color"></i>
+                <div>
+                  <span class="info-label">Coordenadas</span>
+                  <span class="info-value">{{ sede.lat }}, {{ sede.lng }}</span>
+                </div>
+              </div>
+
             </div>
-          }
-        </mat-tab>
+          </p-tabpanel>
 
-      </mat-tab-group>
-    </mat-dialog-content>
+          <!-- ═══ TAB MIEMBROS ═══ -->
+          <p-tabpanel value="1">
+            @if (cargandoMiembros()) {
+              <div class="loading-row"><p-progressSpinner [style]="{ width: '36px', height: '36px' }" /></div>
+            } @else if (miembros().length === 0) {
+              <div class="empty-tab">
+                <i class="pi pi-search"></i>
+                <p>Sin miembros registrados en esta sede.</p>
+              </div>
+            } @else {
+              <div class="estado-resumen">
+                @for (grupo of estadoResumen(); track grupo.label) {
+                  <div class="estado-pill" [style.background]="grupo.bg" [style.color]="grupo.color">
+                    <strong>{{ grupo.count }}</strong> {{ grupo.label }}
+                  </div>
+                }
+              </div>
+              <div class="miembros-list">
+                @for (m of miembros(); track m.miembroId) {
+                  <div class="miembro-row">
+                    <div class="m-avatar" [style.background]="sede.color + '22'" [style.color]="sede.color">
+                      {{ m.nombre[0] }}{{ m.apellido[0] }}
+                    </div>
+                    <div class="m-info">
+                      <span class="m-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+                      <span class="m-sub">
+                        @if (m.liderNombre) { {{ m.liderNombre }} · }{{ m.etapaActual ?? 'Sin etapa' }}
+                      </span>
+                    </div>
+                    <span class="estado-badge" [ngClass]="'est-' + m.estado.toLowerCase()">{{ m.estado }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </p-tabpanel>
 
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cerrar</button>
-    </mat-dialog-actions>
+          <!-- ═══ TAB CÉLULAS ═══ -->
+          <p-tabpanel value="2">
+            @if (celulas().length === 0) {
+              <div class="empty-tab">
+                <i class="pi pi-sitemap"></i>
+                <p>Sin células registradas en esta sede.</p>
+              </div>
+            } @else {
+              <div class="celulas-grid">
+                @for (c of celulas(); track c.celulaId) {
+                  <div class="celula-card" [style.border-left-color]="c.color">
+                    <div class="cel-icon" [style.background]="c.color + '22'" [style.color]="c.color">
+                      <i class="pi pi-users"></i>
+                    </div>
+                    <div class="cel-info">
+                      <span class="cel-nombre">{{ c.nombre }}</span>
+                      <span class="cel-lider">
+                        <i class="pi pi-user"></i>{{ c.lider }}
+                      </span>
+                    </div>
+                    <div class="cel-count">
+                      <span class="cel-num" [style.color]="c.color">{{ c.miembros }}</span>
+                      <span class="cel-lbl">miembros</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </p-tabpanel>
+
+        </p-tabpanels>
+      </p-tabs>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton [text]="true" (click)="ref.close()">Cerrar</button>
+    </div>
   `,
   styles: [`
     /* Header */
@@ -228,21 +218,21 @@ interface CelulaSimulada {
     .det-kpi-l { font-size:11px; opacity:.75; text-transform:uppercase; letter-spacing:.4px; }
 
     /* Body */
-    mat-dialog-content { padding:0 !important; min-width:min(560px, 94vw); max-height:65vh !important; }
-    .tab-icon { font-size:16px!important; width:16px!important; height:16px!important; margin-right:4px; vertical-align:middle; }
+    .dialog-content { padding:0 !important; min-width:min(560px, 94vw); max-height:65vh; overflow-y:auto; }
+    .tab-icon { font-size:16px!important; margin-right:4px; vertical-align:middle; }
 
     /* Info grid */
     .info-grid { display:flex; flex-direction:column; gap:2px; padding:12px 16px; }
     .info-item { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid #f1f5f9; }
     .info-item:last-child { border-bottom:none; }
-    .info-item mat-icon { font-size:20px!important; width:20px!important; height:20px!important; flex-shrink:0; margin-top:2px; }
+    .info-item i { font-size:20px!important; flex-shrink:0; margin-top:2px; }
     .info-label { display:block; font-size:11px; color:#94a3b8; text-transform:uppercase; letter-spacing:.4px; margin-bottom:2px; }
     .info-value { font-size:13px; font-weight:600; color:#1e293b; }
 
     /* Miembros */
     .loading-row { display:flex; justify-content:center; padding:32px; }
     .empty-tab { display:flex; flex-direction:column; align-items:center; gap:8px; padding:40px; color:#94a3b8; font-size:13px; }
-    .empty-tab mat-icon { font-size:40px!important; width:40px!important; height:40px!important; }
+    .empty-tab i { font-size:40px!important; }
 
     .estado-resumen { display:flex; gap:8px; flex-wrap:wrap; padding:12px 16px 4px; }
     .estado-pill { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
@@ -268,22 +258,23 @@ interface CelulaSimulada {
       padding:12px 14px; border-left:4px solid transparent;
     }
     .cel-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .cel-icon mat-icon { font-size:18px!important; width:18px!important; height:18px!important; }
+    .cel-icon i { font-size:18px!important; }
     .cel-info { flex:1; min-width:0; }
     .cel-nombre { display:block; font-size:13px; font-weight:600; color:#1e293b; }
     .cel-lider { display:flex; align-items:center; gap:3px; font-size:11px; color:#94a3b8; }
-    .cel-lider mat-icon { font-size:13px!important; width:13px!important; height:13px!important; }
+    .cel-lider i { font-size:13px!important; }
     .cel-count { text-align:center; flex-shrink:0; }
     .cel-num { display:block; font-size:20px; font-weight:700; line-height:1; }
     .cel-lbl { font-size:10px; color:#94a3b8; text-transform:uppercase; }
 
-    mat-dialog-actions { padding:12px 20px !important; }
+    .dialog-actions { display:flex; justify-content:flex-end; padding:12px 20px !important; }
   `],
 })
 export class SedeDetalleDialogComponent implements OnInit {
   private miembroSvc = inject(MiembrosService);
-  readonly dialogRef = inject(MatDialogRef<SedeDetalleDialogComponent>);
-  readonly data: SedeDetalleData = inject(MAT_DIALOG_DATA);
+  readonly ref = inject(DynamicDialogRef);
+  readonly config = inject(DynamicDialogConfig<SedeDetalleData>);
+  readonly data: SedeDetalleData = this.config.data;
 
   sede = this.data.sede;
 

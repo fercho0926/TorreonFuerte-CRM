@@ -90,7 +90,7 @@
   white-space: nowrap;
 }
 
-.hero-btn mat-icon { font-size: 17px; width: 17px; height: 17px; }
+.hero-btn i { font-size: 17px; width: 17px; height: 17px; }
 .hero-btn:hover { transform: translateY(-1px); }
 
 .btn-white {
@@ -142,7 +142,7 @@
   flex-shrink: 0;
 }
 
-.kpi-icon mat-icon {
+.kpi-icon i {
   font-size: 20px; width: 20px; height: 20px;
   color: var(--c);
 }
@@ -199,7 +199,7 @@
   flex-shrink: 0;
 }
 
-.ch-icon mat-icon {
+.ch-icon i {
   font-size: 17px; width: 17px; height: 17px;
   color: #1199c5;
 }
@@ -222,7 +222,7 @@
   white-space: nowrap;
 }
 
-.ch-link mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.ch-link i { font-size: 16px; width: 16px; height: 16px; }
 .ch-link:hover { text-decoration: underline; }
 
 /* ── Mid grid ────────────────────────────────────────────────────────────── */
@@ -358,7 +358,7 @@
   flex-shrink: 0;
 }
 
-.min-icon mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.min-icon i { font-size: 18px; width: 18px; height: 18px; }
 
 .min-body {
   flex: 1;
@@ -420,7 +420,7 @@
   flex-shrink: 0;
 }
 
-.ev-icon mat-icon {
+.ev-icon i {
   font-size: 18px; width: 18px; height: 18px;
   color: var(--ac);
 }
@@ -449,7 +449,7 @@
   color: #94a3b8;
 }
 
-.ev-date mat-icon { font-size: 12px; width: 12px; height: 12px; }
+.ev-date i { font-size: 12px; width: 12px; height: 12px; }
 
 .ev-right {
   display: flex;
@@ -495,7 +495,7 @@
   font-size: 0.82rem;
 }
 
-.empty-block mat-icon {
+.empty-block i {
   font-size: 36px; width: 36px; height: 36px;
   opacity: 0.4;
 }

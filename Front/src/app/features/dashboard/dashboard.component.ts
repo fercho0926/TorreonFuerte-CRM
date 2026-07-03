@@ -1,7 +1,6 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DatePipe, DecimalPipe, NgClass, PercentPipe } from '@angular/common';
 import { DashboardService } from '../../core/auth/dashboard.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { DashboardData } from '../../core/models/dashboard.models';
@@ -10,7 +9,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatIconModule, MatProgressSpinnerModule, DatePipe, DecimalPipe, PercentPipe, RouterLink],
+  imports: [ProgressSpinnerModule, DatePipe, DecimalPipe, NgClass, PercentPipe, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })

@@ -3,14 +3,12 @@ import {
   PLATFORM_ID, ViewChild, ElementRef, AfterViewInit,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog } from '@angular/material/dialog';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DividerModule } from 'primeng/divider';
+import { DialogService } from 'primeng/dynamicdialog';
 import { SedesService } from '../../core/auth/sedes.service';
 import { Sede, SedeStats } from '../../core/models/sede.models';
 import { SedeDetalleDialogComponent } from './sede-detalle-dialog/sede-detalle-dialog.component';
@@ -19,16 +17,14 @@ import { SedeDetalleDialogComponent } from './sede-detalle-dialog/sede-detalle-d
   selector: 'app-sedes',
   standalone: true,
   imports: [
-    MatCardModule, MatIconModule, MatButtonModule,
-    MatChipsModule, MatTooltipModule, MatProgressSpinnerModule,
-    MatDividerModule,
+    CardModule, ButtonModule, TooltipModule, ProgressSpinnerModule, DividerModule,
   ],
   templateUrl: './sedes.component.html',
   styleUrl: './sedes.component.css',
 })
 export class SedesComponent implements OnInit, AfterViewInit, OnDestroy {
   private svc        = inject(SedesService);
-  private dialog     = inject(MatDialog);
+  private dialogService = inject(DialogService);
   private platformId = inject(PLATFORM_ID);
 
   @ViewChild('mapEl') mapEl!: ElementRef<HTMLDivElement>;
@@ -210,10 +206,8 @@ export class SedesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   abrirDetalle(sede: Sede, event: Event) {
     event.stopPropagation();
-    this.dialog.open(SedeDetalleDialogComponent, {
-      data: { sede },
-      width: '600px',
-      maxHeight: '90vh',
+    this.dialogService.open(SedeDetalleDialogComponent, {
+      data: { sede }, width: '600px', showHeader: false, dismissableMask: true,
     });
   }
 

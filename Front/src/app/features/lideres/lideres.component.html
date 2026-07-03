@@ -1,473 +1,472 @@
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <div class="page-header">
   <div class="header-left">
-    <mat-icon class="header-icon">account_tree</mat-icon>
+    <i class="pi pi-sitemap header-icon"></i>
     <div>
       <h1>Estructura de Liderazgo</h1>
       <p>Árbol jerárquico · Pastor → Zona → Célula → Miembros</p>
     </div>
   </div>
-  <button mat-flat-button color="primary" (click)="abrirForm()">
-    <mat-icon>person_add</mat-icon> Nuevo Líder
+  <button pButton (click)="abrirForm()">
+    <i class="pi pi-user-plus"></i> Nuevo Líder
   </button>
 </div>
 
 <!-- ── Tarjetas de resumen ────────────────────────────────────────────────── -->
 <div class="stats-row">
-  <mat-card class="stat-card pastor">
-    <mat-icon>church</mat-icon>
+  <p-card class="stat-card pastor">
+    <i class="pi pi-building"></i>
     <div>
       <span class="stat-num">{{ totalPastores() }}</span>
       <span class="stat-lbl">Pastor{{ totalPastores() !== 1 ? 'es' : '' }}</span>
     </div>
-  </mat-card>
-  <mat-card class="stat-card zona">
-    <mat-icon>groups</mat-icon>
+  </p-card>
+  <p-card class="stat-card zona">
+    <i class="pi pi-users"></i>
     <div>
       <span class="stat-num">{{ totalZonas() }}</span>
       <span class="stat-lbl">Zona{{ totalZonas() !== 1 ? 's' : '' }}</span>
     </div>
-  </mat-card>
-  <mat-card class="stat-card celula">
-    <mat-icon>group</mat-icon>
+  </p-card>
+  <p-card class="stat-card celula">
+    <i class="pi pi-users"></i>
     <div>
       <span class="stat-num">{{ totalCelulas() }}</span>
       <span class="stat-lbl">Célula{{ totalCelulas() !== 1 ? 's' : '' }}</span>
     </div>
-  </mat-card>
-  <mat-card class="stat-card miembros">
-    <mat-icon>people</mat-icon>
+  </p-card>
+  <p-card class="stat-card miembros">
+    <i class="pi pi-users"></i>
     <div>
       <span class="stat-num">{{ totalMiembros() }}</span>
       <span class="stat-lbl">Miembros activos</span>
     </div>
-  </mat-card>
+  </p-card>
 </div>
 
 <!-- ── Tabs ───────────────────────────────────────────────────────────────── -->
-<mat-tab-group animationDuration="200ms" class="lideres-tabs">
+<p-tabs value="0" class="lideres-tabs">
+  <p-tablist>
+    <p-tab value="0"><i class="pi pi-sitemap tab-icon"></i> Árbol Jerárquico</p-tab>
+    <p-tab value="1"><i class="pi pi-list tab-icon"></i> Lista de Líderes</p-tab>
+    <p-tab value="2"><i class="pi pi-history tab-icon"></i> Historial de Cambios</p-tab>
+  </p-tablist>
 
-  <!-- ╔══════════════ TAB 1: ÁRBOL ══════════════╗ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">account_tree</mat-icon> Árbol Jerárquico
-    </ng-template>
+  <p-tabpanels>
 
-    @if (cargando()) {
-      <div class="loading-center"><mat-spinner diameter="48" /></div>
-    } @else if (arbol()) {
+    <!-- ╔══════════════ TAB 1: ÁRBOL ══════════════╗ -->
+    <p-tabpanel value="0">
 
-      <!-- Breadcrumb -->
-      <nav class="drill-breadcrumb">
-        <button class="bc-item bc-home" (click)="navBack(0)">
-          <mat-icon>home</mat-icon>
-          <span>Inicio</span>
-        </button>
-        @for (node of navPath(); track node.liderId; let i = $index) {
-          <mat-icon class="bc-sep">chevron_right</mat-icon>
-          <button class="bc-item" [class.bc-active]="i === navPath().length - 1"
-                  (click)="navBack(i + 1)">
-            {{ node.nombre }} {{ node.apellido }}
+      @if (cargando()) {
+        <div class="loading-center"><p-progressSpinner [style]="{ width: '48px', height: '48px' }" /></div>
+      } @else if (arbol()) {
+
+        <!-- Breadcrumb -->
+        <nav class="drill-breadcrumb">
+          <button class="bc-item bc-home" (click)="navBack(0)">
+            <i class="pi pi-home"></i>
+            <span>Inicio</span>
           </button>
-        }
-      </nav>
-
-      <!-- Current level header -->
-      @if (viewNode(); as vn) {
-        <div class="drill-level-header" [ngClass]="'dlh-' + nivelClass(vn.nivel)">
-          <div class="dlh-avatar" [ngClass]="nivelClass(vn.nivel)">
-            {{ initials(vn.nombre, vn.apellido) }}
-          </div>
-          <div class="dlh-info">
-            <span class="dlh-nombre">{{ vn.nombre }} {{ vn.apellido }}</span>
-            <span class="dlh-sub">
-              <span class="nivel-badge" [ngClass]="nivelClass(vn.nivel)">
-                <mat-icon>{{ nivelIcon(vn.nivel) }}</mat-icon>{{ nivelLabel(vn.nivel) }}
-              </span>
-              <span class="dlh-zona">{{ vn.zonaOCelula }}</span>
-            </span>
-          </div>
-          <div class="dlh-actions">
-            <button mat-icon-button matTooltip="Editar" (click)="onAccionArbol({ tipo: 'editar', nodo: vn })">
-              <mat-icon>edit</mat-icon>
+          @for (node of navPath(); track node.liderId; let i = $index) {
+            <i class="pi pi-chevron-right bc-sep"></i>
+            <button class="bc-item" [class.bc-active]="i === navPath().length - 1"
+                    (click)="navBack(i + 1)">
+              {{ node.nombre }} {{ node.apellido }}
             </button>
-            @if (vn.nivel !== 'LiderCelula') {
-              <button mat-icon-button matTooltip="Agregar sub-líder"
-                      (click)="onAccionArbol({ tipo: 'agregar', nodo: vn })">
-                <mat-icon>person_add</mat-icon>
-              </button>
-            }
-          </div>
-          <div class="dlh-count">
-            <mat-icon>people</mat-icon>
-            <span>{{ vn.totalMiembros }}</span>
-            <small>miembro{{ vn.totalMiembros !== 1 ? 's' : '' }}</small>
-          </div>
-        </div>
+          }
+        </nav>
 
-        <!-- Sub-leaders grid -->
-        @if (vn.subLideres && vn.subLideres.length > 0) {
-          <div class="drill-section-title">
-            <mat-icon>account_tree</mat-icon>
-            {{ vn.nivel === 'Pastor' ? 'Zonas' : 'Células' }}
-            <span class="dsg-count">{{ vn.subLideres.length }}</span>
-          </div>
-          <div class="drill-grid">
-            @for (hijo of vn.subLideres; track hijo.liderId) {
-              <div class="drill-card" [ngClass]="'dc-' + nivelClass(hijo.nivel)"
-                   (click)="navTo(hijo)">
-                <div class="dcard-top">
-                  <div class="dcard-avatar" [ngClass]="nivelClass(hijo.nivel)">
-                    {{ initials(hijo.nombre, hijo.apellido) }}
-                  </div>
-                  <span class="nivel-badge sm" [ngClass]="nivelClass(hijo.nivel)">
-                    {{ nivelLabel(hijo.nivel) }}
-                  </span>
-                </div>
-                <div class="dcard-nombre">{{ hijo.nombre }} {{ hijo.apellido }}</div>
-                <div class="dcard-zona">{{ hijo.zonaOCelula }}</div>
-                <div class="dcard-footer">
-                  <span class="dcard-miembros">
-                    <mat-icon>people</mat-icon>{{ hijo.totalMiembros }}
-                  </span>
-                  @if (hijo.subLideres && hijo.subLideres.length > 0) {
-                    <span class="dcard-sub">
-                      <mat-icon>account_tree</mat-icon>{{ hijo.subLideres.length }}
-                    </span>
-                  }
-                  <mat-icon class="dcard-arrow">chevron_right</mat-icon>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-        <!-- Members list (LiderCelula) -->
-        @if (vn.nivel === 'LiderCelula') {
-          @if ((vn.miembros?.length ?? 0) > 0) {
-            <div class="drill-section-title">
-              <mat-icon>group</mat-icon> Miembros de la célula
-              <span class="dsg-count">{{ vn.miembros!.length }}</span>
+        <!-- Current level header -->
+        @if (viewNode(); as vn) {
+          <div class="drill-level-header" [ngClass]="'dlh-' + nivelClass(vn.nivel)">
+            <div class="dlh-avatar" [ngClass]="nivelClass(vn.nivel)">
+              {{ initials(vn.nombre, vn.apellido) }}
             </div>
-            <div class="drill-members">
-              @for (m of vn.miembros!; track m.miembroId) {
-                <div class="dm-row">
-                  <div class="dm-avatar" [ngClass]="m.estado === 'Activo' ? 'mc-activo' : m.estado === 'Visitante' ? 'mc-visitante' : 'mc-inactivo'">
-                    {{ initials(m.nombre, m.apellido) }}
+            <div class="dlh-info">
+              <span class="dlh-nombre">{{ vn.nombre }} {{ vn.apellido }}</span>
+              <span class="dlh-sub">
+                <span class="nivel-badge" [ngClass]="nivelClass(vn.nivel)">
+                  <i class="pi" [ngClass]="nivelIcon(vn.nivel)"></i>{{ nivelLabel(vn.nivel) }}
+                </span>
+                <span class="dlh-zona">{{ vn.zonaOCelula }}</span>
+              </span>
+            </div>
+            <div class="dlh-actions">
+              <button pButton [text]="true" [rounded]="true" pTooltip="Editar" (click)="onAccionArbol({ tipo: 'editar', nodo: vn })">
+                <i class="pi pi-pencil"></i>
+              </button>
+              @if (vn.nivel !== 'LiderCelula') {
+                <button pButton [text]="true" [rounded]="true" pTooltip="Agregar sub-líder"
+                        (click)="onAccionArbol({ tipo: 'agregar', nodo: vn })">
+                  <i class="pi pi-user-plus"></i>
+                </button>
+              }
+            </div>
+            <div class="dlh-count">
+              <i class="pi pi-users"></i>
+              <span>{{ vn.totalMiembros }}</span>
+              <small>miembro{{ vn.totalMiembros !== 1 ? 's' : '' }}</small>
+            </div>
+          </div>
+
+          <!-- Sub-leaders grid -->
+          @if (vn.subLideres && vn.subLideres.length > 0) {
+            <div class="drill-section-title">
+              <i class="pi pi-sitemap"></i>
+              {{ vn.nivel === 'Pastor' ? 'Zonas' : 'Células' }}
+              <span class="dsg-count">{{ vn.subLideres.length }}</span>
+            </div>
+            <div class="drill-grid">
+              @for (hijo of vn.subLideres; track hijo.liderId) {
+                <div class="drill-card" [ngClass]="'dc-' + nivelClass(hijo.nivel)"
+                     (click)="navTo(hijo)">
+                  <div class="dcard-top">
+                    <div class="dcard-avatar" [ngClass]="nivelClass(hijo.nivel)">
+                      {{ initials(hijo.nombre, hijo.apellido) }}
+                    </div>
+                    <span class="nivel-badge sm" [ngClass]="nivelClass(hijo.nivel)">
+                      {{ nivelLabel(hijo.nivel) }}
+                    </span>
                   </div>
-                  <div class="dm-info">
-                    <span class="dm-nombre">{{ m.nombre }} {{ m.apellido }}</span>
-                    @if (m.etapaActual) { <span class="dm-etapa">{{ m.etapaActual }}</span> }
+                  <div class="dcard-nombre">{{ hijo.nombre }} {{ hijo.apellido }}</div>
+                  <div class="dcard-zona">{{ hijo.zonaOCelula }}</div>
+                  <div class="dcard-footer">
+                    <span class="dcard-miembros">
+                      <i class="pi pi-users"></i>{{ hijo.totalMiembros }}
+                    </span>
+                    @if (hijo.subLideres && hijo.subLideres.length > 0) {
+                      <span class="dcard-sub">
+                        <i class="pi pi-sitemap"></i>{{ hijo.subLideres.length }}
+                      </span>
+                    }
+                    <i class="pi pi-chevron-right dcard-arrow"></i>
                   </div>
-                  <span class="dm-estado" [ngClass]="m.estado === 'Activo' ? 'mc-activo' : m.estado === 'Visitante' ? 'mc-visitante' : 'mc-inactivo'">
-                    {{ m.estado }}
-                  </span>
-                  <button mat-icon-button class="dm-btn" matTooltip="Ver ficha"
-                          (click)="onAccionArbol({ tipo: 'verDetalle', nodo: vn })">
-                    <mat-icon>open_in_new</mat-icon>
-                  </button>
                 </div>
               }
             </div>
-          } @else {
+          }
+
+          <!-- Members list (LiderCelula) -->
+          @if (vn.nivel === 'LiderCelula') {
+            @if ((vn.miembros?.length ?? 0) > 0) {
+              <div class="drill-section-title">
+                <i class="pi pi-users"></i> Miembros de la célula
+                <span class="dsg-count">{{ vn.miembros!.length }}</span>
+              </div>
+              <div class="drill-members">
+                @for (m of vn.miembros!; track m.miembroId) {
+                  <div class="dm-row">
+                    <div class="dm-avatar" [ngClass]="m.estado === 'Activo' ? 'mc-activo' : m.estado === 'Visitante' ? 'mc-visitante' : 'mc-inactivo'">
+                      {{ initials(m.nombre, m.apellido) }}
+                    </div>
+                    <div class="dm-info">
+                      <span class="dm-nombre">{{ m.nombre }} {{ m.apellido }}</span>
+                      @if (m.etapaActual) { <span class="dm-etapa">{{ m.etapaActual }}</span> }
+                    </div>
+                    <span class="dm-estado" [ngClass]="m.estado === 'Activo' ? 'mc-activo' : m.estado === 'Visitante' ? 'mc-visitante' : 'mc-inactivo'">
+                      {{ m.estado }}
+                    </span>
+                    <button pButton [text]="true" [rounded]="true" class="dm-btn" pTooltip="Ver ficha"
+                            (click)="onAccionArbol({ tipo: 'verDetalle', nodo: vn })">
+                      <i class="pi pi-external-link"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="drill-empty">
+                <i class="pi pi-users"></i>
+                <p>Esta célula aún no tiene miembros registrados.</p>
+              </div>
+            }
+          }
+
+          <!-- No children (non-celula) -->
+          @if (vn.nivel !== 'LiderCelula' && (!vn.subLideres || vn.subLideres.length === 0)) {
             <div class="drill-empty">
-              <mat-icon>group_off</mat-icon>
-              <p>Esta célula aún no tiene miembros registrados.</p>
+              <i class="pi pi-sitemap"></i>
+              <p>No hay sub-líderes asignados aún.</p>
+              <button pButton
+                      (click)="onAccionArbol({ tipo: 'agregar', nodo: vn })">
+                <i class="pi pi-user-plus"></i> Agregar sub-líder
+              </button>
             </div>
           }
         }
 
-        <!-- No children (non-celula) -->
-        @if (vn.nivel !== 'LiderCelula' && (!vn.subLideres || vn.subLideres.length === 0)) {
-          <div class="drill-empty">
-            <mat-icon>account_tree</mat-icon>
-            <p>No hay sub-líderes asignados aún.</p>
-            <button mat-flat-button color="primary"
-                    (click)="onAccionArbol({ tipo: 'agregar', nodo: vn })">
-              <mat-icon>person_add</mat-icon> Agregar sub-líder
-            </button>
-          </div>
-        }
+      } @else {
+        <div class="empty-state">
+          <i class="pi pi-sitemap"></i>
+          <p>No hay líderes registrados aún.</p>
+          <button pButton (click)="abrirForm()">
+            Designar primer líder
+          </button>
+        </div>
       }
+    </p-tabpanel>
 
-    } @else {
-      <div class="empty-state">
-        <mat-icon>account_tree</mat-icon>
-        <p>No hay líderes registrados aún.</p>
-        <button mat-flat-button color="primary" (click)="abrirForm()">
-          Designar primer líder
-        </button>
+    <!-- ╔══════════════ TAB 2: LISTA ══════════════╗ -->
+    <p-tabpanel value="1">
+
+      <!-- Filtros -->
+      <div class="filtros-row">
+        <div class="search-wrap">
+          <i class="pi pi-search search-icon"></i>
+          <input class="search-input" type="text" placeholder="Buscar líder, zona o célula…"
+                 [ngModel]="filtroBusqueda()" (ngModelChange)="filtroBusqueda.set($event)" />
+          @if (filtroBusqueda()) {
+            <button pButton [text]="true" [rounded]="true" class="clear-btn" (click)="filtroBusqueda.set('')">
+              <i class="pi pi-times"></i>
+            </button>
+          }
+        </div>
+        <div class="nivel-chips">
+          @for (n of [['', 'Todos'], ['Pastor','Pastor'], ['LiderZona','Zona'], ['LiderCelula','Célula']]; track n[0]) {
+            <button class="nivel-chip" [class.chip-sel]="filtroNivel() === n[0]"
+                    (click)="filtroNivel.set($any(n[0]))">
+              {{ n[1] }}
+            </button>
+          }
+        </div>
+        <span class="result-count">{{ lideresFiltrados().length }} líder{{ lideresFiltrados().length !== 1 ? 'es' : '' }}</span>
       </div>
-    }
-  </mat-tab>
 
-  <!-- ╔══════════════ TAB 2: LISTA ══════════════╗ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">view_list</mat-icon> Lista de Líderes
-    </ng-template>
+      @if (cargando()) {
+        <div class="loading-center"><p-progressSpinner [style]="{ width: '48px', height: '48px' }" /></div>
+      } @else if (lideresFiltrados().length === 0) {
+        <div class="empty-table">
+          <i class="pi pi-search-minus"></i>
+          <p>No se encontraron líderes con ese filtro.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-toggle"></th>
+                <th class="col-lider">Líder</th>
+                <th class="col-nivel">Nivel</th>
+                <th class="col-zona">Territorio</th>
+                <th class="col-reporta">Reporta a</th>
+                <th class="col-miembros">Miembros</th>
+                <th class="col-fecha">Desde</th>
+                <th class="col-acciones"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of lideresFiltrados(); track l.liderId) {
 
-    <!-- Filtros -->
-    <div class="filtros-row">
-      <div class="search-wrap">
-        <mat-icon class="search-icon">search</mat-icon>
-        <input class="search-input" type="text" placeholder="Buscar líder, zona o célula…"
-               [ngModel]="filtroBusqueda()" (ngModelChange)="filtroBusqueda.set($event)" />
-        @if (filtroBusqueda()) {
-          <button mat-icon-button class="clear-btn" (click)="filtroBusqueda.set('')">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </div>
-      <div class="nivel-chips">
-        @for (n of [['', 'Todos'], ['Pastor','Pastor'], ['LiderZona','Zona'], ['LiderCelula','Célula']]; track n[0]) {
-          <button class="nivel-chip" [class.chip-sel]="filtroNivel() === n[0]"
-                  (click)="filtroNivel.set($any(n[0]))">
-            {{ n[1] }}
-          </button>
-        }
-      </div>
-      <span class="result-count">{{ lideresFiltrados().length }} líder{{ lideresFiltrados().length !== 1 ? 'es' : '' }}</span>
-    </div>
+                <!-- Fila principal -->
+                <tr [class.row-expanded]="expandidoId() === l.liderId"
+                    [class.row-pastor]="l.nivel === 'Pastor'"
+                    [class.row-zona]="l.nivel === 'LiderZona'">
 
-    @if (cargando()) {
-      <div class="loading-center"><mat-spinner diameter="48" /></div>
-    } @else if (lideresFiltrados().length === 0) {
-      <div class="empty-table">
-        <mat-icon>search_off</mat-icon>
-        <p>No se encontraron líderes con ese filtro.</p>
-      </div>
-    } @else {
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th class="col-toggle"></th>
-              <th class="col-lider">Líder</th>
-              <th class="col-nivel">Nivel</th>
-              <th class="col-zona">Territorio</th>
-              <th class="col-reporta">Reporta a</th>
-              <th class="col-miembros">Miembros</th>
-              <th class="col-fecha">Desde</th>
-              <th class="col-acciones"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (l of lideresFiltrados(); track l.liderId) {
-
-              <!-- Fila principal -->
-              <tr [class.row-expanded]="expandidoId() === l.liderId"
-                  [class.row-pastor]="l.nivel === 'Pastor'"
-                  [class.row-zona]="l.nivel === 'LiderZona'">
-
-                <!-- Toggle -->
-                <td class="col-toggle">
-                  @if (discipulos(l).length > 0 || l.nivel === 'LiderCelula') {
-                    <button mat-icon-button class="expand-btn"
-                            [class.expanded]="expandidoId() === l.liderId"
-                            (click)="toggleExpand(l)"
-                            [matTooltip]="expandidoId() === l.liderId ? 'Ocultar' : 'Ver discípulos'">
-                      <mat-icon>expand_more</mat-icon>
-                    </button>
-                  }
-                </td>
-
-                <!-- Líder -->
-                <td class="col-lider">
-                  <div class="cell-lider">
-                    <div class="lider-avatar" [ngClass]="nivelClass(l.nivel)">
-                      {{ initials(l.nombre, l.apellido) }}
-                    </div>
-                    <div class="lider-info">
-                      <span class="lider-nombre">{{ l.nombre }} {{ l.apellido }}</span>
-                      @if (l.telefono) {
-                        <span class="lider-tel">{{ l.telefono }}</span>
-                      }
-                    </div>
-                  </div>
-                </td>
-
-                <!-- Nivel -->
-                <td class="col-nivel">
-                  <span class="nivel-badge" [ngClass]="nivelClass(l.nivel)">
-                    <mat-icon>{{ nivelIcon(l.nivel) }}</mat-icon>
-                    {{ nivelLabel(l.nivel) }}
-                  </span>
-                </td>
-
-                <!-- Territorio -->
-                <td class="col-zona">{{ l.zonaOCelula }}</td>
-
-                <!-- Reporta a -->
-                <td class="col-reporta">
-                  @if (l.liderPadreNombre) {
-                    <span class="padre-text">{{ l.liderPadreNombre }}</span>
-                  } @else {
-                    <span class="text-muted">—</span>
-                  }
-                </td>
-
-                <!-- Miembros -->
-                <td class="col-miembros">
-                  <div class="miembros-pill">
-                    <mat-icon>people</mat-icon>
-                    <span>{{ l.totalMiembros }}</span>
-                  </div>
-                </td>
-
-                <!-- Desde -->
-                <td class="col-fecha">{{ l.fechaAsignacion | date:'dd/MM/yy':'':'es' }}</td>
-
-                <!-- Acciones -->
-                <td class="col-acciones">
-                  <div class="acciones-row">
-                    <button mat-icon-button class="btn-edit" matTooltip="Editar" (click)="abrirForm(l)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    @if (l.nivel !== 'Pastor') {
-                      <button mat-icon-button class="btn-del" matTooltip="Eliminar" (click)="eliminar(l.liderId)">
-                        <mat-icon>delete_outline</mat-icon>
+                  <!-- Toggle -->
+                  <td class="col-toggle">
+                    @if (discipulos(l).length > 0 || l.nivel === 'LiderCelula') {
+                      <button pButton [text]="true" [rounded]="true" class="expand-btn"
+                              [class.expanded]="expandidoId() === l.liderId"
+                              (click)="toggleExpand(l)"
+                              [pTooltip]="expandidoId() === l.liderId ? 'Ocultar' : 'Ver discípulos'">
+                        <i class="pi pi-chevron-down"></i>
                       </button>
                     }
-                  </div>
-                </td>
-              </tr>
+                  </td>
 
-              <!-- Fila expandida: discípulos -->
-              @if (expandidoId() === l.liderId) {
-                <tr class="expand-detail-row">
-                  <td colspan="8" class="expand-detail-cell">
-                    <div class="discipulos-panel" [ngClass]="'panel-' + nivelClass(l.nivel)">
-
-                      <div class="discipulos-header">
-                        <mat-icon>{{ nivelClass(l.nivel) === 'celula' ? 'group' : 'account_tree' }}</mat-icon>
-                        <span>
-                          {{ l.nivel === 'LiderCelula' ? 'Miembros en ' : 'Sub-líderes de ' }}
-                          {{ l.zonaOCelula }}
-                        </span>
-                        <span class="discipulos-count">
-                          {{ l.nivel === 'LiderCelula' ? l.totalMiembros : discipulos(l).length }}
-                          {{ l.nivel === 'LiderCelula' ? 'miembro' : 'líder' }}{{ (l.nivel === 'LiderCelula' ? l.totalMiembros : discipulos(l).length) !== 1 ? 's' : '' }}
-                        </span>
+                  <!-- Líder -->
+                  <td class="col-lider">
+                    <div class="cell-lider">
+                      <div class="lider-avatar" [ngClass]="nivelClass(l.nivel)">
+                        {{ initials(l.nombre, l.apellido) }}
                       </div>
+                      <div class="lider-info">
+                        <span class="lider-nombre">{{ l.nombre }} {{ l.apellido }}</span>
+                        @if (l.telefono) {
+                          <span class="lider-tel">{{ l.telefono }}</span>
+                        }
+                      </div>
+                    </div>
+                  </td>
 
-                      @if (l.nivel === 'LiderCelula') {
-                        <!-- Célula: no tenemos lista individual, mostramos resumen visual -->
-                        <div class="celula-resumen">
-                          @for (i of [].constructor(l.totalMiembros); track $index) {
-                            <div class="miembro-bubble" [ngClass]="nivelClass(l.nivel)"
-                                 [matTooltip]="'Miembro ' + ($index + 1)">
-                              {{ $index + 1 }}
-                            </div>
-                          }
-                          @if (l.totalMiembros === 0) {
-                            <span class="text-muted" style="padding: 8px 0">Sin miembros registrados aún</span>
-                          }
-                        </div>
-                      } @else {
-                        <!-- Pastor / LiderZona: mostrar sub-líderes -->
-                        <div class="discipulos-grid">
-                          @for (d of discipulos(l); track d.liderId) {
-                            <div class="discipulo-card" [ngClass]="'dc-' + nivelClass(d.nivel)">
-                              <div class="dc-avatar" [ngClass]="nivelClass(d.nivel)">
-                                {{ initials(d.nombre, d.apellido) }}
-                              </div>
-                              <div class="dc-info">
-                                <span class="dc-nombre">{{ d.nombre }} {{ d.apellido }}</span>
-                                <span class="dc-zona">{{ d.zonaOCelula }}</span>
-                              </div>
-                              <div class="dc-right">
-                                <span class="nivel-badge sm" [ngClass]="nivelClass(d.nivel)">
-                                  {{ nivelLabel(d.nivel) }}
-                                </span>
-                                <span class="dc-miembros">
-                                  <mat-icon>people</mat-icon>{{ d.totalMiembros }}
-                                </span>
-                              </div>
-                              <button mat-icon-button class="dc-expand"
-                                      [matTooltip]="'Ver discípulos de ' + d.nombre"
-                                      (click)="toggleExpand(d); $event.stopPropagation()">
-                                <mat-icon>chevron_right</mat-icon>
-                              </button>
-                            </div>
-                          }
-                        </div>
+                  <!-- Nivel -->
+                  <td class="col-nivel">
+                    <span class="nivel-badge" [ngClass]="nivelClass(l.nivel)">
+                      <i class="pi" [ngClass]="nivelIcon(l.nivel)"></i>
+                      {{ nivelLabel(l.nivel) }}
+                    </span>
+                  </td>
+
+                  <!-- Territorio -->
+                  <td class="col-zona">{{ l.zonaOCelula }}</td>
+
+                  <!-- Reporta a -->
+                  <td class="col-reporta">
+                    @if (l.liderPadreNombre) {
+                      <span class="padre-text">{{ l.liderPadreNombre }}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+
+                  <!-- Miembros -->
+                  <td class="col-miembros">
+                    <div class="miembros-pill">
+                      <i class="pi pi-users"></i>
+                      <span>{{ l.totalMiembros }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Desde -->
+                  <td class="col-fecha">{{ l.fechaAsignacion | date:'dd/MM/yy':'':'es' }}</td>
+
+                  <!-- Acciones -->
+                  <td class="col-acciones">
+                    <div class="acciones-row">
+                      <button pButton [text]="true" [rounded]="true" class="btn-edit" pTooltip="Editar" (click)="abrirForm(l)">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                      @if (l.nivel !== 'Pastor') {
+                        <button pButton [text]="true" [rounded]="true" class="btn-del" pTooltip="Eliminar" (click)="eliminar(l.liderId)">
+                          <i class="pi pi-trash"></i>
+                        </button>
                       }
                     </div>
                   </td>
                 </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    }
-  </mat-tab>
 
-  <!-- ╔══════════════ TAB 3: HISTORIAL ══════════════╗ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">history</mat-icon> Historial de Cambios
-    </ng-template>
+                <!-- Fila expandida: discípulos -->
+                @if (expandidoId() === l.liderId) {
+                  <tr class="expand-detail-row">
+                    <td colspan="8" class="expand-detail-cell">
+                      <div class="discipulos-panel" [ngClass]="'panel-' + nivelClass(l.nivel)">
 
-    @if (cargando()) {
-      <div class="loading-center"><mat-spinner diameter="48" /></div>
-    } @else {
-      <div class="historial-container">
-        @for (item of historial(); track item.historialId) {
-          <div class="timeline-item" [ngClass]="{ 'timeline-inactivo': !item.activo }">
-            <!-- Indicador de línea de tiempo -->
-            <div class="timeline-dot" [ngClass]="nivelClass(item.nivel)">
-              <mat-icon>{{ nivelIcon(item.nivel) }}</mat-icon>
-            </div>
+                        <div class="discipulos-header">
+                          <i class="pi" [ngClass]="nivelClass(l.nivel) === 'celula' ? 'pi-users' : 'pi-sitemap'"></i>
+                          <span>
+                            {{ l.nivel === 'LiderCelula' ? 'Miembros en ' : 'Sub-líderes de ' }}
+                            {{ l.zonaOCelula }}
+                          </span>
+                          <span class="discipulos-count">
+                            {{ l.nivel === 'LiderCelula' ? l.totalMiembros : discipulos(l).length }}
+                            {{ l.nivel === 'LiderCelula' ? 'miembro' : 'líder' }}{{ (l.nivel === 'LiderCelula' ? l.totalMiembros : discipulos(l).length) !== 1 ? 's' : '' }}
+                          </span>
+                        </div>
 
-            <!-- Contenido -->
-            <mat-card class="timeline-card">
-              <div class="timeline-header">
-                <div class="timeline-title-group">
-                  <span class="timeline-nombre">{{ item.liderNombre }}</span>
-                  <span class="nivel-badge" [ngClass]="nivelClass(item.nivel)">
-                    {{ nivelLabel(item.nivel) }}
-                  </span>
-                  @if (!item.activo) {
-                    <span class="badge-inactivo">Concluido</span>
-                  } @else {
-                    <span class="badge-activo">Activo</span>
-                  }
-                </div>
-                <span class="timeline-fecha">
-                  {{ item.fechaInicio | date:'dd/MM/yyyy':'':'es' }}
-                  @if (item.fechaFin) {
-                    → {{ item.fechaFin | date:'dd/MM/yyyy':'':'es' }}
-                  } @else {
-                    → Presente
-                  }
-                </span>
-              </div>
-
-              <mat-divider />
-
-              <div class="timeline-body">
-                <span class="tl-zona">
-                  <mat-icon class="tl-icon">place</mat-icon>
-                  {{ item.zonaOCelula }}
-                </span>
-                @if (item.motivoCambio) {
-                  <span class="tl-motivo">
-                    <mat-icon class="tl-icon">note</mat-icon>
-                    {{ item.motivoCambio }}
-                  </span>
+                        @if (l.nivel === 'LiderCelula') {
+                          <!-- Célula: no tenemos lista individual, mostramos resumen visual -->
+                          <div class="celula-resumen">
+                            @for (i of [].constructor(l.totalMiembros); track $index) {
+                              <div class="miembro-bubble" [ngClass]="nivelClass(l.nivel)"
+                                   [pTooltip]="'Miembro ' + ($index + 1)">
+                                {{ $index + 1 }}
+                              </div>
+                            }
+                            @if (l.totalMiembros === 0) {
+                              <span class="text-muted" style="padding: 8px 0">Sin miembros registrados aún</span>
+                            }
+                          </div>
+                        } @else {
+                          <!-- Pastor / LiderZona: mostrar sub-líderes -->
+                          <div class="discipulos-grid">
+                            @for (d of discipulos(l); track d.liderId) {
+                              <div class="discipulo-card" [ngClass]="'dc-' + nivelClass(d.nivel)">
+                                <div class="dc-avatar" [ngClass]="nivelClass(d.nivel)">
+                                  {{ initials(d.nombre, d.apellido) }}
+                                </div>
+                                <div class="dc-info">
+                                  <span class="dc-nombre">{{ d.nombre }} {{ d.apellido }}</span>
+                                  <span class="dc-zona">{{ d.zonaOCelula }}</span>
+                                </div>
+                                <div class="dc-right">
+                                  <span class="nivel-badge sm" [ngClass]="nivelClass(d.nivel)">
+                                    {{ nivelLabel(d.nivel) }}
+                                  </span>
+                                  <span class="dc-miembros">
+                                    <i class="pi pi-users"></i>{{ d.totalMiembros }}
+                                  </span>
+                                </div>
+                                <button pButton [text]="true" [rounded]="true" class="dc-expand"
+                                        [pTooltip]="'Ver discípulos de ' + d.nombre"
+                                        (click)="toggleExpand(d); $event.stopPropagation()">
+                                  <i class="pi pi-chevron-right"></i>
+                                </button>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
                 }
-                <span class="tl-registro">
-                  <mat-icon class="tl-icon">person</mat-icon>
-                  Registrado por: {{ item.registradoPor }}
-                </span>
-              </div>
-            </mat-card>
-          </div>
-        }
-      </div>
-    }
-  </mat-tab>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </p-tabpanel>
 
-</mat-tab-group>
+    <!-- ╔══════════════ TAB 3: HISTORIAL ══════════════╗ -->
+    <p-tabpanel value="2">
+
+      @if (cargando()) {
+        <div class="loading-center"><p-progressSpinner [style]="{ width: '48px', height: '48px' }" /></div>
+      } @else {
+        <div class="historial-container">
+          @for (item of historial(); track item.historialId) {
+            <div class="timeline-item" [ngClass]="{ 'timeline-inactivo': !item.activo }">
+              <!-- Indicador de línea de tiempo -->
+              <div class="timeline-dot" [ngClass]="nivelClass(item.nivel)">
+                <i class="pi" [ngClass]="nivelIcon(item.nivel)"></i>
+              </div>
+
+              <!-- Contenido -->
+              <p-card class="timeline-card">
+                <div class="timeline-header">
+                  <div class="timeline-title-group">
+                    <span class="timeline-nombre">{{ item.liderNombre }}</span>
+                    <span class="nivel-badge" [ngClass]="nivelClass(item.nivel)">
+                      {{ nivelLabel(item.nivel) }}
+                    </span>
+                    @if (!item.activo) {
+                      <span class="badge-inactivo">Concluido</span>
+                    } @else {
+                      <span class="badge-activo">Activo</span>
+                    }
+                  </div>
+                  <span class="timeline-fecha">
+                    {{ item.fechaInicio | date:'dd/MM/yyyy':'':'es' }}
+                    @if (item.fechaFin) {
+                      → {{ item.fechaFin | date:'dd/MM/yyyy':'':'es' }}
+                    } @else {
+                      → Presente
+                    }
+                  </span>
+                </div>
+
+                <p-divider />
+
+                <div class="timeline-body">
+                  <span class="tl-zona">
+                    <i class="pi pi-map-marker tl-icon"></i>
+                    {{ item.zonaOCelula }}
+                  </span>
+                  @if (item.motivoCambio) {
+                    <span class="tl-motivo">
+                      <i class="pi pi-file-edit tl-icon"></i>
+                      {{ item.motivoCambio }}
+                    </span>
+                  }
+                  <span class="tl-registro">
+                    <i class="pi pi-user tl-icon"></i>
+                    Registrado por: {{ item.registradoPor }}
+                  </span>
+                </div>
+              </p-card>
+            </div>
+          }
+        </div>
+      }
+    </p-tabpanel>
+
+  </p-tabpanels>
+</p-tabs>

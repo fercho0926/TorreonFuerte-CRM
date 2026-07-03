@@ -1,19 +1,13 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDialog } from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
+import { TabsModule } from 'primeng/tabs';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
+import { DividerModule } from 'primeng/divider';
+import { DialogService } from 'primeng/dynamicdialog';
 import { Router } from '@angular/router';
 import { LideresService } from '../../core/auth/lideres.service';
 import { AuthService } from '../../core/auth/auth.service';
@@ -26,10 +20,9 @@ import { LiderFormDialogComponent } from './lider-form-dialog/lider-form-dialog.
   standalone: true,
   imports: [
     NgClass, DatePipe, FormsModule,
-    MatTabsModule, MatCardModule, MatButtonModule, MatIconModule,
-    MatTableModule, MatChipsModule, MatProgressSpinnerModule,
-    MatTooltipModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatDividerModule,
+    TabsModule, CardModule, ButtonModule,
+    ProgressSpinnerModule,
+    TooltipModule, DividerModule,
   ],
   templateUrl: './lideres.component.html',
   styleUrl: './lideres.component.css',
@@ -37,7 +30,7 @@ import { LiderFormDialogComponent } from './lider-form-dialog/lider-form-dialog.
 export class LideresComponent implements OnInit {
   private svc    = inject(LideresService);
   private auth   = inject(AuthService);
-  private dialog = inject(MatDialog);
+  private dialogService = inject(DialogService);
   private router = inject(Router);
 
   // ── Estado ────────────────────────────────────────────────────────────────────
@@ -119,12 +112,13 @@ export class LideresComponent implements OnInit {
 
   // ── CRUD ──────────────────────────────────────────────────────────────────────
   abrirForm(lider?: Lider, preNivel?: NivelLider, prePadreId?: number) {
-    const ref = this.dialog.open(LiderFormDialogComponent, {
+    const ref = this.dialogService.open(LiderFormDialogComponent, {
       data: { lider, preseleccionarNivel: preNivel, preseleccionarPadreId: prePadreId },
       width: '520px',
-      disableClose: true,
+      showHeader: false,
+      closeOnEscape: false,
     });
-    ref.afterClosed().subscribe(result => {
+    ref?.onClose.subscribe(result => {
       if (result) this.cargar();
     });
   }
@@ -159,7 +153,7 @@ export class LideresComponent implements OnInit {
   }
 
   nivelIcon(nivel: NivelLider): string {
-    const map: Record<NivelLider, string> = { Pastor: 'church', LiderZona: 'groups', LiderCelula: 'group' };
+    const map: Record<NivelLider, string> = { Pastor: 'pi-building', LiderZona: 'pi-users', LiderCelula: 'pi-users' };
     return map[nivel];
   }
 }

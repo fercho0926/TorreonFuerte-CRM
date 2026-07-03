@@ -1,7 +1,7 @@
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <div class="page-header">
   <div class="header-left">
-    <mat-icon class="header-icon">route</mat-icon>
+    <i class="pi pi-sitemap header-icon"></i>
     <div>
       <h1>Plan de Preparación</h1>
       <p>Camino de formación espiritual · {{ totalEnFormacion() }} miembros en proceso</p>
@@ -11,7 +11,7 @@
 
 <!-- ── Loading ────────────────────────────────────────────────────────────── -->
 @if (cargando()) {
-  <div class="loading-center"><mat-spinner diameter="52" /></div>
+  <div class="loading-center"><p-progressSpinner [style]="{ width: '52px', height: '52px' }" /></div>
 } @else {
 
 <!-- ════════════════════════════════════════════════════════════════════════ -->
@@ -75,7 +75,7 @@
              [style.background]="etapaSeleccionada()?.etapaId === etapa.etapaId ? etapa.color : etapa.colorClaro"
              [style.border-color]="etapa.color"
              [style.color]="etapaSeleccionada()?.etapaId === etapa.etapaId ? 'white' : etapa.color">
-          <mat-icon>{{ etapa.icono }}</mat-icon>
+          <i class="pi" [ngClass]="etapa.icono"></i>
         </div>
 
         <!-- Label -->
@@ -100,7 +100,7 @@
     <!-- Stage header card -->
     <div class="detail-header" [style.border-left-color]="etapa.color">
       <div class="detail-icon-wrap" [style.background]="etapa.colorClaro">
-        <mat-icon [style.color]="etapa.color">{{ etapa.icono }}</mat-icon>
+        <i class="pi" [ngClass]="etapa.icono" [style.color]="etapa.color"></i>
       </div>
       <div class="detail-meta">
         <div class="detail-title-row">
@@ -133,24 +133,24 @@
     </div>
 
     <!-- Members table -->
-    <mat-card class="members-card">
+    <p-card class="members-card">
       <div class="card-header-row">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon [style.color]="etapa.color">people</mat-icon>
+        <div class="card-header-text">
+          <div class="card-title">
+            <i class="pi pi-users" [style.color]="etapa.color"></i>
             Miembros en esta etapa
-          </mat-card-title>
-          <mat-card-subtitle>
+          </div>
+          <div class="card-subtitle">
             {{ miembros().length }} persona{{ miembros().length !== 1 ? 's' : '' }}
             @if (etapaSiguiente()) {
               · Puedes avanzarlos a "{{ etapaSiguiente()!.nombre }}"
             }
-          </mat-card-subtitle>
-        </mat-card-header>
-        <button mat-stroked-button class="add-miembro-btn"
+          </div>
+        </div>
+        <button pButton [outlined]="true" class="add-miembro-btn"
                 [style.border-color]="etapa.color" [style.color]="etapa.color"
                 (click)="mostrarPicker.set(!mostrarPicker())">
-          <mat-icon>person_add</mat-icon> Añadir miembro
+          <i class="pi pi-user-plus"></i> Añadir miembro
         </button>
       </div>
 
@@ -170,7 +170,7 @@
                   <span class="picker-nombre">{{ m.nombre }} {{ m.apellido }}</span>
                   <span class="picker-estado">{{ m.estado }}</span>
                 </div>
-                <mat-icon class="picker-add-icon">add_circle_outline</mat-icon>
+                <i class="pi pi-plus-circle picker-add-icon"></i>
               </div>
             }
             @if (miembrosFiltrados().length === 0) {
@@ -180,21 +180,27 @@
         </div>
       }
 
-      <mat-card-content>
-        @if (cargandoMiembros()) {
-          <div class="loading-center small"><mat-spinner diameter="36" /></div>
-        } @else if (miembros().length === 0) {
-          <div class="empty-members">
-            <mat-icon>person_search</mat-icon>
-            <p>No hay miembros en esta etapa aún.</p>
-          </div>
-        } @else {
-          <table mat-table [dataSource]="miembros()" class="members-table">
-
-            <!-- Nombre -->
-            <ng-container matColumnDef="nombre">
-              <th mat-header-cell *matHeaderCellDef>Miembro</th>
-              <td mat-cell *matCellDef="let m">
+      @if (cargandoMiembros()) {
+        <div class="loading-center small"><p-progressSpinner [style]="{ width: '36px', height: '36px' }" /></div>
+      } @else if (miembros().length === 0) {
+        <div class="empty-members">
+          <i class="pi pi-search"></i>
+          <p>No hay miembros en esta etapa aún.</p>
+        </div>
+      } @else {
+        <p-table [value]="miembros()" class="members-table">
+          <ng-template #header>
+            <tr>
+              <th>Miembro</th>
+              <th>Líder de célula</th>
+              <th>Tiempo en etapa</th>
+              <th></th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-m>
+            <tr>
+              <!-- Nombre -->
+              <td>
                 <div class="cell-member">
                   <div class="member-avatar" [style.background]="etapa.colorClaro" [style.color]="etapa.color">
                     {{ m.nombre[0] }}{{ m.apellido[0] }}
@@ -207,53 +213,41 @@
                   </div>
                 </div>
               </td>
-            </ng-container>
 
-            <!-- Líder -->
-            <ng-container matColumnDef="lider">
-              <th mat-header-cell *matHeaderCellDef>Líder de célula</th>
-              <td mat-cell *matCellDef="let m">
+              <!-- Líder -->
+              <td>
                 <span class="cell-lider">{{ m.liderNombre ?? '—' }}</span>
               </td>
-            </ng-container>
 
-            <!-- Días en etapa -->
-            <ng-container matColumnDef="dias">
-              <th mat-header-cell *matHeaderCellDef>Tiempo en etapa</th>
-              <td mat-cell *matCellDef="let m">
+              <!-- Días en etapa -->
+              <td>
                 <span class="dias-chip" [ngClass]="diasClass(m.diasEnEtapa)">
-                  <mat-icon class="dias-icon">schedule</mat-icon>
+                  <i class="pi pi-clock dias-icon"></i>
                   {{ diasLabel(m.diasEnEtapa) }}
                 </span>
               </td>
-            </ng-container>
 
-            <!-- Acciones -->
-            <ng-container matColumnDef="acciones">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let m">
-                <button mat-stroked-button
+              <!-- Acciones -->
+              <td>
+                <button pButton [outlined]="true"
                         [style.border-color]="etapa.color"
                         [style.color]="etapa.color"
                         [disabled]="avanzando() === m.miembroId"
                         (click)="avanzar(m)"
-                        [matTooltip]="etapaSiguiente() ? 'Avanzar a ' + etapaSiguiente()!.nombre : 'Marcar como completado'">
+                        [pTooltip]="etapaSiguiente() ? 'Avanzar a ' + etapaSiguiente()!.nombre : 'Marcar como completado'">
                   @if (avanzando() === m.miembroId) {
-                    <mat-spinner diameter="16" />
+                    <p-progressSpinner [style]="{ width: '16px', height: '16px' }" strokeWidth="6" />
                   } @else {
-                    <mat-icon>arrow_forward</mat-icon>
+                    <i class="pi pi-arrow-right"></i>
                   }
                   {{ etapaSiguiente() ? 'Avanzar' : 'Completar' }}
                 </button>
               </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-            <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
-          </table>
-        }
-      </mat-card-content>
-    </mat-card>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
+    </p-card>
 
   </div><!-- /detail-section -->
 }

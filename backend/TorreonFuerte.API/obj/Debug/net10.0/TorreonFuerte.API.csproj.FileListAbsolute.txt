@@ -148,7 +148,6 @@ C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\stati
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\staticwebassets.development.json
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\swae.build.ex.cache
-C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\TorreonFuerte.API.dll
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\refint\TorreonFuerte.API.dll
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\TorreonFuerte.API.pdb
@@ -162,3 +161,4 @@ C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\Torre
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\TorreonFuerte.API.genruntimeconfig.cache
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\ref\TorreonFuerte.API.dll
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\bin\Debug\net10.0\Scalar.AspNetCore.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.API\obj\Debug\net10.0\TorreonFuerte.API.sourcelink.json

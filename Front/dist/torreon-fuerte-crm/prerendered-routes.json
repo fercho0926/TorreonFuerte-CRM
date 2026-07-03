@@ -1,12 +1,5 @@
 {
   "routes": {
-    "/": {},
-    "/dashboard": {},
-    "/etapas": {},
-    "/eventos": {},
-    "/lideres": {},
-    "/login": {},
-    "/miembros": {},
-    "/sedes": {}
+    "/login": {}
   }
 }

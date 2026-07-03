@@ -10,3 +10,4 @@ C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Domain\obj\Debug\net10.0\To
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Domain\obj\Debug\net10.0\refint\TorreonFuerte.Domain.dll
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Domain\obj\Debug\net10.0\TorreonFuerte.Domain.pdb
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Domain\obj\Debug\net10.0\ref\TorreonFuerte.Domain.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Domain\obj\Debug\net10.0\TorreonFuerte.Domain.sourcelink.json

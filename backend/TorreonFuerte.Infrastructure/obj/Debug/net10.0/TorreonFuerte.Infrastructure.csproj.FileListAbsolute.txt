@@ -17,3 +17,4 @@ C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Infrastructure\obj\Debug\ne
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Infrastructure\obj\Debug\net10.0\TorreonFuerte.Infrastructure.pdb
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Infrastructure\obj\Debug\net10.0\TorreonFuerte.Infrastructure.genruntimeconfig.cache
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Infrastructure\obj\Debug\net10.0\ref\TorreonFuerte.Infrastructure.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Infrastructure\obj\Debug\net10.0\TorreonFuerte.Infrastructure.sourcelink.json

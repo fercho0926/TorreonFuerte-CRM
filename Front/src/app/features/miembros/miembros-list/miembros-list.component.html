@@ -1,37 +1,35 @@
 <!-- ── Header ──────────────────────────────────────────────────────────── -->
 <div class="page-header">
   <div class="header-left">
-    <mat-icon class="header-icon">people</mat-icon>
+    <i class="pi pi-users header-icon"></i>
     <div>
       <h1>Miembros</h1>
       <p>Gestión de la congregación · {{ miembros().length }} registros</p>
     </div>
   </div>
-  <a mat-flat-button color="primary" routerLink="nuevo">
-    <mat-icon>person_add</mat-icon> Nuevo Miembro
-  </a>
+  <a pButton routerLink="nuevo"><i class="pi pi-user-plus"></i> Nuevo Miembro</a>
 </div>
 
 <!-- ── Stats clickeables ────────────────────────────────────────────────── -->
 <div class="stats-row">
   <div class="stat-card s-total" [class.active]="filtro() === 'Todos'" (click)="filtro.set('Todos')">
-    <mat-icon>groups</mat-icon>
+    <i class="pi pi-users"></i>
     <div><span class="sn">{{ miembros().length }}</span><span class="sl">Total</span></div>
   </div>
   <div class="stat-card s-activo" [class.active]="filtro() === 'Activo'" (click)="filtro.set('Activo')">
-    <mat-icon>how_to_reg</mat-icon>
+    <i class="pi pi-check-circle"></i>
     <div><span class="sn">{{ totalActivos() }}</span><span class="sl">Activos</span></div>
   </div>
   <div class="stat-card s-lider" [class.active]="filtro() === 'Lider'" (click)="filtro.set('Lider')">
-    <mat-icon>star</mat-icon>
+    <i class="pi pi-star-fill"></i>
     <div><span class="sn">{{ totalLideres() }}</span><span class="sl">Líderes</span></div>
   </div>
   <div class="stat-card s-visitante" [class.active]="filtro() === 'Visitante'" (click)="filtro.set('Visitante')">
-    <mat-icon>person_search</mat-icon>
+    <i class="pi pi-search"></i>
     <div><span class="sn">{{ totalVisitantes() }}</span><span class="sl">Visitantes</span></div>
   </div>
   <div class="stat-card s-inactivo" [class.active]="filtro() === 'Inactivo'" (click)="filtro.set('Inactivo')">
-    <mat-icon>person_off</mat-icon>
+    <i class="pi pi-user-minus"></i>
     <div><span class="sn">{{ totalInactivos() }}</span><span class="sl">Inactivos</span></div>
   </div>
 </div>
@@ -39,15 +37,14 @@
 <!-- ── Buscador ─────────────────────────────────────────────────────────── -->
 <div class="toolbar">
   <div class="search-wrap">
-    <mat-icon class="search-icon">search</mat-icon>
+    <i class="pi pi-search search-icon"></i>
     <input class="search-input" type="text"
            placeholder="Buscar nombre, email, teléfono o líder…"
            [ngModel]="busqueda()"
            (ngModelChange)="busqueda.set($event)" />
     @if (busqueda()) {
-      <button class="clear-btn" mat-icon-button (click)="busqueda.set('')">
-        <mat-icon>close</mat-icon>
-      </button>
+      <button pButton [text]="true" [rounded]="true" class="clear-btn"
+              (click)="busqueda.set('')"><i class="pi pi-times"></i></button>
     }
   </div>
   <span class="result-count">{{ filtrados().length }} resultado{{ filtrados().length !== 1 ? 's' : '' }}</span>
@@ -55,15 +52,14 @@
 
 <!-- ── Loading ───────────────────────────────────────────────────────────── -->
 @if (loading()) {
-  <div class="loading-center"><mat-spinner diameter="48" /></div>
+  <div class="loading-center"><p-progressSpinner [style]="{ width: '48px', height: '48px' }" /></div>
 } @else if (filtrados().length === 0) {
   <div class="empty-state">
-    <mat-icon>manage_search</mat-icon>
+    <i class="pi pi-search"></i>
     <p>No hay miembros que coincidan.</p>
     @if (busqueda() || filtro() !== 'Todos') {
-      <button mat-stroked-button (click)="busqueda.set(''); filtro.set('Todos')">
-        Limpiar filtros
-      </button>
+      <button pButton [outlined]="true"
+              (click)="busqueda.set(''); filtro.set('Todos')">Limpiar filtros</button>
     }
   </div>
 } @else {
@@ -92,12 +88,10 @@
             <!-- Toggle expand (solo líderes) -->
             <td class="col-expand">
               @if (m.estado === 'Lider') {
-                <button mat-icon-button class="expand-btn"
+                <button pButton [text]="true" [rounded]="true" class="expand-btn"
                         [class.expanded]="expandidoId() === m.miembroId"
                         (click)="toggleExpand(m)"
-                        [matTooltip]="expandidoId() === m.miembroId ? 'Ocultar célula' : 'Ver célula'">
-                  <mat-icon>expand_more</mat-icon>
-                </button>
+                        [pTooltip]="expandidoId() === m.miembroId ? 'Ocultar célula' : 'Ver célula'"><i class="pi pi-chevron-down"></i></button>
               }
             </td>
 
@@ -125,7 +119,7 @@
             <td class="col-contacto">
               @if (m.telefono) {
                 <div class="cell-icon-row">
-                  <mat-icon>phone</mat-icon>{{ m.telefono }}
+                  <i class="pi pi-phone"></i>{{ m.telefono }}
                 </div>
               } @else {
                 <span class="text-muted">—</span>
@@ -136,11 +130,11 @@
             <td class="col-lider">
               @if (m.liderNombre) {
                 <div class="cell-icon-row lider-cell">
-                  <mat-icon>person</mat-icon>{{ m.liderNombre }}
+                  <i class="pi pi-user"></i>{{ m.liderNombre }}
                 </div>
               } @else if (m.estado === 'Lider') {
                 <div class="cell-icon-row lider-badge-cell">
-                  <mat-icon>stars</mat-icon>
+                  <i class="pi pi-star-fill"></i>
                   {{ miembrosACargo(m).length }} miembro{{ miembrosACargo(m).length !== 1 ? 's' : '' }} a cargo
                 </div>
               } @else {
@@ -151,15 +145,12 @@
             <!-- Acciones -->
             <td class="col-acciones">
               <div class="acciones-row">
-                <a mat-icon-button [routerLink]="[m.miembroId]" matTooltip="Ver detalle" class="btn-ver">
-                  <mat-icon>visibility</mat-icon>
-                </a>
-                <a mat-icon-button [routerLink]="[m.miembroId, 'editar']" matTooltip="Editar" class="btn-edit">
-                  <mat-icon>edit</mat-icon>
-                </a>
-                <button mat-icon-button (click)="eliminar(m)" matTooltip="Eliminar" class="btn-del">
-                  <mat-icon>delete_outline</mat-icon>
-                </button>
+                <a pButton [text]="true" [rounded]="true" [routerLink]="[m.miembroId]"
+                   pTooltip="Ver detalle" class="btn-ver"><i class="pi pi-eye"></i></a>
+                <a pButton [text]="true" [rounded]="true" [routerLink]="[m.miembroId, 'editar']"
+                   pTooltip="Editar" class="btn-edit"><i class="pi pi-pencil"></i></a>
+                <button pButton [text]="true" [rounded]="true" (click)="eliminar(m)"
+                        pTooltip="Eliminar" class="btn-del"><i class="pi pi-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -170,14 +161,14 @@
               <td colspan="6" class="expand-detail-cell">
                 <div class="celula-panel">
                   <div class="celula-header">
-                    <mat-icon>group</mat-icon>
+                    <i class="pi pi-users"></i>
                     <span>Célula de {{ m.nombre }} {{ m.apellido }}</span>
                     <span class="celula-count">{{ miembrosACargo(m).length }} integrante{{ miembrosACargo(m).length !== 1 ? 's' : '' }}</span>
                   </div>
 
                   @if (miembrosACargo(m).length === 0) {
                     <div class="celula-empty">
-                      <mat-icon>people_outline</mat-icon>
+                      <i class="pi pi-users"></i>
                       <span>Sin miembros asignados aún</span>
                     </div>
                   } @else {
@@ -224,26 +215,24 @@
             <span class="estado-chip" [ngClass]="estadoClass(m.estado)">{{ m.estado }}</span>
           </div>
           @if (m.estado === 'Lider') {
-            <button mat-icon-button class="expand-btn" [class.expanded]="expandidoId() === m.miembroId"
-                    (click)="toggleExpand(m)">
-              <mat-icon>expand_more</mat-icon>
-            </button>
+            <button pButton [text]="true" [rounded]="true" class="expand-btn" [class.expanded]="expandidoId() === m.miembroId"
+                    (click)="toggleExpand(m)"><i class="pi pi-chevron-down"></i></button>
           }
         </div>
 
         <div class="card-body">
           @if (m.email) {
-            <div class="info-row"><mat-icon>email</mat-icon><span>{{ m.email }}</span></div>
+            <div class="info-row"><i class="pi pi-envelope"></i><span>{{ m.email }}</span></div>
           }
           @if (m.telefono) {
-            <div class="info-row"><mat-icon>phone</mat-icon><span>{{ m.telefono }}</span></div>
+            <div class="info-row"><i class="pi pi-phone"></i><span>{{ m.telefono }}</span></div>
           }
           @if (m.liderNombre) {
-            <div class="info-row"><mat-icon>person</mat-icon>
+            <div class="info-row"><i class="pi pi-user"></i>
               <span class="lider-val">{{ m.liderNombre }}</span>
             </div>
           } @else if (m.estado === 'Lider') {
-            <div class="info-row"><mat-icon>stars</mat-icon>
+            <div class="info-row"><i class="pi pi-star-fill"></i>
               <span class="lider-val">{{ miembrosACargo(m).length }} miembro{{ miembrosACargo(m).length !== 1 ? 's' : '' }} a cargo</span>
             </div>
           }
@@ -253,7 +242,7 @@
         @if (m.estado === 'Lider' && expandidoId() === m.miembroId) {
           <div class="celula-panel">
             <div class="celula-header">
-              <mat-icon>group</mat-icon>
+              <i class="pi pi-users"></i>
               <span>Célula · {{ miembrosACargo(m).length }} integrante{{ miembrosACargo(m).length !== 1 ? 's' : '' }}</span>
             </div>
             <div class="celula-grid">
@@ -273,15 +262,9 @@
         }
 
         <div class="card-actions">
-          <a mat-stroked-button [routerLink]="[m.miembroId]" class="btn-ver">
-            <mat-icon>visibility</mat-icon> Ver
-          </a>
-          <a mat-stroked-button [routerLink]="[m.miembroId, 'editar']" class="btn-edit">
-            <mat-icon>edit</mat-icon> Editar
-          </a>
-          <button mat-icon-button class="btn-del" (click)="eliminar(m)">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
+          <a pButton [outlined]="true" [routerLink]="[m.miembroId]" class="btn-ver"><i class="pi pi-eye"></i> Ver</a>
+          <a pButton [outlined]="true" [routerLink]="[m.miembroId, 'editar']" class="btn-edit"><i class="pi pi-pencil"></i> Editar</a>
+          <button pButton [text]="true" [rounded]="true" class="btn-del" (click)="eliminar(m)"><i class="pi pi-trash"></i></button>
         </div>
 
       </div>

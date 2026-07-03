@@ -1,15 +1,14 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { EventosService } from '../../../core/auth/eventos.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MiembrosService } from '../../../core/auth/miembros.service';
@@ -22,124 +21,118 @@ export interface EventoFormData { evento?: Evento; }
   selector: 'app-evento-form-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatDatepickerModule, MatNativeDateModule,
-    MatProgressSpinnerModule, MatCheckboxModule,
+    ReactiveFormsModule, NgClass,
+    FloatLabelModule, InputTextModule, TextareaModule, SelectModule,
+    ButtonModule, DatePickerModule, ProgressSpinnerModule,
   ],
   template: `
-    <h2 mat-dialog-title>
-      <mat-icon>{{ data.evento ? 'edit_calendar' : 'event_available' }}</mat-icon>
+    <h2>
+      <i class="pi" [ngClass]="data.evento ? 'pi-calendar' : 'pi-calendar-plus'"></i>
       {{ data.evento ? 'Editar Evento' : 'Nuevo Evento' }}
     </h2>
 
-    <mat-dialog-content>
+    <div class="dialog-content">
       <form [formGroup]="form" class="form-body">
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Nombre del evento</mat-label>
-          <input matInput formControlName="nombre" placeholder="Ej: Retiro de Hombres 2026">
-          <mat-icon matPrefix>title</mat-icon>
-        </mat-form-field>
-
-        <div class="row-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Tipo</mat-label>
-            <mat-select formControlName="tipo">
-              @for (t of tipos; track t.value) {
-                <mat-option [value]="t.value">
-                  <mat-icon>{{ t.icono }}</mat-icon> {{ t.label }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>category</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Responsable</mat-label>
-            <mat-select formControlName="responsable">
-              @for (m of miembros(); track m.miembroId) {
-                <mat-option [value]="m.nombre + ' ' + m.apellido">
-                  {{ m.nombre }} {{ m.apellido }}
-                  <span style="font-size:11px;color:#94a3b8"> · {{ m.estado }}</span>
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>person</mat-icon>
-          </mat-form-field>
+        <div class="field full">
+          <p-floatlabel variant="on">
+            <input pInputText id="nombre" formControlName="nombre" />
+            <label for="nombre">Nombre del evento</label>
+          </p-floatlabel>
         </div>
 
         <div class="row-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de inicio</mat-label>
-            <input matInput [matDatepicker]="dpInicio" formControlName="fecha">
-            <mat-datepicker-toggle matSuffix [for]="dpInicio" />
-            <mat-datepicker #dpInicio />
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-select inputId="tipo" formControlName="tipo" [options]="tipos"
+                        optionLabel="label" optionValue="value" />
+              <label for="tipo">Tipo</label>
+            </p-floatlabel>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Fecha de fin (opcional)</mat-label>
-            <input matInput [matDatepicker]="dpFin" formControlName="fechaFin">
-            <mat-datepicker-toggle matSuffix [for]="dpFin" />
-            <mat-datepicker #dpFin />
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-select inputId="responsable" formControlName="responsable" [options]="responsables()"
+                        optionLabel="label" optionValue="value" />
+              <label for="responsable">Responsable</label>
+            </p-floatlabel>
+          </div>
         </div>
 
         <div class="row-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Hora de inicio</mat-label>
-            <input matInput formControlName="horaInicio" type="time">
-            <mat-icon matPrefix>schedule</mat-icon>
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-datepicker inputId="fecha" formControlName="fecha" dateFormat="yy-mm-dd" [showIcon]="true" />
+              <label for="fecha">Fecha de inicio</label>
+            </p-floatlabel>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Hora de fin</mat-label>
-            <input matInput formControlName="horaFin" type="time">
-            <mat-icon matPrefix>schedule</mat-icon>
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-datepicker inputId="fechaFin" formControlName="fechaFin" dateFormat="yy-mm-dd" [showIcon]="true" />
+              <label for="fechaFin">Fecha de fin (opcional)</label>
+            </p-floatlabel>
+          </div>
         </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Lugar</mat-label>
-          <input matInput formControlName="lugar" placeholder="Nombre del lugar y ciudad">
-          <mat-icon matPrefix>place</mat-icon>
-        </mat-form-field>
+        <div class="row-2">
+          <div class="field">
+            <p-floatlabel variant="on">
+              <input pInputText id="horaInicio" formControlName="horaInicio" type="time" />
+              <label for="horaInicio">Hora de inicio</label>
+            </p-floatlabel>
+          </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Cupo máximo (opcional)</mat-label>
-          <input matInput formControlName="maxInscritos" type="number" min="1"
-                 placeholder="Dejar vacío si no hay límite">
-          <mat-icon matPrefix>groups</mat-icon>
-        </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <input pInputText id="horaFin" formControlName="horaFin" type="time" />
+              <label for="horaFin">Hora de fin</label>
+            </p-floatlabel>
+          </div>
+        </div>
 
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="descripcion" rows="3"
-                    placeholder="Detalle del evento..."></textarea>
-          <mat-icon matPrefix>notes</mat-icon>
-        </mat-form-field>
+        <div class="field full">
+          <p-floatlabel variant="on">
+            <input pInputText id="lugar" formControlName="lugar" />
+            <label for="lugar">Lugar</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field full">
+          <p-floatlabel variant="on">
+            <input pInputText id="maxInscritos" formControlName="maxInscritos" type="number" min="1" />
+            <label for="maxInscritos">Cupo máximo (opcional)</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="field full">
+          <p-floatlabel variant="on">
+            <textarea pTextarea id="descripcion" formControlName="descripcion" rows="3"></textarea>
+            <label for="descripcion">Descripción</label>
+          </p-floatlabel>
+        </div>
 
       </form>
-    </mat-dialog-content>
+    </div>
 
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" (click)="guardar()"
-              [disabled]="form.invalid || saving()">
-        @if (saving()) { <mat-spinner diameter="18" /> }
-        @else { <mat-icon>save</mat-icon> }
+    <div class="dialog-actions">
+      <button pButton [text]="true" (click)="ref.close()">Cancelar</button>
+      <button pButton (click)="guardar()" [disabled]="form.invalid || saving()">
+        @if (saving()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+        @else { <i class="pi pi-save"></i> }
         {{ data.evento ? 'Guardar cambios' : 'Crear evento' }}
       </button>
-    </mat-dialog-actions>
+    </div>
   `,
   styles: [`
-    h2[mat-dialog-title] { display:flex; align-items:center; gap:8px; }
-    mat-dialog-content   { padding-top:16px !important; min-width: min(560px, 92vw); }
-    .form-body           { display:flex; flex-direction:column; gap:6px; }
-    .full                { width:100%; }
-    .row-2               { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    mat-form-field       { width:100%; }
-    mat-dialog-actions   { gap:8px; padding:16px !important; }
+    h2 { display:flex; align-items:center; gap:8px; margin: 0; padding: 20px 20px 0; font-size: 18px; font-weight: 700; color: #0f172a; }
+    .dialog-content { padding: 16px 20px 0; min-width: min(560px, 92vw); }
+    .form-body       { display:flex; flex-direction:column; gap:16px; }
+    .field           { display: flex; flex-direction: column; }
+    .field.full      { width:100%; }
+    .field p-floatlabel, .field p-select, .field input, .field textarea { width: 100%; }
+    .row-2           { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .dialog-actions  { display:flex; justify-content:flex-end; gap:8px; padding:16px 20px; }
     @media(max-width:520px){ .row-2{ grid-template-columns:1fr; } }
   `],
 })
@@ -148,8 +141,9 @@ export class EventoFormDialogComponent implements OnInit {
   private svc       = inject(EventosService);
   private auth      = inject(AuthService);
   private miembroSvc = inject(MiembrosService);
-  readonly dialogRef = inject(MatDialogRef<EventoFormDialogComponent>);
-  readonly data: EventoFormData = inject(MAT_DIALOG_DATA);
+  readonly ref    = inject(DynamicDialogRef);
+  readonly config = inject(DynamicDialogConfig<EventoFormData>);
+  readonly data: EventoFormData = this.config.data;
 
   saving   = signal(false);
   miembros = signal<MiembroList[]>([]);
@@ -157,6 +151,13 @@ export class EventoFormDialogComponent implements OnInit {
   tipos = Object.entries(EVENTO_TIPO_META).map(([value, m]) => ({
     value: value as EventoTipo, label: m.label, icono: m.icono,
   }));
+
+  responsables = computed(() =>
+    this.miembros().map(m => ({
+      value: `${m.nombre} ${m.apellido}`,
+      label: `${m.nombre} ${m.apellido} · ${m.estado}`,
+    }))
+  );
 
   form = this.fb.group({
     nombre:       [this.data.evento?.nombre       ?? '', Validators.required],
@@ -201,7 +202,7 @@ export class EventoFormDialogComponent implements OnInit {
       : this.svc.create(payload);
 
     op.subscribe({
-      next: r  => { this.saving.set(false); this.dialogRef.close(r); },
+      next: r  => { this.saving.set(false); this.ref.close(r); },
       error: () => this.saving.set(false),
     });
   }

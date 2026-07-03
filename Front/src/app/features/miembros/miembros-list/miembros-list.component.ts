@@ -1,12 +1,10 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgClass, DatePipe } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
+import { NgClass } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { MiembrosService } from '../../../core/auth/miembros.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MiembroList, EstadoMiembro } from '../../../core/models/miembro.models';
@@ -33,9 +31,8 @@ type FiltroEstado = 'Todos' | EstadoMiembro;
   selector: 'app-miembros-list',
   standalone: true,
   imports: [
-    RouterLink, FormsModule, NgClass, DatePipe,
-    MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTooltipModule, MatMenuModule,
+    RouterLink, FormsModule, NgClass,
+    ButtonModule, ProgressSpinnerModule, TooltipModule,
   ],
   templateUrl: './miembros-list.component.html',
   styleUrl: './miembros-list.component.css',
@@ -74,7 +71,7 @@ export class MiembrosListComponent implements OnInit {
   cargar() {
     this.loading.set(true);
     const sedeId = this.auth.currentUser()!.sedeId;
-    this.svc.getMockBySede(sedeId).subscribe({
+    this.svc.getAll(sedeId).subscribe({
       next: (data) => { this.miembros.set(data); this.loading.set(false); },
       error: () => this.loading.set(false),
     });

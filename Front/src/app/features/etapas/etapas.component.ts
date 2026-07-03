@@ -1,13 +1,10 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { FormsModule } from '@angular/forms';
 import { EtapasService } from '../../core/auth/etapas.service';
 import { MiembrosService } from '../../core/auth/miembros.service';
@@ -25,9 +22,8 @@ const BOT_Y  = 185;
   standalone: true,
   imports: [
     NgClass, DatePipe, FormsModule,
-    MatIconModule, MatButtonModule, MatCardModule,
-    MatTableModule, MatTooltipModule, MatProgressSpinnerModule,
-    MatChipsModule, MatDividerModule,
+    ButtonModule, CardModule,
+    TableModule, TooltipModule, ProgressSpinnerModule,
   ],
   templateUrl: './etapas.component.html',
   styleUrl: './etapas.component.css',

@@ -13,3 +13,4 @@ C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\refint\TorreonFuerte.Application.dll
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.pdb
 C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\ref\TorreonFuerte.Application.dll
+C:\WorkSpace\TorreonFuerte-CRM\backend\TorreonFuerte.Application\obj\Debug\net10.0\TorreonFuerte.Application.sourcelink.json

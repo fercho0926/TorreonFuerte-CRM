@@ -80,7 +80,7 @@
       <div class="form-header">
         <div class="form-brand">
           <div class="form-icon-wrap">
-            <mat-icon>castle</mat-icon>
+            <i class="pi pi-building"></i>
           </div>
           <span class="form-brand-name">Torreón Fuerte · CRM</span>
         </div>
@@ -93,57 +93,63 @@
 
         <div class="field-group">
           <label class="field-label">
-            <mat-icon class="label-icon">mail_outline</mat-icon>
+            <i class="pi pi-envelope label-icon"></i>
             Correo electrónico
           </label>
-          <mat-form-field appearance="outline" class="field">
-            <input matInput type="email" formControlName="email"
-                   autocomplete="email" placeholder="usuario@iglesia.com" />
+          <div class="field">
+            <p-floatlabel variant="on">
+              <input pInputText id="email" type="email" formControlName="email"
+                     autocomplete="email" placeholder="usuario@iglesia.com" />
+              <label for="email">Correo electrónico</label>
+            </p-floatlabel>
             @if (form.get('email')?.touched && form.get('email')?.hasError('required')) {
-              <mat-error>El correo es requerido</mat-error>
+              <p-message severity="error" text="El correo es requerido" variant="simple" size="small" />
             }
             @if (form.get('email')?.touched && form.get('email')?.hasError('email')) {
-              <mat-error>Formato de correo inválido</mat-error>
+              <p-message severity="error" text="Formato de correo inválido" variant="simple" size="small" />
             }
-          </mat-form-field>
+          </div>
         </div>
 
         <div class="field-group">
           <label class="field-label">
-            <mat-icon class="label-icon">lock_outline</mat-icon>
+            <i class="pi pi-lock label-icon"></i>
             Contraseña
           </label>
-          <mat-form-field appearance="outline" class="field">
-            <input matInput [type]="hidePassword() ? 'password' : 'text'"
-                   formControlName="password" autocomplete="current-password" />
-            <button mat-icon-button matSuffix type="button"
+          <div class="field password-field">
+            <p-floatlabel variant="on">
+              <input pInputText [type]="hidePassword() ? 'password' : 'text'"
+                     id="password" formControlName="password" autocomplete="current-password" />
+              <label for="password">Contraseña</label>
+            </p-floatlabel>
+            <button pButton [text]="true" [rounded]="true" type="button" class="password-toggle"
                     (click)="hidePassword.set(!hidePassword())">
-              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              <i class="pi" [ngClass]="hidePassword() ? 'pi-eye-slash' : 'pi-eye'"></i>
             </button>
             @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
-              <mat-error>La contraseña es requerida</mat-error>
+              <p-message severity="error" text="La contraseña es requerida" variant="simple" size="small" />
             }
-          </mat-form-field>
+          </div>
         </div>
 
         @if (error()) {
           <div class="error-alert">
-            <mat-icon>error_outline</mat-icon>
+            <i class="pi pi-exclamation-circle"></i>
             <span>{{ error() }}</span>
           </div>
         }
 
         <div class="form-divider"></div>
 
-        <button mat-raised-button type="submit" class="submit-btn" [disabled]="loading()">
+        <button pButton type="submit" class="submit-btn" [disabled]="loading()">
           <div class="btn-shimmer"></div>
           <span class="btn-inner">
             @if (loading()) {
-              <mat-spinner diameter="20" class="spin-white" />
+              <p-progressSpinner [style]="{width:'20px',height:'20px'}" styleClass="spin-white" />
               Verificando...
             } @else {
               Ingresar al sistema
-              <mat-icon>arrow_forward</mat-icon>
+              <i class="pi pi-arrow-right"></i>
             }
           </span>
         </button>
@@ -152,7 +158,7 @@
 
       <!-- Footer -->
       <div class="form-footer">
-        <mat-icon>shield</mat-icon>
+        <i class="pi pi-shield"></i>
         Acceso seguro &nbsp;·&nbsp; Autenticación JWT
       </div>
 

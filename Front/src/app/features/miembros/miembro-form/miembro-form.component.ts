@@ -1,15 +1,15 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { CardModule } from 'primeng/card';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DatePickerModule } from 'primeng/datepicker';
+import { MessageModule } from 'primeng/message';
 import { MiembrosService } from '../../../core/auth/miembros.service';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -18,9 +18,8 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [
     RouterLink, ReactiveFormsModule,
-    MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule,
-    MatDatepickerModule, MatNativeDateModule,
+    CardModule, FloatLabelModule, InputTextModule, TextareaModule, SelectModule,
+    ButtonModule, ProgressSpinnerModule, DatePickerModule, MessageModule,
   ],
   templateUrl: './miembro-form.component.html',
   styleUrl: './miembro-form.component.css',

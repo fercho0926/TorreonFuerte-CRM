@@ -52,28 +52,36 @@
 }
 
 .stat-card {
+  border-left: 4px solid transparent;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.stat-card ::ng-deep .p-card-body {
+  padding: 16px 20px !important;
+}
+
+.stat-card ::ng-deep .p-card-content {
   display: flex !important;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px !important;
-  border-left: 4px solid transparent;
-  border-radius: 10px !important;
+  padding: 0 !important;
 }
 
-.stat-card mat-icon {
+.stat-card i {
   font-size: 32px;
   width: 32px;
   height: 32px;
 }
 
 .stat-card.pastor  { border-left-color: #7c3aed; }
-.stat-card.pastor  mat-icon { color: #7c3aed; }
+.stat-card.pastor  i { color: #7c3aed; }
 .stat-card.zona    { border-left-color: #0284c7; }
-.stat-card.zona    mat-icon { color: #0284c7; }
+.stat-card.zona    i { color: #0284c7; }
 .stat-card.celula  { border-left-color: #059669; }
-.stat-card.celula  mat-icon { color: #059669; }
+.stat-card.celula  i { color: #059669; }
 .stat-card.miembros { border-left-color: #d97706; }
-.stat-card.miembros mat-icon { color: #d97706; }
+.stat-card.miembros i { color: #d97706; }
 
 .stat-num {
   display: block;
@@ -120,7 +128,7 @@
   gap: 12px;
 }
 
-.empty-state mat-icon {
+.empty-state i {
   font-size: 56px;
   width: 56px;
   height: 56px;
@@ -153,7 +161,7 @@
 }
 .bc-item:hover { background: #f1f5f9; color: #0f172a; }
 .bc-item.bc-active { color: #1199c5; pointer-events: none; }
-.bc-home mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.bc-home i { font-size: 16px; width: 16px; height: 16px; }
 .bc-sep { font-size: 16px; width: 16px; height: 16px; color: #cbd5e1; flex-shrink: 0; }
 
 /* Level header */
@@ -193,7 +201,7 @@
   display: flex; flex-direction: column; align-items: center; gap: 1px;
   flex-shrink: 0; min-width: 52px;
 }
-.dlh-count mat-icon { font-size: 18px; width: 18px; height: 18px; color: #94a3b8; }
+.dlh-count i { font-size: 18px; width: 18px; height: 18px; color: #94a3b8; }
 .dlh-count span { font-size: 1.2rem; font-weight: 800; color: #0f172a; line-height: 1; }
 .dlh-count small { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.03em; }
 
@@ -209,7 +217,7 @@
   letter-spacing: 0.06em;
   margin-bottom: 12px;
 }
-.drill-section-title mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.drill-section-title i { font-size: 16px; width: 16px; height: 16px; }
 .dsg-count {
   margin-left: 4px;
   background: #f1f5f9;
@@ -280,7 +288,7 @@
   padding: 2px 8px;
   border-radius: 20px;
 }
-.dcard-miembros mat-icon, .dcard-sub mat-icon { font-size: 12px; width: 12px; height: 12px; }
+.dcard-miembros i, .dcard-sub i { font-size: 12px; width: 12px; height: 12px; }
 
 .dcard-arrow {
   margin-left: auto;
@@ -345,7 +353,7 @@
   color: #94a3b8;
   font-size: 0.86rem;
 }
-.drill-empty mat-icon { font-size: 48px; width: 48px; height: 48px; opacity: 0.35; }
+.drill-empty i { font-size: 48px; width: 48px; height: 48px; opacity: 0.35; }
 
 /* ── Filtros ─────────────────────────────────────────────────────────────── */
 .filtros-row {
@@ -455,8 +463,8 @@
 .col-acciones { width: 100px; }
 
 /* Expand button */
-.expand-btn mat-icon { transition: transform 0.25s ease; color: #94a3b8; }
-.expand-btn.expanded mat-icon { transform: rotate(180deg); color: #7c3aed; }
+.expand-btn i { transition: transform 0.25s ease; color: #94a3b8; }
+.expand-btn.expanded i { transform: rotate(180deg); color: #7c3aed; }
 
 /* Celda líder */
 .cell-lider { display: flex; align-items: center; gap: 10px; }
@@ -494,7 +502,7 @@
   white-space: nowrap;
 }
 
-.nivel-badge mat-icon { font-size: 13px; width: 13px; height: 13px; }
+.nivel-badge i { font-size: 13px; width: 13px; height: 13px; }
 .nivel-badge.pastor  { background: #ede9fe; color: #7c3aed; }
 .nivel-badge.zona    { background: #e0f2fe; color: #0284c7; }
 .nivel-badge.celula  { background: #d1fae5; color: #059669; }
@@ -516,7 +524,7 @@
   border-radius: 20px;
 }
 
-.miembros-pill mat-icon { font-size: 14px; width: 14px; height: 14px; }
+.miembros-pill i { font-size: 14px; width: 14px; height: 14px; }
 
 /* Acciones */
 .acciones-row { display: flex; gap: 2px; opacity: 0; transition: opacity 0.15s; }
@@ -537,7 +545,7 @@
   border: 1px solid #e2e8f0;
 }
 
-.empty-table mat-icon { font-size: 40px; width: 40px; height: 40px; }
+.empty-table i { font-size: 40px; width: 40px; height: 40px; }
 
 /* ── Panel discípulos expandido ──────────────────────────────────────────── */
 .expand-detail-row > td { padding: 0 !important; border-bottom: 1px solid #e2e8f0; }
@@ -562,13 +570,13 @@
 }
 
 .panel-pastor .discipulos-header { color: #7c3aed; }
-.panel-pastor .discipulos-header mat-icon { color: #7c3aed; }
+.panel-pastor .discipulos-header i { color: #7c3aed; }
 .panel-zona   .discipulos-header { color: #0284c7; }
-.panel-zona   .discipulos-header mat-icon { color: #0284c7; }
+.panel-zona   .discipulos-header i { color: #0284c7; }
 .panel-celula .discipulos-header { color: #059669; }
-.panel-celula .discipulos-header mat-icon { color: #059669; }
+.panel-celula .discipulos-header i { color: #059669; }
 
-.discipulos-header mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.discipulos-header i { font-size: 18px; width: 18px; height: 18px; }
 
 .discipulos-count {
   margin-left: auto;
@@ -657,7 +665,7 @@
   color: #64748b;
 }
 
-.dc-miembros mat-icon { font-size: 13px; width: 13px; height: 13px; }
+.dc-miembros i { font-size: 13px; width: 13px; height: 13px; }
 
 .dc-expand { color: #94a3b8 !important; flex-shrink: 0; }
 
@@ -697,7 +705,7 @@
   z-index: 1;
 }
 
-.timeline-dot mat-icon {
+.timeline-dot i {
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -709,8 +717,16 @@
 
 .timeline-card {
   flex: 1;
-  padding: 14px 16px !important;
   border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.timeline-card ::ng-deep .p-card-body {
+  padding: 14px 16px !important;
+}
+
+.timeline-card ::ng-deep .p-card-content {
+  padding: 0 !important;
 }
 
 .timeline-inactivo .timeline-card {

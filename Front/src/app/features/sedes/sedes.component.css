@@ -45,7 +45,7 @@
   border: 1px solid #e2e8f0;
 }
 
-.stat-pill mat-icon { font-size: 20px; width: 20px; height: 20px; color: #7c3aed; }
+.stat-pill i { font-size: 20px; color: #7c3aed; }
 .sn { font-size: 18px; font-weight: 700; color: #0f172a; }
 .sl { font-size: 12px; color: #64748b; }
 
@@ -297,7 +297,8 @@
   width: 100%;
 }
 
-mat-card-content { padding: 14px 16px 16px !important; }
+.sede-card ::ng-deep .p-card-body { padding: 14px 16px 16px !important; }
+.sede-card ::ng-deep .p-card-content { padding: 0 !important; }
 
 .card-top {
   display: flex;
@@ -336,7 +337,7 @@ mat-card-content { padding: 14px 16px 16px !important; }
 
 .sede-card:hover .card-fly { color: var(--sc); }
 
-.card-divider { margin: 0 0 12px !important; }
+.card-divider { margin: 0 0 12px !important; border: none; border-top: 1px solid #e2e8f0; }
 
 /* Stats row */
 .card-stats {
@@ -353,10 +354,8 @@ mat-card-content { padding: 14px 16px 16px !important; }
   color: #475569;
 }
 
-.cstat mat-icon {
+.cstat i {
   font-size: 16px !important;
-  width: 16px !important;
-  height: 16px !important;
 }
 
 .cstat span:nth-child(2) {
@@ -391,10 +390,8 @@ mat-card-content { padding: 14px 16px 16px !important; }
   color: #475569;
 }
 
-.card-pastor mat-icon {
+.card-pastor i {
   font-size: 14px !important;
-  width: 14px !important;
-  height: 14px !important;
   color: #94a3b8;
 }
 

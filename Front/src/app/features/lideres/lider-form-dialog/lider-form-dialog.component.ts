@@ -1,14 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LideresService } from '../../../core/auth/lideres.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { MiembrosService } from '../../../core/auth/miembros.service';
@@ -25,97 +25,89 @@ export interface LiderFormData {
   selector: 'app-lider-form-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatDialogModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonModule, MatIconModule,
-    MatDatepickerModule, MatNativeDateModule, MatProgressSpinnerModule,
+    NgClass, ReactiveFormsModule,
+    FloatLabelModule, InputTextModule, TextareaModule, SelectModule,
+    ButtonModule, DatePickerModule, ProgressSpinnerModule,
   ],
   template: `
-    <h2 mat-dialog-title>
-      <mat-icon>{{ data.lider ? 'edit' : 'person_add' }}</mat-icon>
+    <h2>
+      <i class="pi" [ngClass]="data.lider ? 'pi-pencil' : 'pi-user-plus'"></i>
       {{ data.lider ? 'Editar Líder' : 'Nuevo Líder' }}
     </h2>
 
-    <mat-dialog-content>
+    <div class="dialog-content">
       <form [formGroup]="form" class="form-grid">
 
-        <mat-form-field appearance="outline">
-          <mat-label>Nivel de liderazgo</mat-label>
-          <mat-select formControlName="nivel" (selectionChange)="onNivelChange()">
-            <mat-option value="Pastor">Pastor</mat-option>
-            <mat-option value="LiderZona">Líder de Zona</mat-option>
-            <mat-option value="LiderCelula">Líder de Célula</mat-option>
-          </mat-select>
-          <mat-icon matPrefix>military_tech</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-select inputId="nivel" formControlName="nivel" [options]="opcionesNivel" optionLabel="label" optionValue="value" (onChange)="onNivelChange()" />
+            <label for="nivel">Nivel de liderazgo</label>
+          </p-floatlabel>
+        </div>
 
         @if (form.value.nivel && form.value.nivel !== 'Pastor') {
-          <mat-form-field appearance="outline">
-            <mat-label>{{ form.value.nivel === 'LiderZona' ? 'Pastor a cargo' : 'Líder de zona' }}</mat-label>
-            <mat-select formControlName="liderPadreId">
-              @for (p of padresDisponibles(); track p.liderId) {
-                <mat-option [value]="p.liderId">
-                  {{ p.nombre }} {{ p.apellido }} — {{ p.zonaOCelula }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>supervisor_account</mat-icon>
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-select inputId="liderPadreId" formControlName="liderPadreId" [options]="opcionesPadres" optionLabel="label" optionValue="value" />
+              <label for="liderPadreId">{{ form.value.nivel === 'LiderZona' ? 'Pastor a cargo' : 'Líder de zona' }}</label>
+            </p-floatlabel>
+          </div>
         }
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ nivelLabel }} (nombre)</mat-label>
-          <input matInput formControlName="zonaOCelula" placeholder="Ej: Zona Norte / Célula Esperanza">
-          <mat-icon matPrefix>place</mat-icon>
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <input pInputText id="zonaOCelula" formControlName="zonaOCelula" placeholder="Ej: Zona Norte / Célula Esperanza" />
+            <label for="zonaOCelula">{{ nivelLabel }} (nombre)</label>
+          </p-floatlabel>
+        </div>
 
         @if (!data.lider) {
-          <mat-form-field appearance="outline">
-            <mat-label>Miembro a designar</mat-label>
-            <mat-select formControlName="miembroId">
-              @for (m of miembrosDisponibles(); track m.miembroId) {
-                <mat-option [value]="m.miembroId">{{ m.nombre }} {{ m.apellido }}</mat-option>
-              }
-            </mat-select>
-            <mat-icon matPrefix>person</mat-icon>
-          </mat-form-field>
+          <div class="field">
+            <p-floatlabel variant="on">
+              <p-select inputId="miembroId" formControlName="miembroId" [options]="opcionesMiembros" optionLabel="label" optionValue="value" />
+              <label for="miembroId">Miembro a designar</label>
+            </p-floatlabel>
+          </div>
         }
 
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha de asignación</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="fechaAsignacion">
-          <mat-datepicker-toggle matSuffix [for]="picker" />
-          <mat-datepicker #picker />
-        </mat-form-field>
+        <div class="field">
+          <p-floatlabel variant="on">
+            <p-datepicker inputId="fechaAsignacion" formControlName="fechaAsignacion" dateFormat="yy-mm-dd" [showIcon]="true" />
+            <label for="fechaAsignacion">Fecha de asignación</label>
+          </p-floatlabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ data.lider ? 'Motivo del cambio' : 'Motivo de designación' }}</mat-label>
-          <textarea matInput formControlName="motivoCambio" rows="2"
-                    placeholder="Ej: Crecimiento de la célula, nueva zona, etc."></textarea>
-          <mat-icon matPrefix>note</mat-icon>
-        </mat-form-field>
+        <div class="field full-width">
+          <p-floatlabel variant="on">
+            <textarea pTextarea id="motivoCambio" formControlName="motivoCambio" rows="2"
+                      placeholder="Ej: Crecimiento de la célula, nueva zona, etc."></textarea>
+            <label for="motivoCambio">{{ data.lider ? 'Motivo del cambio' : 'Motivo de designación' }}</label>
+          </p-floatlabel>
+        </div>
 
       </form>
-    </mat-dialog-content>
+    </div>
 
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Cancelar</button>
-      <button mat-flat-button color="primary" (click)="guardar()" [disabled]="form.invalid || saving()">
+    <div class="dialog-actions">
+      <button pButton [text]="true" (click)="ref.close()">Cancelar</button>
+      <button pButton (click)="guardar()" [disabled]="form.invalid || saving()">
         @if (saving()) {
-          <mat-spinner diameter="18" />
+          <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" />
         } @else {
-          <mat-icon>save</mat-icon>
+          <i class="pi pi-save"></i>
         }
         {{ data.lider ? 'Guardar cambios' : 'Designar líder' }}
       </button>
-    </mat-dialog-actions>
+    </div>
   `,
   styles: [`
-    h2[mat-dialog-title] { display: flex; align-items: center; gap: 8px; }
-    mat-dialog-content { padding-top: 16px !important; min-width: min(480px, 90vw); }
-    .form-grid { display: flex; flex-direction: column; gap: 4px; }
-    mat-form-field { width: 100%; }
-    mat-dialog-actions { gap: 8px; padding: 16px !important; }
+    h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+    .dialog-content { padding-top: 16px; min-width: min(480px, 90vw); }
+    .form-grid { display: flex; flex-direction: column; gap: 20px; }
+    .field { width: 100%; }
+    .field.full-width { width: 100%; }
+    p-select, p-datepicker, input, textarea { width: 100%; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 0 0; }
   `],
 })
 export class LiderFormDialogComponent implements OnInit {
@@ -123,12 +115,19 @@ export class LiderFormDialogComponent implements OnInit {
   private svc        = inject(LideresService);
   private auth       = inject(AuthService);
   private miembroSvc = inject(MiembrosService);
-  readonly dialogRef = inject(MatDialogRef<LiderFormDialogComponent>);
-  readonly data: LiderFormData = inject(MAT_DIALOG_DATA);
+  readonly ref = inject(DynamicDialogRef);
+  readonly config = inject(DynamicDialogConfig<LiderFormData>);
+  readonly data: LiderFormData = this.config.data!;
 
   saving   = signal(false);
   lideres  = signal<Lider[]>([]);
   miembrosDisponibles = signal<MiembroList[]>([]);
+
+  opcionesNivel = [
+    { label: 'Pastor', value: 'Pastor' },
+    { label: 'Líder de Zona', value: 'LiderZona' },
+    { label: 'Líder de Célula', value: 'LiderCelula' },
+  ];
 
   form = this.fb.group({
     nivel: [this.data.preseleccionarNivel ?? this.data.lider?.nivel ?? 'LiderCelula' as NivelLider, Validators.required],
@@ -152,6 +151,17 @@ export class LiderFormDialogComponent implements OnInit {
     if (nivel === 'LiderZona') return this.lideres().filter(l => l.nivel === 'Pastor');
     if (nivel === 'LiderCelula') return this.lideres().filter(l => l.nivel === 'LiderZona');
     return [];
+  }
+
+  get opcionesPadres() {
+    return this.padresDisponibles().map(p => ({
+      label: `${p.nombre} ${p.apellido} — ${p.zonaOCelula}`,
+      value: p.liderId,
+    }));
+  }
+
+  get opcionesMiembros() {
+    return this.miembrosDisponibles().map(m => ({ label: `${m.nombre} ${m.apellido}`, value: m.miembroId }));
   }
 
   get nivelLabel(): string {
@@ -198,7 +208,7 @@ export class LiderFormDialogComponent implements OnInit {
         });
 
     op.subscribe({
-      next: (result) => { this.saving.set(false); this.dialogRef.close(result); },
+      next: (result) => { this.saving.set(false); this.ref.close(result); },
       error: () => this.saving.set(false),
     });
   }

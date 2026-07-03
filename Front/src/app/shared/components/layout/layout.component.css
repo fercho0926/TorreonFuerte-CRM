@@ -1,7 +1,16 @@
 /* ── Container ───────────────────────────────────────────────────────────── */
 .sidenav-container {
-  height: 100vh;
+  display: flex;
+  min-height: 100vh;
   background: #f1f5f9;
+}
+
+/* ── Backdrop (mobile) ───────────────────────────────────────────────────── */
+.sidenav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 199;
 }
 
 /* ── Sidenav ─────────────────────────────────────────────────────────────── */
@@ -10,13 +19,26 @@
   background: linear-gradient(175deg, #0a7a9e 0%, #0e93bb 55%, #1199c5 100%);
   display: flex;
   flex-direction: column;
-  border-right: none !important;
+  flex-shrink: 0;
   transition: width 0.25s ease;
   overflow: hidden;
 }
 
 .sidenav.collapsed {
   width: 64px;
+}
+
+.sidenav.mobile {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 260px;
+  z-index: 200;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+
+.sidenav.mobile.mobile-open {
+  transform: translateX(0);
 }
 
 /* ── Brand ───────────────────────────────────────────────────────────────── */
@@ -41,7 +63,7 @@
   flex-shrink: 0;
 }
 
-.brand-logo mat-icon {
+.brand-logo i {
   font-size: 20px;
   width: 20px;
   height: 20px;
@@ -227,7 +249,7 @@
   color: #f8fafc;
 }
 
-.icon-btn mat-icon {
+.icon-btn i {
   font-size: 18px;
   width: 18px;
   height: 18px;
@@ -265,7 +287,7 @@
   color: #1e293b !important;
 }
 
-.menu-btn mat-icon {
+.menu-btn i {
   font-size: 22px !important;
   width: 22px !important;
   height: 22px !important;

@@ -1,19 +1,18 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatChipsModule } from '@angular/material/chips';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TabsModule } from 'primeng/tabs';
+import { CardModule } from 'primeng/card';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
+import { DividerModule } from 'primeng/divider';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MessageModule } from 'primeng/message';
+import { MessageService } from 'primeng/api';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
@@ -44,11 +43,11 @@ const MOCK_USUARIOS: UsuarioAdmin[] = [
   selector: 'app-configuracion',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
-    MatTabsModule, MatCardModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatSelectModule, MatSlideToggleModule,
-    MatTableModule, MatTooltipModule, MatDividerModule, MatProgressSpinnerModule,
-    MatChipsModule,
+    ReactiveFormsModule, FormsModule,
+    TabsModule, CardModule, FloatLabelModule, InputTextModule,
+    ButtonModule, SelectModule, ToggleSwitchModule,
+    TableModule, TooltipModule, DividerModule, ProgressSpinnerModule,
+    MessageModule,
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.css',
@@ -56,7 +55,7 @@ const MOCK_USUARIOS: UsuarioAdmin[] = [
 export class ConfiguracionComponent implements OnInit {
   auth    = inject(AuthService);
   private fb    = inject(FormBuilder);
-  private snack = inject(MatSnackBar);
+  private messageService = inject(MessageService);
 
   usuario = this.auth.currentUser;
 
@@ -135,7 +134,7 @@ export class ConfiguracionComponent implements OnInit {
     this.guardandoPerfil.set(true);
     setTimeout(() => {
       this.guardandoPerfil.set(false);
-      this.snack.open('Perfil actualizado correctamente', 'Cerrar', { duration: 3000 });
+      this.messageService.add({ severity: 'success', summary: 'Perfil actualizado correctamente', life: 3000 });
     }, 800);
   }
 
@@ -143,14 +142,14 @@ export class ConfiguracionComponent implements OnInit {
     const v = this.passwordForm.value;
     if (this.passwordForm.invalid) return;
     if (v.nueva !== v.confirmar) {
-      this.snack.open('Las contraseñas nuevas no coinciden', 'Cerrar', { duration: 3000, panelClass: 'snack-error' });
+      this.messageService.add({ severity: 'error', summary: 'Las contraseñas nuevas no coinciden', life: 3000 });
       return;
     }
     this.guardandoPassword.set(true);
     setTimeout(() => {
       this.guardandoPassword.set(false);
       this.passwordForm.reset();
-      this.snack.open('Contraseña actualizada correctamente', 'Cerrar', { duration: 3000 });
+      this.messageService.add({ severity: 'success', summary: 'Contraseña actualizada correctamente', life: 3000 });
     }, 800);
   }
 
@@ -160,18 +159,18 @@ export class ConfiguracionComponent implements OnInit {
       list.map(x => x.id === u.id ? { ...x, activo: !x.activo } : x)
     );
     const estado = !u.activo ? 'activado' : 'desactivado';
-    this.snack.open(`Usuario ${u.nombre} ${estado}`, 'Cerrar', { duration: 2500 });
+    this.messageService.add({ severity: 'success', summary: `Usuario ${u.nombre} ${estado}`, life: 2500 });
   }
 
   cambiarRol(u: UsuarioAdmin, rol: UsuarioAdmin['rol']) {
     this.usuarios.update(list =>
       list.map(x => x.id === u.id ? { ...x, rol } : x)
     );
-    this.snack.open(`Rol de ${u.nombre} actualizado a ${rol}`, 'Cerrar', { duration: 2500 });
+    this.messageService.add({ severity: 'success', summary: `Rol de ${u.nombre} actualizado a ${rol}`, life: 2500 });
   }
 
   enviarAcceso(u: UsuarioAdmin) {
-    this.snack.open(`Email de acceso enviado a ${u.email}`, 'Cerrar', { duration: 3000 });
+    this.messageService.add({ severity: 'success', summary: `Email de acceso enviado a ${u.email}`, life: 3000 });
   }
 
   // ── Acciones: Sede ────────────────────────────────────────────────────────────
@@ -180,7 +179,7 @@ export class ConfiguracionComponent implements OnInit {
     this.guardandoSede.set(true);
     setTimeout(() => {
       this.guardandoSede.set(false);
-      this.snack.open('Configuración de sede guardada', 'Cerrar', { duration: 3000 });
+      this.messageService.add({ severity: 'success', summary: 'Configuración de sede guardada', life: 3000 });
     }, 800);
   }
 
@@ -189,7 +188,7 @@ export class ConfiguracionComponent implements OnInit {
     this.guardandoSistema.set(true);
     setTimeout(() => {
       this.guardandoSistema.set(false);
-      this.snack.open('Preferencias guardadas', 'Cerrar', { duration: 3000 });
+      this.messageService.add({ severity: 'success', summary: 'Preferencias guardadas', life: 3000 });
     }, 600);
   }
 }

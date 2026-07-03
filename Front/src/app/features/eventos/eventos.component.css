@@ -45,16 +45,16 @@
   border-left: 4px solid transparent;
 }
 
-.stat-card mat-icon { font-size: 28px; width: 28px; height: 28px; }
+.stat-card i { font-size: 28px; width: 28px; height: 28px; }
 
 .s-proximo    { border-left-color: #7c3aed; }
-.s-proximo    mat-icon { color: #7c3aed; }
+.s-proximo    i { color: #7c3aed; }
 .s-inscritos  { border-left-color: #059669; }
-.s-inscritos  mat-icon { color: #059669; }
+.s-inscritos  i { color: #059669; }
 .s-mes        { border-left-color: #0284c7; }
-.s-mes        mat-icon { color: #0284c7; }
+.s-mes        i { color: #0284c7; }
 .s-asistencia { border-left-color: #d97706; }
-.s-asistencia mat-icon { color: #d97706; }
+.s-asistencia i { color: #d97706; }
 
 .sn { display: block; font-size: 26px; font-weight: 700; color: #0f172a; line-height: 1; }
 .sl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .4px; }
@@ -72,7 +72,7 @@
   padding: 80px 0; gap: 12px; color: #94a3b8;
 }
 
-.empty-state mat-icon { font-size: 52px; width: 52px; height: 52px; }
+.empty-state i { font-size: 52px; width: 52px; height: 52px; }
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* EVENTO CARDS (grid próximos)                                             */
@@ -161,9 +161,9 @@
   font-weight: 500;
 }
 
-.card-fecha mat-icon,
-.card-lugar mat-icon,
-.card-responsable mat-icon {
+.card-fecha i,
+.card-lugar i,
+.card-responsable i {
   font-size: 14px !important;
   width: 14px !important;
   height: 14px !important;
@@ -236,7 +236,9 @@
 }
 
 /* Menu danger */
-.menu-danger { color: #dc2626 !important; }
+::ng-deep .menu-danger .p-menu-item-link,
+::ng-deep .menu-danger .p-menu-item-icon,
+::ng-deep .menu-danger .p-menu-item-label { color: #dc2626 !important; }
 
 /* ════════════════════════════════════════════════════════════════════════ */
 /* HISTORIAL LIST                                                           */
@@ -273,7 +275,7 @@
   color: white;
 }
 
-.hist-dot mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.hist-dot i { font-size: 20px; width: 20px; height: 20px; }
 
 .hist-info { flex: 1; min-width: 0; }
 
@@ -303,7 +305,7 @@
   color: #64748b;
 }
 
-.hist-meta mat-icon {
+.hist-meta i {
   font-size: 13px !important;
   width: 13px !important;
   height: 13px !important;
@@ -403,7 +405,7 @@
   font-size: 12px; color: #475569;
 }
 
-.min-meta-item mat-icon { font-size: 14px !important; width: 14px !important; height: 14px !important; color: #94a3b8; }
+.min-meta-item i { font-size: 14px !important; width: 14px !important; height: 14px !important; color: #94a3b8; }
 
 /* Integrantes expandido */
 .min-integrantes {
@@ -599,7 +601,7 @@
   text-transform: capitalize;
 }
 
-.cal-panel-header mat-icon:first-child { color: #7c3aed; }
+.cal-panel-header i:first-child { color: #7c3aed; }
 .cal-panel-header span { flex: 1; }
 
 .cal-panel-empty {
@@ -611,7 +613,7 @@
   color: #94a3b8;
 }
 
-.cal-panel-empty mat-icon {
+.cal-panel-empty i {
   font-size: 44px; width: 44px; height: 44px;
   color: #e2e8f0;
 }
@@ -653,7 +655,7 @@
   flex-shrink: 0;
 }
 
-.cal-ev-icon mat-icon { font-size: 22px; width: 22px; height: 22px; }
+.cal-ev-icon i { font-size: 22px; width: 22px; height: 22px; }
 
 .cal-ev-info {
   flex: 1;
@@ -679,7 +681,7 @@
   color: #64748b;
 }
 
-.cal-ev-meta mat-icon {
+.cal-ev-meta i {
   font-size: 13px !important;
   width: 13px !important;
   height: 13px !important;
@@ -702,7 +704,7 @@
   color: #64748b;
 }
 
-.cal-ev-inscritos mat-icon {
+.cal-ev-inscritos i {
   font-size: 13px !important;
   width: 13px !important;
   height: 13px !important;

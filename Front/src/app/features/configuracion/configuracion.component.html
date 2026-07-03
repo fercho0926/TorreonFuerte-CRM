@@ -1,7 +1,7 @@
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <div class="page-header">
   <div class="header-left">
-    <mat-icon class="header-icon">settings</mat-icon>
+    <i class="pi pi-cog header-icon"></i>
     <div>
       <h1>Configuración</h1>
       <p>Perfil, usuarios y preferencias del sistema</p>
@@ -10,23 +10,25 @@
 </div>
 
 <!-- ── Tabs ───────────────────────────────────────────────────────────────── -->
-<mat-tab-group animationDuration="200ms" class="config-tabs">
+<p-tabs value="0" class="config-tabs">
+  <p-tablist>
+    <p-tab value="0"><i class="pi pi-user tab-icon"></i> Mi Perfil</p-tab>
+    <p-tab value="1"><i class="pi pi-users tab-icon"></i> Usuarios</p-tab>
+    <p-tab value="2"><i class="pi pi-building tab-icon"></i> Mi Sede</p-tab>
+    <p-tab value="3"><i class="pi pi-sliders-h tab-icon"></i> Sistema</p-tab>
+  </p-tablist>
 
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 1 — MI PERFIL                                                      -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">person</mat-icon>
-      Mi Perfil
-    </ng-template>
+  <p-tabpanels>
 
-    <div class="tab-content">
-      <div class="two-cols">
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 1 — MI PERFIL                                                      -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <p-tabpanel value="0">
+      <div class="tab-content">
+        <div class="two-cols">
 
-        <!-- Avatar card -->
-        <mat-card class="profile-card">
-          <mat-card-content>
+          <!-- Avatar card -->
+          <p-card class="profile-card">
             <div class="avatar-section">
               <div class="avatar">{{ iniciales() }}</div>
               <div class="avatar-info">
@@ -38,414 +40,397 @@
               </div>
             </div>
 
-            <mat-divider class="card-divider" />
+            <hr class="card-divider" />
 
             <div class="info-row">
-              <mat-icon>church</mat-icon>
+              <i class="pi pi-building"></i>
               <span>{{ usuario()?.sedeNombre }}</span>
             </div>
             <div class="info-row">
-              <mat-icon>email</mat-icon>
+              <i class="pi pi-envelope"></i>
               <span>{{ usuario()?.email }}</span>
             </div>
             <div class="info-row">
-              <mat-icon>shield</mat-icon>
+              <i class="pi pi-shield"></i>
               <span>{{ usuario()?.rol }}</span>
             </div>
-          </mat-card-content>
-        </mat-card>
+          </p-card>
 
-        <!-- Datos personales -->
-        <mat-card class="form-card">
-          <mat-card-header>
-            <mat-icon mat-card-avatar class="card-avatar-icon">edit</mat-icon>
-            <mat-card-title>Datos personales</mat-card-title>
-            <mat-card-subtitle>Actualiza tu nombre</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+          <!-- Datos personales -->
+          <p-card class="form-card">
+            <div class="card-header-row">
+              <i class="pi pi-pencil card-avatar-icon"></i>
+              <div class="card-header-text">
+                <div class="card-title">Datos personales</div>
+                <div class="card-subtitle">Actualiza tu nombre</div>
+              </div>
+            </div>
             <form [formGroup]="perfilForm" class="form-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Nombre</mat-label>
-                <input matInput formControlName="nombre">
-                <mat-icon matPrefix>badge</mat-icon>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="nombre" formControlName="nombre" />
+                  <label for="nombre">Nombre</label>
+                </p-floatlabel>
                 @if (perfilForm.get('nombre')?.hasError('required')) {
-                  <mat-error>Requerido</mat-error>
+                  <p-message severity="error" text="Requerido" variant="simple" size="small" />
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Apellido</mat-label>
-                <input matInput formControlName="apellido">
-                <mat-icon matPrefix>badge</mat-icon>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="apellido" formControlName="apellido" />
+                  <label for="apellido">Apellido</label>
+                </p-floatlabel>
                 @if (perfilForm.get('apellido')?.hasError('required')) {
-                  <mat-error>Requerido</mat-error>
+                  <p-message severity="error" text="Requerido" variant="simple" size="small" />
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Correo electrónico</mat-label>
-                <input matInput [value]="usuario()?.email" readonly>
-                <mat-icon matPrefix>email</mat-icon>
-                <mat-hint>El email no se puede modificar</mat-hint>
-              </mat-form-field>
+              <div class="field span-2">
+                <p-floatlabel variant="on">
+                  <input pInputText id="email" [value]="usuario()?.email" readonly />
+                  <label for="email">Correo electrónico</label>
+                </p-floatlabel>
+                <small class="field-hint">El email no se puede modificar</small>
+              </div>
 
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Sede asignada</mat-label>
-                <input matInput [value]="usuario()?.sedeNombre" readonly>
-                <mat-icon matPrefix>church</mat-icon>
-                <mat-hint>Asignada por el administrador</mat-hint>
-              </mat-form-field>
+              <div class="field span-2">
+                <p-floatlabel variant="on">
+                  <input pInputText id="sede" [value]="usuario()?.sedeNombre" readonly />
+                  <label for="sede">Sede asignada</label>
+                </p-floatlabel>
+                <small class="field-hint">Asignada por el administrador</small>
+              </div>
             </form>
-          </mat-card-content>
-          <mat-card-actions align="end">
-            <button mat-flat-button color="primary"
-                    (click)="guardarPerfil()"
-                    [disabled]="perfilForm.invalid || guardandoPerfil()">
-              @if (guardandoPerfil()) { <mat-spinner diameter="18" /> }
-              @else { <mat-icon>save</mat-icon> }
-              Guardar cambios
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-
-      <!-- Cambiar contraseña -->
-      <mat-card class="form-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar class="card-avatar-icon">lock</mat-icon>
-          <mat-card-title>Cambiar contraseña</mat-card-title>
-          <mat-card-subtitle>Mínimo 8 caracteres</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="passwordForm" class="password-grid">
-            <mat-form-field appearance="outline">
-              <mat-label>Contraseña actual</mat-label>
-              <input matInput type="password" formControlName="actual">
-              <mat-icon matPrefix>lock_outline</mat-icon>
-              @if (passwordForm.get('actual')?.hasError('required') && passwordForm.get('actual')?.touched) {
-                <mat-error>Requerido</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Nueva contraseña</mat-label>
-              <input matInput type="password" formControlName="nueva">
-              <mat-icon matPrefix>lock_reset</mat-icon>
-              @if (passwordForm.get('nueva')?.hasError('minlength')) {
-                <mat-error>Mínimo 8 caracteres</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Confirmar contraseña</mat-label>
-              <input matInput type="password" formControlName="confirmar">
-              <mat-icon matPrefix>check_circle</mat-icon>
-            </mat-form-field>
-          </form>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-flat-button color="primary"
-                  (click)="cambiarPassword()"
-                  [disabled]="passwordForm.invalid || guardandoPassword()">
-            @if (guardandoPassword()) { <mat-spinner diameter="18" /> }
-            @else { <mat-icon>key</mat-icon> }
-            Cambiar contraseña
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </mat-tab>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 2 — USUARIOS                                                       -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">manage_accounts</mat-icon>
-      Usuarios
-    </ng-template>
-
-    <div class="tab-content">
-      @if (!esAdminOSuperAdmin()) {
-        <div class="no-access">
-          <mat-icon>lock</mat-icon>
-          <p>Necesitas permisos de <strong>Admin</strong> o <strong>SuperAdmin</strong> para gestionar usuarios.</p>
+            <div class="card-actions-end">
+              <button pButton
+                      (click)="guardarPerfil()"
+                      [disabled]="perfilForm.invalid || guardandoPerfil()">
+                @if (guardandoPerfil()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+                @else { <i class="pi pi-save"></i> }
+                Guardar cambios
+              </button>
+            </div>
+          </p-card>
         </div>
-      } @else {
-        <mat-card>
-          <mat-card-header>
-            <mat-icon mat-card-avatar class="card-avatar-icon">group</mat-icon>
-            <mat-card-title>Gestión de usuarios</mat-card-title>
-            <mat-card-subtitle>{{ usuarios().length }} usuarios registrados en el sistema</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
+
+        <!-- Cambiar contraseña -->
+        <p-card class="form-card">
+          <div class="card-header-row">
+            <i class="pi pi-lock card-avatar-icon"></i>
+            <div class="card-header-text">
+              <div class="card-title">Cambiar contraseña</div>
+              <div class="card-subtitle">Mínimo 8 caracteres</div>
+            </div>
+          </div>
+          <form [formGroup]="passwordForm" class="password-grid">
+            <div class="field">
+              <p-floatlabel variant="on">
+                <input pInputText id="actual" type="password" formControlName="actual" />
+                <label for="actual">Contraseña actual</label>
+              </p-floatlabel>
+              @if (passwordForm.get('actual')?.hasError('required') && passwordForm.get('actual')?.touched) {
+                <p-message severity="error" text="Requerido" variant="simple" size="small" />
+              }
+            </div>
+
+            <div class="field">
+              <p-floatlabel variant="on">
+                <input pInputText id="nueva" type="password" formControlName="nueva" />
+                <label for="nueva">Nueva contraseña</label>
+              </p-floatlabel>
+              @if (passwordForm.get('nueva')?.hasError('minlength')) {
+                <p-message severity="error" text="Mínimo 8 caracteres" variant="simple" size="small" />
+              }
+            </div>
+
+            <div class="field">
+              <p-floatlabel variant="on">
+                <input pInputText id="confirmar" type="password" formControlName="confirmar" />
+                <label for="confirmar">Confirmar contraseña</label>
+              </p-floatlabel>
+            </div>
+          </form>
+          <div class="card-actions-end">
+            <button pButton
+                    (click)="cambiarPassword()"
+                    [disabled]="passwordForm.invalid || guardandoPassword()">
+              @if (guardandoPassword()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+              @else { <i class="pi pi-key"></i> }
+              Cambiar contraseña
+            </button>
+          </div>
+        </p-card>
+      </div>
+    </p-tabpanel>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 2 — USUARIOS                                                       -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <p-tabpanel value="1">
+      <div class="tab-content">
+        @if (!esAdminOSuperAdmin()) {
+          <div class="no-access">
+            <i class="pi pi-lock"></i>
+            <p>Necesitas permisos de <strong>Admin</strong> o <strong>SuperAdmin</strong> para gestionar usuarios.</p>
+          </div>
+        } @else {
+          <p-card>
+            <div class="card-header-row">
+              <i class="pi pi-users card-avatar-icon"></i>
+              <div class="card-header-text">
+                <div class="card-title">Gestión de usuarios</div>
+                <div class="card-subtitle">{{ usuarios().length }} usuarios registrados en el sistema</div>
+              </div>
+            </div>
             @if (cargandoUsuarios()) {
-              <div class="loading-center"><mat-spinner diameter="40" /></div>
+              <div class="loading-center"><p-progressSpinner [style]="{ width: '40px', height: '40px' }" /></div>
             } @else {
               <div class="table-wrapper">
-                <table mat-table [dataSource]="usuarios()" class="users-table">
-
-                  <!-- Nombre -->
-                  <ng-container matColumnDef="nombre">
-                    <th mat-header-cell *matHeaderCellDef>Usuario</th>
-                    <td mat-cell *matCellDef="let u">
-                      <div class="user-cell">
-                        <div class="user-avatar-sm"
-                             [style.background]="rolColor(u.rol)"
-                             [class.inactivo]="!u.activo">
-                          {{ u.nombre[0] }}{{ u.apellido[0] }}
-                        </div>
-                        <div>
-                          <div class="user-nombre" [class.text-inactivo]="!u.activo">
-                            {{ u.nombre }} {{ u.apellido }}
+                <p-table [value]="usuarios()" class="users-table">
+                  <ng-template #header>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Rol</th>
+                      <th>Sede</th>
+                      <th>Último acceso</th>
+                      <th>Activo</th>
+                      <th></th>
+                    </tr>
+                  </ng-template>
+                  <ng-template #body let-u>
+                    <tr [class.row-inactivo]="!u.activo">
+                      <!-- Nombre -->
+                      <td>
+                        <div class="user-cell">
+                          <div class="user-avatar-sm"
+                               [style.background]="rolColor(u.rol)"
+                               [class.inactivo]="!u.activo">
+                            {{ u.nombre[0] }}{{ u.apellido[0] }}
                           </div>
-                          <div class="user-email">{{ u.email }}</div>
+                          <div>
+                            <div class="user-nombre" [class.text-inactivo]="!u.activo">
+                              {{ u.nombre }} {{ u.apellido }}
+                            </div>
+                            <div class="user-email">{{ u.email }}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </ng-container>
+                      </td>
 
-                  <!-- Rol -->
-                  <ng-container matColumnDef="rol">
-                    <th mat-header-cell *matHeaderCellDef>Rol</th>
-                    <td mat-cell *matCellDef="let u">
-                      <mat-select [value]="u.rol"
-                                  (selectionChange)="cambiarRol(u, $event.value)"
+                      <!-- Rol -->
+                      <td>
+                        <p-select [ngModel]="u.rol"
+                                  (ngModelChange)="cambiarRol(u, $event)"
+                                  [options]="roles"
                                   class="rol-select"
-                                  [style.color]="rolColor(u.rol)">
-                        @for (r of roles; track r) {
-                          <mat-option [value]="r">{{ r }}</mat-option>
-                        }
-                      </mat-select>
-                    </td>
-                  </ng-container>
+                                  [style]="{ color: rolColor(u.rol) }" />
+                      </td>
 
-                  <!-- Sede -->
-                  <ng-container matColumnDef="sede">
-                    <th mat-header-cell *matHeaderCellDef>Sede</th>
-                    <td mat-cell *matCellDef="let u" class="sede-cell">{{ u.sedeNombre }}</td>
-                  </ng-container>
+                      <!-- Sede -->
+                      <td class="sede-cell">{{ u.sedeNombre }}</td>
 
-                  <!-- Último acceso -->
-                  <ng-container matColumnDef="ultimoAcceso">
-                    <th mat-header-cell *matHeaderCellDef>Último acceso</th>
-                    <td mat-cell *matCellDef="let u" class="fecha-cell">
-                      {{ formatFecha(u.ultimoAcceso) }}
-                    </td>
-                  </ng-container>
+                      <!-- Último acceso -->
+                      <td class="fecha-cell">
+                        {{ formatFecha(u.ultimoAcceso) }}
+                      </td>
 
-                  <!-- Activo -->
-                  <ng-container matColumnDef="activo">
-                    <th mat-header-cell *matHeaderCellDef>Activo</th>
-                    <td mat-cell *matCellDef="let u">
-                      <mat-slide-toggle
-                        [checked]="u.activo"
-                        (change)="toggleActivo(u)"
-                        color="primary" />
-                    </td>
-                  </ng-container>
+                      <!-- Activo -->
+                      <td>
+                        <p-toggleswitch
+                          [ngModel]="u.activo"
+                          (onChange)="toggleActivo(u)" />
+                      </td>
 
-                  <!-- Acciones -->
-                  <ng-container matColumnDef="acciones">
-                    <th mat-header-cell *matHeaderCellDef></th>
-                    <td mat-cell *matCellDef="let u">
-                      <button mat-icon-button
-                              matTooltip="Enviar email de acceso"
-                              (click)="enviarAcceso(u)">
-                        <mat-icon>mail_outline</mat-icon>
-                      </button>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="columnas"></tr>
-                  <tr mat-row *matRowDef="let row; columns: columnas;"
-                      [class.row-inactivo]="!row.activo"></tr>
-                </table>
+                      <!-- Acciones -->
+                      <td>
+                        <button pButton [text]="true" [rounded]="true"
+                                pTooltip="Enviar email de acceso"
+                                (click)="enviarAcceso(u)"><i class="pi pi-envelope"></i></button>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
               </div>
             }
-          </mat-card-content>
-        </mat-card>
-      }
-    </div>
-  </mat-tab>
+          </p-card>
+        }
+      </div>
+    </p-tabpanel>
 
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 3 — MI SEDE                                                        -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">church</mat-icon>
-      Mi Sede
-    </ng-template>
-
-    <div class="tab-content">
-      <mat-card class="form-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar class="card-avatar-icon">schedule</mat-icon>
-          <mat-card-title>Horarios y contacto</mat-card-title>
-          <mat-card-subtitle>{{ usuario()?.sedeNombre }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 3 — MI SEDE                                                        -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <p-tabpanel value="2">
+      <div class="tab-content">
+        <p-card class="form-card">
+          <div class="card-header-row">
+            <i class="pi pi-clock card-avatar-icon"></i>
+            <div class="card-header-text">
+              <div class="card-title">Horarios y contacto</div>
+              <div class="card-subtitle">{{ usuario()?.sedeNombre }}</div>
+            </div>
+          </div>
           <form [formGroup]="sedeForm">
 
             <div class="section-label">
-              <mat-icon>wb_sunny</mat-icon>
+              <i class="pi pi-sun"></i>
               Horarios de culto
             </div>
             <div class="sede-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Domingo AM</mat-label>
-                <input matInput formControlName="horarioDomingoAM" placeholder="9:00 AM">
-                <mat-icon matPrefix>wb_sunny</mat-icon>
-              </mat-form-field>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="horarioDomingoAM" formControlName="horarioDomingoAM" placeholder="9:00 AM" />
+                  <label for="horarioDomingoAM">Domingo AM</label>
+                </p-floatlabel>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Domingo PM</mat-label>
-                <input matInput formControlName="horarioDomingoPM" placeholder="6:00 PM">
-                <mat-icon matPrefix>nights_stay</mat-icon>
-              </mat-form-field>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="horarioDomingoPM" formControlName="horarioDomingoPM" placeholder="6:00 PM" />
+                  <label for="horarioDomingoPM">Domingo PM</label>
+                </p-floatlabel>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Miércoles</mat-label>
-                <input matInput formControlName="horarioMiercoles" placeholder="7:00 PM">
-                <mat-icon matPrefix>event</mat-icon>
-              </mat-form-field>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="horarioMiercoles" formControlName="horarioMiercoles" placeholder="7:00 PM" />
+                  <label for="horarioMiercoles">Miércoles</label>
+                </p-floatlabel>
+              </div>
             </div>
 
             <div class="section-label" style="margin-top:24px">
-              <mat-icon>contact_phone</mat-icon>
+              <i class="pi pi-phone"></i>
               Información de contacto
             </div>
             <div class="contacto-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Teléfono</mat-label>
-                <input matInput formControlName="telefono">
-                <mat-icon matPrefix>phone</mat-icon>
-              </mat-form-field>
+              <div class="field">
+                <p-floatlabel variant="on">
+                  <input pInputText id="telefono" formControlName="telefono" />
+                  <label for="telefono">Teléfono</label>
+                </p-floatlabel>
+              </div>
 
-              <mat-form-field appearance="outline" class="span-2">
-                <mat-label>Email de la sede</mat-label>
-                <input matInput formControlName="email">
-                <mat-icon matPrefix>email</mat-icon>
+              <div class="field span-2">
+                <p-floatlabel variant="on">
+                  <input pInputText id="sedeEmail" formControlName="email" />
+                  <label for="sedeEmail">Email de la sede</label>
+                </p-floatlabel>
                 @if (sedeForm.get('email')?.hasError('email')) {
-                  <mat-error>Email inválido</mat-error>
+                  <p-message severity="error" text="Email inválido" variant="simple" size="small" />
                 }
-              </mat-form-field>
+              </div>
             </div>
 
           </form>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-flat-button color="primary"
-                  (click)="guardarSede()"
-                  [disabled]="sedeForm.invalid || guardandoSede()">
-            @if (guardandoSede()) { <mat-spinner diameter="18" /> }
-            @else { <mat-icon>save</mat-icon> }
-            Guardar cambios
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </mat-tab>
-
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <!-- TAB 4 — SISTEMA                                                        -->
-  <!-- ══════════════════════════════════════════════════════════════════════ -->
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon class="tab-icon">tune</mat-icon>
-      Sistema
-    </ng-template>
-
-    <div class="tab-content">
-      <mat-card class="form-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar class="card-avatar-icon">tune</mat-icon>
-          <mat-card-title>Preferencias del sistema</mat-card-title>
-          <mat-card-subtitle>Configura el comportamiento de la aplicación</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content class="sistema-content">
-
-          <div class="pref-row">
-            <div class="pref-info">
-              <div class="pref-icon-wrap" style="background:#ede9fe">
-                <mat-icon style="color:#7c3aed">notifications</mat-icon>
-              </div>
-              <div>
-                <div class="pref-label">Notificaciones</div>
-                <div class="pref-desc">Alertas de nuevos miembros, eventos próximos y actividad</div>
-              </div>
-            </div>
-            <mat-slide-toggle
-              [checked]="notificaciones()"
-              (change)="notificaciones.set($event.checked)"
-              color="primary" />
-          </div>
-
-          <mat-divider />
-
-          <div class="pref-row">
-            <div class="pref-info">
-              <div class="pref-icon-wrap" style="background:#dbeafe">
-                <mat-icon style="color:#0284c7">language</mat-icon>
-              </div>
-              <div>
-                <div class="pref-label">Idioma</div>
-                <div class="pref-desc">Español (Colombia) — otros idiomas próximamente</div>
-              </div>
-            </div>
-            <span class="idioma-badge">🇨🇴 Español</span>
-          </div>
-
-          <mat-divider />
-
-          <div class="pref-row">
-            <div class="pref-info">
-              <div class="pref-icon-wrap" style="background:#f1f5f9">
-                <mat-icon style="color:#64748b">info_outline</mat-icon>
-              </div>
-              <div>
-                <div class="pref-label">Versión</div>
-                <div class="pref-desc">CRM Torreón Fuerte v1.0.0 · Angular 20 · .NET 8 · SQL Server</div>
-              </div>
-            </div>
-          </div>
-
-          <mat-divider />
-
-          <div class="pref-row">
-            <div class="pref-info">
-              <div class="pref-icon-wrap" style="background:#fee2e2">
-                <mat-icon style="color:#ef4444">logout</mat-icon>
-              </div>
-              <div>
-                <div class="pref-label">Cerrar sesión</div>
-                <div class="pref-desc">Salir del sistema en este dispositivo</div>
-              </div>
-            </div>
-            <button mat-stroked-button color="warn" (click)="auth.logout()">
-              <mat-icon>logout</mat-icon>
-              Cerrar sesión
+          <div class="card-actions-end">
+            <button pButton
+                    (click)="guardarSede()"
+                    [disabled]="sedeForm.invalid || guardandoSede()">
+              @if (guardandoSede()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+              @else { <i class="pi pi-save"></i> }
+              Guardar cambios
             </button>
           </div>
-
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-flat-button color="primary"
-                  (click)="guardarSistema()"
-                  [disabled]="guardandoSistema()">
-            @if (guardandoSistema()) { <mat-spinner diameter="18" /> }
-            @else { <mat-icon>save</mat-icon> }
-            Guardar preferencias
-          </button>
-        </mat-card-actions>
-      </mat-card>
-
-      <div class="version-footer">
-        <mat-icon>castle</mat-icon>
-        Torreón Fuerte CRM — Desarrollado para la familia de fe
+        </p-card>
       </div>
-    </div>
-  </mat-tab>
+    </p-tabpanel>
 
-</mat-tab-group>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB 4 — SISTEMA                                                        -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <p-tabpanel value="3">
+      <div class="tab-content">
+        <p-card class="form-card">
+          <div class="card-header-row">
+            <i class="pi pi-sliders-h card-avatar-icon"></i>
+            <div class="card-header-text">
+              <div class="card-title">Preferencias del sistema</div>
+              <div class="card-subtitle">Configura el comportamiento de la aplicación</div>
+            </div>
+          </div>
+          <div class="sistema-content">
+
+            <div class="pref-row">
+              <div class="pref-info">
+                <div class="pref-icon-wrap" style="background:#ede9fe">
+                  <i class="pi pi-bell" style="color:#7c3aed"></i>
+                </div>
+                <div>
+                  <div class="pref-label">Notificaciones</div>
+                  <div class="pref-desc">Alertas de nuevos miembros, eventos próximos y actividad</div>
+                </div>
+              </div>
+              <p-toggleswitch
+                [ngModel]="notificaciones()"
+                (onChange)="notificaciones.set($event.checked)" />
+            </div>
+
+            <hr />
+
+            <div class="pref-row">
+              <div class="pref-info">
+                <div class="pref-icon-wrap" style="background:#dbeafe">
+                  <i class="pi pi-globe" style="color:#0284c7"></i>
+                </div>
+                <div>
+                  <div class="pref-label">Idioma</div>
+                  <div class="pref-desc">Español (Colombia) — otros idiomas próximamente</div>
+                </div>
+              </div>
+              <span class="idioma-badge">🇨🇴 Español</span>
+            </div>
+
+            <hr />
+
+            <div class="pref-row">
+              <div class="pref-info">
+                <div class="pref-icon-wrap" style="background:#f1f5f9">
+                  <i class="pi pi-info-circle" style="color:#64748b"></i>
+                </div>
+                <div>
+                  <div class="pref-label">Versión</div>
+                  <div class="pref-desc">CRM Torreón Fuerte v1.0.0 · Angular 20 · .NET 8 · SQL Server</div>
+                </div>
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="pref-row">
+              <div class="pref-info">
+                <div class="pref-icon-wrap" style="background:#fee2e2">
+                  <i class="pi pi-sign-out" style="color:#ef4444"></i>
+                </div>
+                <div>
+                  <div class="pref-label">Cerrar sesión</div>
+                  <div class="pref-desc">Salir del sistema en este dispositivo</div>
+                </div>
+              </div>
+              <button pButton [outlined]="true" severity="danger" (click)="auth.logout()">
+                <i class="pi pi-sign-out"></i>
+                Cerrar sesión
+              </button>
+            </div>
+
+          </div>
+          <div class="card-actions-end">
+            <button pButton
+                    (click)="guardarSistema()"
+                    [disabled]="guardandoSistema()">
+              @if (guardandoSistema()) { <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="6" /> }
+              @else { <i class="pi pi-save"></i> }
+              Guardar preferencias
+            </button>
+          </div>
+        </p-card>
+
+        <div class="version-footer">
+          <i class="pi pi-shield"></i>
+          Torreón Fuerte CRM — Desarrollado para la familia de fe
+        </div>
+      </div>
+    </p-tabpanel>
+
+  </p-tabpanels>
+</p-tabs>
