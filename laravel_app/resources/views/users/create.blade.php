@@ -34,10 +34,22 @@
             <div class="form-group">
                 <label>Rol</label>
                 <select name="role" class="form-control @error('role') is-invalid @enderror" required>
-                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Usuario</option>
-                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrador</option>
+                    @foreach(\App\Models\User::ROLE_LABELS as $valor => $etiqueta)
+                        <option value="{{ $valor }}" {{ old('role', 'user') == $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                    @endforeach
                 </select>
                 @error('role')<span class="invalid-feedback">{{ $message }}</span>@enderror
+            </div>
+            <div class="form-group">
+                <label>Persona vinculada</label>
+                <select name="persona_id" class="form-control @error('persona_id') is-invalid @enderror">
+                    <option value="">Ninguna (cuenta técnica, ej. administrador del sistema)</option>
+                    @foreach($personas as $persona)
+                        <option value="{{ $persona->id }}" {{ (string) old('persona_id') === (string) $persona->id ? 'selected' : '' }}>{{ $persona->nombre_completo }}</option>
+                    @endforeach
+                </select>
+                @error('persona_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                <small class="form-text text-muted">Necesaria para roles de líder de célula/zona: así el sistema sabe qué célula(s) puede ver.</small>
             </div>
         </div>
         <div class="card-footer">

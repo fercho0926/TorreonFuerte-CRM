@@ -26,6 +26,8 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Email</th>
+                    <th>Rol</th>
+                    <th>Persona vinculada</th>
                     <th>Registrado</th>
                     <th>Acciones</th>
                 </tr>
@@ -36,6 +38,8 @@
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
+                        <td><span class="badge badge-secondary">{{ \App\Models\User::ROLE_LABELS[$user->role] ?? $user->role }}</span></td>
+                        <td>{{ $user->persona?->nombre_completo ?? '—' }}</td>
                         <td>{{ $user->created_at->format('Y-m-d H:i') }}</td>
                         <td>
                             <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning">Editar</a>

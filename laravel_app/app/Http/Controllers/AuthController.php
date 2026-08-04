@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Evento;
+use App\Models\Persona;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,11 +58,38 @@ class AuthController extends Controller
 
         $userCount = User::count();
         $activeSessions = DB::table('sessions')->count();
+        $personaCount = Persona::count();
+        $liderCount = Persona::lideres()->count();
+
+        $personasPorRed = Persona::query()
+            ->selectRaw('COALESCE(personas.red, lideres.red) as red_grupo, COUNT(*) as total')
+            ->leftJoin('personas as lideres', 'personas.lider_id', '=', 'lideres.id')
+            ->groupByRaw('COALESCE(personas.red, lideres.red)')
+            ->orderByRaw('red_grupo IS NULL, red_grupo')
+            ->get();
+
+        $eventos = Evento::with('inscripciones.pagos')->get();
+        $eventoCount = $eventos->count();
+        $totalEsperadoEventos = $eventos->sum(fn (Evento $evento) => $evento->totalEsperado());
+        $totalRecaudadoEventos = $eventos->sum(fn (Evento $evento) => $evento->totalRecaudado());
+
+        $proximosEventos = $eventos
+            ->where('estado', '!=', 'cancelado')
+            ->filter(fn (Evento $evento) => $evento->fecha->greaterThanOrEqualTo(today()))
+            ->sortBy('fecha')
+            ->take(5);
 
         return view('dashboard', [
             'userName' => Session::get('user_name', 'Usuario'),
             'userCount' => $userCount,
             'activeSessions' => $activeSessions,
+            'personaCount' => $personaCount,
+            'liderCount' => $liderCount,
+            'personasPorRed' => $personasPorRed,
+            'eventoCount' => $eventoCount,
+            'totalEsperadoEventos' => $totalEsperadoEventos,
+            'totalRecaudadoEventos' => $totalRecaudadoEventos,
+            'proximosEventos' => $proximosEventos,
         ]);
     }
 }
