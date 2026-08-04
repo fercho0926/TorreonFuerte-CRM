@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - export DOCROOT=/home/torreonf/crm.torreonfuerte.org.co
+    - export REPO=/home/torreonf/repositories/torreonfuerte-crm
+    - /usr/bin/rsync -a --exclude='.git' --exclude='.github' --exclude='laravel_app/.env' --exclude='laravel_app/storage' --exclude='laravel_app/vendor' --exclude='laravel_app/node_modules' $REPO/ $DOCROOT/
+    - /bin/bash -lc "cd $DOCROOT/laravel_app && composer install --no-dev --optimize-autoloader --no-interaction 2>&1" || true
+    - /bin/bash -lc "cd $DOCROOT/laravel_app && php artisan migrate --force 2>&1" || true
+    - /bin/bash -lc "cd $DOCROOT/laravel_app && php artisan config:cache && php artisan route:cache && php artisan view:cache 2>&1" || true
+    - /bin/bash -lc "cd $DOCROOT/laravel_app && php artisan storage:link 2>&1" || true
