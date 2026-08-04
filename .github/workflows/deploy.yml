@@ -41,40 +41,32 @@ jobs:
             npm run build
           fi
 
-      - name: Prepare SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.CPANEL_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.CPANEL_SSH_PORT }} -H ${{ secrets.CPANEL_SSH_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Deploy files with rsync
-        run: |
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.CPANEL_SSH_PORT }}" \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude 'node_modules' \
-            --exclude '.env' \
-            --exclude 'storage/app' \
-            --exclude 'storage/logs' \
-            --exclude 'storage/framework/cache' \
-            --exclude 'storage/framework/sessions' \
-            --exclude 'storage/framework/views' \
-            laravel_app/ \
-            ${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.CPANEL_DEPLOY_PATH }}/laravel_app/
+      - name: Deploy files to cPanel via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.CPANEL_SSH_HOST }}
+          username: ${{ secrets.CPANEL_SSH_USER }}
+          port: ${{ secrets.CPANEL_SSH_PORT }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
+          source: "laravel_app/**"
+          target: ${{ secrets.CPANEL_DEPLOY_PATH }}
+          strip_components: 0
+          overwrite: true
 
       - name: Run post-deploy commands on server
-        run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.CPANEL_SSH_PORT }} \
-            ${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }} \
-            "cd ${{ secrets.CPANEL_DEPLOY_PATH }}/laravel_app && \
-             php artisan migrate --force && \
-             php artisan config:cache && \
-             php artisan route:cache && \
-             php artisan view:cache && \
-             php artisan storage:link || true"
-
-      - name: Clean up SSH key
-        if: always()
-        run: rm -f ~/.ssh/deploy_key
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.CPANEL_SSH_HOST }}
+          username: ${{ secrets.CPANEL_SSH_USER }}
+          port: ${{ secrets.CPANEL_SSH_PORT }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
+          script: |
+            cd ${{ secrets.CPANEL_DEPLOY_PATH }}/laravel_app
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link || true
