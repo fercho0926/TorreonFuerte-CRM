@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Persona;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UsersController extends Controller
 {
@@ -18,7 +20,7 @@ class UsersController extends Controller
             return $redirect;
         }
 
-        $users = User::orderBy('created_at', 'desc')->get();
+        $users = User::with('persona')->orderBy('created_at', 'desc')->get();
 
         return view('users.index', [
             'users' => $users,
@@ -35,7 +37,9 @@ class UsersController extends Controller
             return $redirect;
         }
 
-        return view('users.create');
+        return view('users.create', [
+            'personas' => $this->personasDisponibles(),
+        ]);
     }
 
     public function store(Request $request)
@@ -52,7 +56,8 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'role' => ['required', 'in:admin,user'],
+            'role' => ['required', Rule::in(User::ROLES)],
+            'persona_id' => ['nullable', Rule::exists('personas', 'id')],
         ]);
 
         User::create([
@@ -60,6 +65,7 @@ class UsersController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
+            'persona_id' => $data['persona_id'] ?: null,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
@@ -77,6 +83,7 @@ class UsersController extends Controller
 
         return view('users.edit', [
             'user' => $user,
+            'personas' => $this->personasDisponibles(),
         ]);
     }
 
@@ -94,11 +101,14 @@ class UsersController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
-            'role' => ['nullable', 'in:admin,user'],
+            'role' => ['nullable', Rule::in(User::ROLES)],
+            'persona_id' => ['nullable', Rule::exists('personas', 'id')],
         ]);
 
         $user->name = $data['name'];
         $user->email = $data['email'];
+        $user->role = $data['role'] ?? $user->role;
+        $user->persona_id = $data['persona_id'] ?: null;
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
@@ -122,5 +132,10 @@ class UsersController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    private function personasDisponibles()
+    {
+        return Persona::orderBy('apellidos')->orderBy('nombres')->get();
     }
 }

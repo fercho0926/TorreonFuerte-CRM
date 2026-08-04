@@ -41,6 +41,42 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="{{ route('personas.index') }}" class="nav-link @if(request()->routeIs('personas.*')) active @endif">
+                            <i class="nav-icon fas fa-address-card"></i>
+                            <p>Personas</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('lideres.index') }}" class="nav-link @if(request()->routeIs('lideres.*')) active @endif">
+                            <i class="nav-icon fas fa-user-tie"></i>
+                            <p>Líderes</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('celulas.index') }}" class="nav-link @if(request()->routeIs('celulas.*')) active @endif">
+                            <i class="nav-icon fas fa-people-arrows"></i>
+                            <p>Células</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('encuentros.index') }}" class="nav-link @if(request()->routeIs('encuentros.*')) active @endif">
+                            <i class="nav-icon fas fa-calendar-check"></i>
+                            <p>Encuentros</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('eventos.index') }}" class="nav-link @if(request()->routeIs('eventos.*')) active @endif">
+                            <i class="nav-icon fas fa-glass-cheers"></i>
+                            <p>Eventos</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('ministerios.index') }}" class="nav-link @if(request()->routeIs('ministerios.*')) active @endif">
+                            <i class="nav-icon fas fa-hands-helping"></i>
+                            <p>Ministerios</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('users.index') }}" class="nav-link @if(request()->routeIs('users.index')) active @endif">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Usuarios</p>
