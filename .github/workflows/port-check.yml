@@ -1,12 +1,10 @@
 name: Port Check (temporary)
-
 on:
   workflow_dispatch:
-
 jobs:
   scan:
-          environment: production
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Scan common SSH ports on host
         run: |
@@ -14,7 +12,7 @@ jobs:
           echo "Scanning host: $HOST"
           for PORT in 22 2222 2200 21098 7822 18765 2022 2020; do
             if timeout 5 bash -c "cat < /dev/null > /dev/tcp/$HOST/$PORT" 2>/dev/null; then
-              echo "OPEN  -> port $PORT is OPEN"
+              echo "OPEN -> port $PORT is OPEN"
             else
               echo "closed-> port $PORT is closed/filtered"
             fi
