@@ -62,11 +62,11 @@ class EstructuraFormulariosTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<label for="fm-barrio"[^>]*fm-req/', $html);
     }
 
-    public function test_persona_tiene_sus_cinco_secciones_con_los_campos_en_su_lugar(): void
+    public function test_persona_tiene_sus_tres_secciones_con_los_campos_en_su_lugar(): void
     {
         $html = $this->get(route('personas.create'))->getContent();
 
-        $orden = ['Datos personales', 'Contacto', 'Estado y documento', 'Ubicación', 'Liderazgo'];
+        $orden = ['Datos personales', 'Ubicación', 'Liderazgo'];
         $ultima = -1;
         foreach ($orden as $titulo) {
             $posicion = strpos($html, '<h3 class="fm-seccion__titulo">'.$titulo.'</h3>');
@@ -76,14 +76,14 @@ class EstructuraFormulariosTest extends TestCase
         }
 
         $seccion = fn (string $titulo) => substr($html, strpos($html, '<h3 class="fm-seccion__titulo">'.$titulo.'</h3>'));
-        $this->assertStringContainsString('name="nombres"', substr($seccion('Datos personales'), 0, strpos($seccion('Datos personales'), 'fm-seccion__titulo">Contacto') ?: 99999));
+        $this->assertStringContainsString('name="nombres"', substr($seccion('Datos personales'), 0, strpos($seccion('Datos personales'), 'fm-seccion__titulo">Ubicación') ?: 99999));
         $this->assertLessThan(strpos($html, 'name="direccion"'), strpos($html, 'name="numero_documento"'));
         $this->assertLessThan(strpos($html, 'name="lider_id"'), strpos($html, 'name="ciudad"'));
     }
 
     public function test_los_formularios_incrustados_y_filtros_tambien_usan_los_componentes(): void
     {
-        foreach (['célula (ficha)', 'evento (ficha)', 'encuentro (ficha)', 'ministerio (ficha)', 'redes', 'sin líder', 'personas (listado)', 'líderes (listado)', 'usuarios (listado)'] as $etiqueta) {
+        foreach (['célula (ficha)', 'evento (ficha)', 'encuentro (ficha)', 'ministerio (ficha)', 'sin líder', 'personas (listado)', 'líderes (listado)', 'usuarios (listado)'] as $etiqueta) {
             $html = $this->get($this->pantallasConFormulariosIncrustados()[$etiqueta])->assertOk()->getContent();
             $this->assertStringContainsString('data-form="1"', $html, "{$etiqueta}: sin formularios con componentes");
         }

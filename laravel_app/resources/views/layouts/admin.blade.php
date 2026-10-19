@@ -54,7 +54,8 @@
                                 <small>{{ $rolEtiqueta }}</small>
                                 <small class="d-block">{{ $sedeActual?->nombre ?? 'Todas las sedes' }}</small>
                             </li>
-                            <li class="user-footer">
+                            <li class="user-footer d-flex justify-content-between align-items-center gap-2">
+                                <a href="{{ route('cuenta.edit') }}" class="btn btn-outline-primary"><i class="fas fa-id-card"></i> Mi cuenta</a>
                                 <form method="POST" action="{{ route('logout') }}" class="text-end">
                                     @csrf
                                     <button type="submit" class="btn btn-outline-secondary "><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>

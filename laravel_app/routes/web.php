@@ -7,28 +7,50 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\LideresController;
 use App\Http\Controllers\MinisteriosController;
 use App\Http\Controllers\PersonasController;
-use App\Http\Controllers\RedesController;
 use App\Http\Controllers\SedeActivaController;
 use App\Http\Controllers\SedesController;
 use App\Http\Controllers\SinLiderController;
 use App\Http\Controllers\TrasladosController;
+use App\Http\Controllers\ClavesUsuarioController;
+use App\Http\Controllers\CuentaController;
+use App\Http\Controllers\RecuperacionClaveController;
+use App\Http\Controllers\SolicitudesClaveController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/olvide-clave', [RecuperacionClaveController::class, 'create'])->name('recuperacion.create');
+Route::post('/olvide-clave', [RecuperacionClaveController::class, 'store'])->name('recuperacion.store');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+Route::get('/cambiar-clave', [CuentaController::class, 'editarClave'])->name('cambiar-clave.edit');
+Route::put('/cambiar-clave', [CuentaController::class, 'actualizarClave'])->name('cambiar-clave.update');
+Route::get('/mi-cuenta', [CuentaController::class, 'mostrar'])->name('cuenta.edit');
+Route::put('/mi-cuenta/clave', [CuentaController::class, 'cambiarClave'])->name('cuenta.clave.update');
 
 Route::get('/users', [UsersController::class, 'index'])->name('users.index');
+Route::get('/users/datos', [UsersController::class, 'datos'])->name('users.datos');
+Route::get('/users/exportar', [UsersController::class, 'exportar'])->name('users.exportar');
 Route::get('/users/create', [UsersController::class, 'create'])->name('users.create');
 Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
 Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
 Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+Route::post('/users/{user}/clave', [ClavesUsuarioController::class, 'store'])->name('users.clave.store');
+Route::post('/claves/{registro}/enviada', [ClavesUsuarioController::class, 'enviada'])->name('claves.enviada');
+Route::get('/solicitudes-clave', [SolicitudesClaveController::class, 'index'])->name('solicitudes-clave.index');
+Route::get('/solicitudes-clave/datos', [SolicitudesClaveController::class, 'datos'])->name('solicitudes-clave.datos');
+Route::get('/solicitudes-clave/exportar', [SolicitudesClaveController::class, 'exportar'])->name('solicitudes-clave.exportar');
+Route::post('/solicitudes-clave/{solicitud}/atender', [SolicitudesClaveController::class, 'atender'])->name('solicitudes-clave.atender');
+Route::post('/solicitudes-clave/{solicitud}/descartar', [SolicitudesClaveController::class, 'descartar'])->name('solicitudes-clave.descartar');
 
 Route::get('/personas', [PersonasController::class, 'index'])->name('personas.index');
 Route::get('/personas/create', [PersonasController::class, 'create'])->name('personas.create');
+Route::get('/personas/buscar', [PersonasController::class, 'buscar'])->name('personas.buscar');
+Route::get('/personas/datos', [PersonasController::class, 'datos'])->name('personas.datos');
+Route::get('/personas/exportar', [PersonasController::class, 'exportar'])->name('personas.exportar');
+Route::post('/personas/rapida', [PersonasController::class, 'rapida'])->name('personas.rapida');
 Route::post('/personas', [PersonasController::class, 'store'])->name('personas.store');
 Route::get('/personas/{persona}', [PersonasController::class, 'show'])->name('personas.show');
 Route::get('/personas/{persona}/edit', [PersonasController::class, 'edit'])->name('personas.edit');
@@ -40,6 +62,8 @@ Route::post('/personas/{persona}/reactivar', [PersonasController::class, 'reacti
 Route::delete('/personas/{persona}', [PersonasController::class, 'destroy'])->name('personas.destroy');
 
 Route::get('/lideres', [LideresController::class, 'index'])->name('lideres.index');
+Route::get('/lideres/datos', [LideresController::class, 'datos'])->name('lideres.datos');
+Route::get('/lideres/exportar', [LideresController::class, 'exportar'])->name('lideres.exportar');
 Route::get('/lideres/designar', [LideresController::class, 'designar'])->name('lideres.designar');
 Route::post('/lideres/designar', [LideresController::class, 'storeDesignar'])->name('lideres.designar.store');
 Route::get('/lideres/{lider}', [LideresController::class, 'show'])->name('lideres.show');
@@ -49,6 +73,8 @@ Route::delete('/lideres/{lider}', [LideresController::class, 'destroy'])->name('
 Route::post('/sede-activa', [SedeActivaController::class, 'update'])->name('sede-activa.update');
 
 Route::get('/sedes', [SedesController::class, 'index'])->name('sedes.index');
+Route::get('/sedes/datos', [SedesController::class, 'datos'])->name('sedes.datos');
+Route::get('/sedes/exportar', [SedesController::class, 'exportar'])->name('sedes.exportar');
 Route::get('/sedes/create', [SedesController::class, 'create'])->name('sedes.create');
 Route::post('/sedes', [SedesController::class, 'store'])->name('sedes.store');
 Route::get('/sedes/{sede}', [SedesController::class, 'show'])->name('sedes.show');
@@ -61,16 +87,15 @@ Route::post('/sedes/{sede}/reactivar', [SedesController::class, 'reactivar'])->n
 Route::delete('/sedes/{sede}', [SedesController::class, 'destroy'])->name('sedes.destroy');
 
 Route::get('/sin-lider', [SinLiderController::class, 'index'])->name('sin-lider.index');
+Route::get('/sin-lider/datos', [SinLiderController::class, 'datos'])->name('sin-lider.datos');
+Route::get('/sin-lider/exportar', [SinLiderController::class, 'exportar'])->name('sin-lider.exportar');
 Route::post('/sin-lider/{persona}/asignar', [SinLiderController::class, 'asignar'])->name('sin-lider.asignar');
 
-Route::get('/redes', [RedesController::class, 'index'])->name('redes.index');
-Route::post('/redes', [RedesController::class, 'store'])->name('redes.store');
-Route::put('/redes/{red}', [RedesController::class, 'update'])->name('redes.update');
-Route::post('/redes/{red}/fusionar', [RedesController::class, 'fusionar'])->name('redes.fusionar');
-Route::delete('/redes/{red}', [RedesController::class, 'destroy'])->name('redes.destroy');
 
 
 Route::get('/encuentros', [EncuentrosController::class, 'index'])->name('encuentros.index');
+Route::get('/encuentros/datos', [EncuentrosController::class, 'datos'])->name('encuentros.datos');
+Route::get('/encuentros/exportar', [EncuentrosController::class, 'exportar'])->name('encuentros.exportar');
 Route::get('/encuentros/create', [EncuentrosController::class, 'create'])->name('encuentros.create');
 Route::post('/encuentros', [EncuentrosController::class, 'store'])->name('encuentros.store');
 Route::get('/encuentros/{encuentro}', [EncuentrosController::class, 'show'])->name('encuentros.show');
@@ -80,6 +105,8 @@ Route::put('/encuentros/{encuentro}/asistencia', [EncuentrosController::class, '
 Route::delete('/encuentros/{encuentro}', [EncuentrosController::class, 'destroy'])->name('encuentros.destroy');
 
 Route::get('/eventos', [EventosController::class, 'index'])->name('eventos.index');
+Route::get('/eventos/datos', [EventosController::class, 'datos'])->name('eventos.datos');
+Route::get('/eventos/exportar', [EventosController::class, 'exportar'])->name('eventos.exportar');
 Route::get('/eventos/create', [EventosController::class, 'create'])->name('eventos.create');
 Route::post('/eventos', [EventosController::class, 'store'])->name('eventos.store');
 Route::get('/eventos/{evento}', [EventosController::class, 'show'])->name('eventos.show');
@@ -94,6 +121,8 @@ Route::post('/eventos/{evento}/personas/{inscripcion}/pagos', [EventosController
 Route::delete('/eventos/{evento}/personas/{inscripcion}/pagos/{pago}', [EventosController::class, 'eliminarPago'])->name('eventos.pagos.destroy');
 
 Route::get('/ministerios', [MinisteriosController::class, 'index'])->name('ministerios.index');
+Route::get('/ministerios/datos', [MinisteriosController::class, 'datos'])->name('ministerios.datos');
+Route::get('/ministerios/exportar', [MinisteriosController::class, 'exportar'])->name('ministerios.exportar');
 Route::get('/ministerios/create', [MinisteriosController::class, 'create'])->name('ministerios.create');
 Route::post('/ministerios', [MinisteriosController::class, 'store'])->name('ministerios.store');
 Route::get('/ministerios/{ministerio}', [MinisteriosController::class, 'show'])->name('ministerios.show');
@@ -103,6 +132,8 @@ Route::put('/ministerios/{ministerio}/integrantes', [MinisteriosController::clas
 Route::delete('/ministerios/{ministerio}', [MinisteriosController::class, 'destroy'])->name('ministerios.destroy');
 
 Route::get('/celulas', [CelulasController::class, 'index'])->name('celulas.index');
+Route::get('/celulas/datos', [CelulasController::class, 'datos'])->name('celulas.datos');
+Route::get('/celulas/exportar', [CelulasController::class, 'exportar'])->name('celulas.exportar');
 Route::get('/celulas/create', [CelulasController::class, 'create'])->name('celulas.create');
 Route::post('/celulas', [CelulasController::class, 'store'])->name('celulas.store');
 Route::get('/celulas/{celula}', [CelulasController::class, 'show'])->name('celulas.show');

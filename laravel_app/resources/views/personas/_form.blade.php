@@ -4,7 +4,7 @@
     $esLider = (bool) ($persona?->es_lider ?? ($esLiderInicial ?? false));
     $opcionesLider = \App\Support\Formulario::opciones(
         $lideres,
-        fn ($l) => $l->nombre_completo.($l->redLider ? ' — '.$l->redLider->nombre : ''),
+        fn ($l) => $l->nombre_completo,
         fn ($l) => $l->numero_documento ? 'Doc. '.$l->numero_documento : ($l->celular ? 'Cel. '.$l->celular : null)
     );
     $opcionesEstado = collect(\App\Models\Persona::ESTADOS)->map(fn ($etiqueta, $valor) => ['id' => $valor, 'texto' => $etiqueta])->values()->all();
@@ -26,20 +26,15 @@
     </div>
 @endif
 
-<x-form.section titulo="Datos personales" descripcion="Cómo se llama y cuándo nació." icono="fa-user" id="seccion-personal">
+<x-form.section titulo="Datos personales" descripcion="Nombre, contacto, estado y documento. Basta con el celular o el correo; el documento es obligatorio solo para miembros activos y líderes." icono="fa-user" id="seccion-personal">
     <x-form.input name="nombres" label="Nombres" icono="fa-user" :required="true" ejemplo="Ej. Ana María" :value="$persona?->nombres" maxlength="255" />
     <x-form.input name="apellidos" label="Apellidos" icono="fa-user" :required="true" ejemplo="Ej. Pérez Soto" :value="$persona?->apellidos" maxlength="255" />
     <x-form.date name="fecha_nacimiento" label="Fecha de nacimiento" :value="$persona?->fecha_nacimiento" max="hoy" atajos="" col="col-md-4"
         ayuda="Opcional. Con ella se calcula la edad." />
-</x-form.section>
-
-<x-form.section titulo="Contacto" descripcion="Basta con el celular o el correo para registrar a una persona." icono="fa-address-book" id="seccion-contacto">
-    <x-form.input name="celular" label="Celular" type="tel" icono="fa-phone" mascara="celular" ejemplo="310 555 9999" :value="$persona?->celular" maxlength="20" />
-    <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" ejemplo="nombre@correo.com" :value="$persona?->email" maxlength="255" />
-</x-form.section>
-
-<x-form.section titulo="Estado y documento" descripcion="El documento es opcional para visitantes y obligatorio para miembros activos y líderes." icono="fa-id-card" id="seccion-documento">
-    <x-form.select name="estado" label="Estado" icono="fa-user-check" :required="true" :opciones="$opcionesEstado" :value="$persona?->estado ?? 'visitante'" :vacio="null" col="col-md-4" />
+    <x-form.input name="celular" label="Celular" type="tel" icono="fa-phone" mascara="celular" ejemplo="310 555 9999" :value="$persona?->celular" maxlength="20" col="col-md-4" />
+    <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" ejemplo="nombre@correo.com" :value="$persona?->email" maxlength="255" col="col-md-4" />
+    <x-form.select name="estado" label="Estado" icono="fa-user-check" :required="true" :opciones="$opcionesEstado" :value="$persona?->estado ?? 'visitante'" :vacio="null" col="col-md-4"
+        ayuda="«En célula»: asiste a una célula y aún no es parte de la iglesia." />
     <x-form.select name="tipo_documento" label="Tipo de documento" icono="fa-id-badge" :opciones="$opcionesDocumento" :value="$persona?->tipo_documento" vacio="Sin documento"
         requeridoSi="estado:miembro_activo|es_lider:1" col="col-md-3" />
     <x-form.input name="numero_documento" label="Número de documento" icono="fa-hashtag" mascara="documento" ejemplo="Solo números y letras" :value="$persona?->numero_documento"
@@ -60,9 +55,7 @@
 
     @if($puedeDesignarLider)
         <x-form.switch name="es_lider" label="Esta persona es líder" :marcado="$esLider" icono="fa-star" />
-        <x-form.select name="red_id" label="Red" icono="fa-sitemap" :opciones="$redes->map(fn ($r) => ['id' => $r->id, 'texto' => $r->nombre])->all()" :value="$persona?->red_id"
-            visibleSi="es_lider:1" requeridoSi="es_lider:1" />
     @elseif($persona?->es_lider)
-        <div class="col-12"><p><x-ui.estado valor="lider" /> {{ $persona->redLider?->nombre }}</p></div>
+        <div class="col-12"><p><x-ui.estado valor="lider" /></p></div>
     @endif
 </x-form.section>

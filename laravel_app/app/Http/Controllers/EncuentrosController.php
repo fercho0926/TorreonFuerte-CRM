@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\EncuentrosGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Encuentro;
 use App\Models\Persona;
@@ -10,19 +13,20 @@ use Illuminate\Validation\Rule;
 
 class EncuentrosController extends Controller
 {
-    public function index()
+    use ServicioGrilla;
+
+    protected function grilla(): Grilla
+    {
+        return app(EncuentrosGrilla::class);
+    }
+
+    public function index(Request $request)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
-        $encuentros = Encuentro::withCount('personas')
-            ->orderByDesc('fecha_realizacion')
-            ->get();
-
-        return view('encuentros.index', [
-            'encuentros' => $encuentros,
-        ]);
+        return view('encuentros.index', $this->datosDeLaGrilla($request));
     }
 
     public function create()

@@ -23,7 +23,7 @@ class AislamientoUsuariosTest extends TestCase
     private function datosUsuario(array $extra = []): array
     {
         return $extra + [
-            'name' => 'Nuevo Usuario', 'email' => 'nuevo@iglesia.co', 'password' => 'secreto123', 'password_confirmation' => 'secreto123', 'role' => 'lider_celula',
+            'name' => 'Nuevo Usuario', 'email' => 'nuevo@iglesia.co', 'celular' => '3105559999', 'role' => 'lider_celula',
         ];
     }
 

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\SedesGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Http\Requests\SedeRequest;
 use App\Models\Sede;
 use App\Models\User;
@@ -16,11 +19,18 @@ use Illuminate\Validation\ValidationException;
  */
 class SedesController extends Controller
 {
+    use ServicioGrilla;
+
     public function __construct(private SedeService $sedes, private SedeContext $contexto)
     {
     }
 
-    public function index()
+    protected function grilla(): Grilla
+    {
+        return app(SedesGrilla::class);
+    }
+
+    public function index(Request $request)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
@@ -28,9 +38,7 @@ class SedesController extends Controller
 
         $this->autorizar('ver', Sede::class);
 
-        return view('sedes.index', [
-            'resumen' => $this->sedes->resumen(),
-        ]);
+        return view('sedes.index', $this->datosDeLaGrilla($request));
     }
 
     public function create()

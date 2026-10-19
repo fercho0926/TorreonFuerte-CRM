@@ -1,6 +1,7 @@
 @props([
     'name', 'label' => null, 'opciones' => [], 'value' => null, 'icono' => null, 'required' => false, 'ayuda' => null,
     'vacio' => 'Seleccione...', 'col' => 'col-md-6', 'buscar' => false, 'visibleSi' => null, 'requeridoSi' => null, 'id' => null, 'ocultarEtiqueta' => false,
+    'fuente' => null, 'filtros' => [],
 ])
 @php
     $id = $id ?? \App\Support\Formulario::id($name);
@@ -19,6 +20,7 @@
             @endif
             <select id="{{ $id }}" name="{{ $name }}" data-selector
                 @if($buscar) data-buscar @endif
+                @if($fuente) data-fuente="{{ $fuente }}" data-filtros="{{ json_encode($filtros) }}" @endif
                 @if($requeridoSi) data-requerido-si="{{ $requeridoSi }}" @endif
                 @if($required) required aria-required="true" @endif
                 @if($tieneError) aria-invalid="true" @endif
@@ -27,6 +29,7 @@
                 @if($vacio !== null)
                     <option value="">{{ $vacio }}</option>
                 @endif
+                {{-- Con fuente remota solo se vuelca la opción ya elegida; el resto viene del servidor. --}}
                 @foreach($lista as $o)
                     <option value="{{ $o['id'] }}" @if($o['apoyo']) data-apoyo="{{ $o['apoyo'] }}" @endif @selected($actual !== '' && $actual === (string) $o['id'])>{{ $o['texto'] }}</option>
                 @endforeach

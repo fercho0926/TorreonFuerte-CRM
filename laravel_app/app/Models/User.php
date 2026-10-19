@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['sede_id', 'name', 'email', 'password', 'role', 'persona_id'])]
+#[Fillable(['sede_id', 'name', 'email', 'celular', 'password', 'debe_cambiar_clave', 'clave_vence_en', 'role', 'persona_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -41,12 +43,31 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'debe_cambiar_clave' => 'boolean',
+            'clave_vence_en' => 'datetime',
         ];
     }
 
     public function persona(): BelongsTo
     {
         return $this->belongsTo(Persona::class);
+    }
+
+    public function registrosClave(): HasMany
+    {
+        return $this->hasMany(RegistroClave::class)->withoutGlobalScopes();
+    }
+
+    /** Último registro de clave temporal generado para la cuenta. */
+    public function ultimoRegistroClave(): HasOne
+    {
+        return $this->hasOne(RegistroClave::class)->withoutGlobalScopes()->latestOfMany();
+    }
+
+    /** Verdadero si la contraseña vigente es una clave temporal que ya venció. */
+    public function claveTemporalVencida(): bool
+    {
+        return $this->debe_cambiar_clave && $this->clave_vence_en !== null && $this->clave_vence_en->isPast();
     }
 
     /**

@@ -1,6 +1,7 @@
 @props([
     'name' => 'personas[]', 'label' => null, 'opciones' => [], 'seleccionados' => [], 'icono' => 'fa-users', 'required' => false,
     'ayuda' => null, 'col' => 'col-12', 'visibleSi' => null, 'id' => null, 'vacio' => 'No hay opciones disponibles todavía.',
+    'fuente' => null, 'filtros' => [], 'crear' => null,
 ])
 @php
     $id = $id ?? \App\Support\Formulario::id($name);
@@ -14,10 +15,12 @@
 <div class="{{ $col }}" @if($visibleSi) data-visible-si="{{ $visibleSi }}" @endif>
     <div class="fm-campo @if($tieneError) tiene-error @endif">
         @include('components.form._etiqueta', ['id' => $id, 'label' => $label, 'required' => $required])
-        @if(count($lista) === 0)
+        @if(count($lista) === 0 && !$fuente)
             <p class="text-muted mb-0">{{ $vacio }}</p>
         @else
             <select id="{{ $id }}" name="{{ $name }}" multiple data-multi
+                @if($fuente) data-fuente="{{ $fuente }}" data-filtros="{{ json_encode($filtros) }}" @endif
+                @if($crear) data-crear="{{ $crear }}" @endif
                 @if($required) required aria-required="true" @endif
                 @if($tieneError) aria-invalid="true" @endif
                 aria-describedby="{{ $descrito }}"
@@ -27,7 +30,7 @@
                 @endforeach
             </select>
             @if(!$ayuda)
-                <small class="fm-ayuda">Escribe para buscar. Sin JavaScript, mantén Ctrl (o Cmd) para elegir varias.</small>
+                <small class="fm-ayuda">{{ $fuente ? 'Escribe al menos 2 letras del nombre, apellido, documento o celular.' : 'Escribe para buscar. Sin JavaScript, mantén Ctrl (o Cmd) para elegir varias.' }}</small>
             @endif
         @endif
         @if($ayuda)

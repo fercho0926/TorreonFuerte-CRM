@@ -1,50 +1,39 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Constitución de Torreón Fuerte CRM
 
-## Core Principles
+## Principios Fundamentales
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Todo artefacto de especificación en español
+Todo el contenido generado con spec-kit (especificación, plan, tareas, investigación, modelo de datos, contratos, guías rápidas, listas de verificación y esta constitución) se redacta en español. Se conservan sin traducir los nombres de archivos, rutas, ramas, identificadores de código, comandos y fragmentos técnicos. Las palabras normativas se escriben DEBE / DEBERÍA / PUEDE.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Aislamiento por sede y alcance por rol (NO NEGOCIABLE)
+Ninguna pantalla, respuesta JSON, exportación o búsqueda puede mostrar información fuera del alcance del usuario (su sede y su rol: administrador, pastor, líder de célula, usuario). El alcance se aplica en la consulta, no solo en la vista. Toda funcionalidad nueva DEBE probar el aislamiento entre sedes y entre roles.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Grillas estándar para todo listado principal
+Todo listado principal DEBE usar la grilla estándar (`<x-ui.grilla>` con una definición `App\Grillas\Grilla`): ordenar por columna sobre todo el conjunto, filtro por columna, búsqueda general cuando aplique, 10/25/50/100 filas por página, paginador, adaptación a teléfono y exportación a CSV con los filtros y el orden actuales. Una prueba automática DEBE fallar si un listado principal usa una tabla simple. La exportación de datos de acceso (usuarios, solicitudes de clave) DEBE restringirse a administradores. Las tablas pequeñas dentro de una ficha no son listados principales. La guía está en el README, sección «Grillas».
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Pruebas primero
+Cada funcionalidad se acompaña de pruebas automáticas (PHPUnit para el servidor, Vitest para JavaScript) escritas antes o junto con el código. Los cambios no se dan por terminados con pruebas en rojo ni con una compilación (`npm run build`) fallida.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Mejora progresiva
+Las pantallas DEBEN seguir funcionando sin JavaScript (formularios, filtros, paginación del servidor); el JavaScript solo las mejora. Los endpoints JSON responden errores en JSON, porque el manejador global solo lo hace para `api/*`.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Simplicidad
+Se prefiere reutilizar componentes y servicios existentes (componentes `x-form.*` y `x-ui.*`, `AlcanceService`, `Estados`, `Permisos`) antes que crear abstracciones nuevas. Ningún `<form>` se escribe a mano fuera de los componentes de formulario.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Restricciones Técnicas
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- PHP 8.3 y Laravel 13; vistas Blade; AdminLTE 4 sobre Bootstrap 5; Vite; DataTables 2 para las grillas.
+- Los activos compilados (`public/build`) forman parte del despliegue al hosting.
+- Nunca se ejecuta `migrate:fresh` sobre la base local; las pruebas usan bases temporales.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Flujo de Desarrollo
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+- Cada funcionalidad sigue el ciclo de spec-kit: especificar, clarificar, planificar, generar tareas e implementar.
+- Antes de cerrar una funcionalidad: `php artisan test`, `npm test` y `npm run build` en verde, y verificación en el navegador de los flujos principales.
+- Los commits se hacen solo cuando el responsable del proyecto lo pide.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+## Gobernanza
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Esta constitución prevalece sobre otras prácticas del proyecto. Las enmiendas se documentan aquí con su fecha y motivo, y toda revisión de código verifica el cumplimiento de los principios II y III.
+
+**Versión**: 1.0.0 | **Ratificada**: 2026-10-19 | **Última enmienda**: 2026-10-19

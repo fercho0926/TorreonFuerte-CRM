@@ -12,19 +12,21 @@ class CoherenciaCelulaLiderTest extends TestCase
 {
     use IniciaSesion, RefreshDatabase;
 
-    public function test_solo_se_agregan_a_la_celula_personas_de_su_lider_directo(): void
+    public function test_se_puede_agregar_a_la_celula_a_alguien_de_otro_lider_sin_cambiar_su_lider_directo(): void
     {
         $this->comoAdmin();
         $lider = Persona::factory()->lider()->create();
         $celula = Celula::factory()->create(['lider_id' => $lider->id]);
         $propia = Persona::factory()->create(['lider_id' => $lider->id]);
-        $ajena = Persona::factory()->create(['lider_id' => Persona::factory()->lider()->create()->id]);
+        $otroLider = Persona::factory()->lider()->create();
+        $ajena = Persona::factory()->create(['lider_id' => $otroLider->id]);
 
         $this->post(route('celulas.miembros.store', $celula), ['persona_id' => $propia->id])->assertSessionHas('success');
-        $this->post(route('celulas.miembros.store', $celula), ['persona_id' => $ajena->id])->assertSessionHas('error');
+        $this->post(route('celulas.miembros.store', $celula), ['persona_id' => $ajena->id])->assertSessionHas('success');
 
         $this->assertTrue($celula->miembros()->whereKey($propia->id)->exists());
-        $this->assertFalse($celula->miembros()->whereKey($ajena->id)->exists());
+        $this->assertTrue($celula->miembros()->whereKey($ajena->id)->exists());
+        $this->assertSame($otroLider->id, $ajena->fresh()->lider_id, 'la célula no cambia el líder directo');
     }
 
     public function test_al_cambiar_el_lider_la_persona_sale_de_las_celulas_del_lider_anterior(): void
@@ -64,7 +66,6 @@ class CoherenciaCelulaLiderTest extends TestCase
             'numero_documento' => $a->numero_documento,
             'celular' => $a->celular,
             'es_lider' => 1,
-            'red_id' => $a->red_id,
             'lider_id' => $b->id,
         ])->assertSessionHasErrors('lider_id');
 

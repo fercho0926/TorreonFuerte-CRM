@@ -16,7 +16,7 @@ class AccesibilidadInterfazTest extends TestCase
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
 
     private const RUTAS = ['dashboard', 'personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'encuentros.index',
-        'ministerios.index', 'redes.index', 'sin-lider.index', 'users.index', 'sedes.index'];
+        'ministerios.index', 'sin-lider.index', 'users.index', 'sedes.index'];
 
     protected function setUp(): void
     {

@@ -5,7 +5,7 @@
 @section('page-title', 'Crear nuevo usuario')
 
 @section('content')
-<x-form.layout :action="route('users.store')" guardar="Guardar usuario" icono="fa-save" :cancelar="route('users.index')">
+<x-form.layout :action="route('users.store')" guardar="Crear y generar clave" icono="fa-key" :cancelar="route('users.index')">
     @include('users._form')
 </x-form.layout>
 @endsection

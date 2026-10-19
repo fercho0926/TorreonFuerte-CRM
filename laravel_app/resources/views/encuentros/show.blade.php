@@ -45,13 +45,13 @@
     <x-form.section :titulo="'Personas participantes ('.$encuentro->personas->count().')'" descripcion="Marca quién asistió y cuánto pagó cada persona." icono="fa-users" id="seccion-asistencia">
         <div class="col-12">
             <x-form.lista-asistencia name="asistio[]" etiqueta="Asistió" vacio="Este encuentro aún no tiene personas asignadas."
-                :columnas="['Documento', 'Red']"
+                :columnas="['Documento', 'Celular']"
                 :filas="$encuentro->personas->map(fn ($p) => [
                     'id' => $p->id,
                     'nombre' => $p->nombre_completo,
                     'extra' => [
                         'Documento' => trim(($p->tipo_documento ?? '').' '.($p->numero_documento ?? '')) ?: '—',
-                        'Red' => $p->redLider?->nombre ?? $p->lider?->redLider?->nombre ?? '—',
+                        'Celular' => $p->celular ?? '—',
                     ],
                     'campos' => [['etiqueta' => 'Valor pagado', 'name' => 'valor_pagado['.$p->id.']', 'valor' => $p->pivot->valor_pagado, 'tipo' => 'monto']],
                 ])->all()"

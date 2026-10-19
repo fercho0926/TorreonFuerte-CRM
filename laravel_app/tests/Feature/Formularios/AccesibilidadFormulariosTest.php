@@ -88,7 +88,7 @@ class AccesibilidadFormulariosTest extends TestCase
         foreach ($xp->query('//*[contains(@class,"input-group-text")]') as $icono) {
             $this->assertSame('true', $icono->getAttribute('aria-hidden'));
         }
-        $this->assertGreaterThanOrEqual(5, $xp->query('//section[contains(@class,"fm-seccion")]//h3')->length);
+        $this->assertGreaterThanOrEqual(3, $xp->query('//section[contains(@class,"fm-seccion")]//h3')->length);
     }
 
     public function test_los_interruptores_de_asistencia_tienen_nombre_accesible(): void

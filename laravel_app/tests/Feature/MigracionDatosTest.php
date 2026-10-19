@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Celula;
 use App\Models\Persona;
-use App\Models\Red;
 use App\Models\User;
 use App\Support\MigracionRedesZonas;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,22 +42,6 @@ class MigracionDatosTest extends TestCase
         ], $extra));
 
         return Persona::find($id);
-    }
-
-    public function test_redes_con_distinta_escritura_quedan_en_una_sola(): void
-    {
-        $a = $this->crearLegado('Ana', 'Jóvenes');
-        $b = $this->crearLegado('Beto', 'jovenes ');
-        $c = $this->crearLegado('Caro', '  JÓVENES');
-        $d = $this->crearLegado('Dani', 'Matrimonios');
-
-        $resultado = MigracionRedesZonas::ejecutar();
-
-        $this->assertSame(2, $resultado['redes']);
-        $this->assertSame(2, Red::count());
-        $this->assertSame($a->fresh()->red_id, $b->fresh()->red_id);
-        $this->assertSame($a->fresh()->red_id, $c->fresh()->red_id);
-        $this->assertNotSame($a->fresh()->red_id, $d->fresh()->red_id);
     }
 
     public function test_los_usuarios_con_el_rol_retirado_de_lider_de_zona_pasan_a_lider(): void

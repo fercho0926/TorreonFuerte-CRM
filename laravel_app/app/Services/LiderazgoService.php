@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Celula;
 use App\Models\Persona;
 use App\Models\PersonaCambio;
-use App\Models\Red;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -99,18 +98,18 @@ class LiderazgoService
         return $celulas->pluck('nombre')->all();
     }
 
-    public function designarLider(Persona $persona, Red $red, ?User $por = null): Persona
+    public function designarLider(Persona $persona, ?User $por = null): Persona
     {
         if (!$persona->numero_documento) {
             throw ValidationException::withMessages(['persona_id' => 'Para designar un líder la persona debe tener documento de identidad registrado.']);
         }
 
-        return DB::transaction(function () use ($persona, $red, $por) {
-            $antes = ['es_lider' => $persona->es_lider, 'red_id' => $persona->red_id];
+        return DB::transaction(function () use ($persona, $por) {
+            $antes = ['es_lider' => $persona->es_lider];
 
-            $persona->update(['es_lider' => true, 'red_id' => $red->id]);
+            $persona->update(['es_lider' => true]);
 
-            $this->registrarCambio($persona, 'rol_lider', $antes, ['es_lider' => true, 'red_id' => $red->id], $por);
+            $this->registrarCambio($persona, 'rol_lider', $antes, ['es_lider' => true], $por);
 
             return $persona;
         });
@@ -150,7 +149,7 @@ class LiderazgoService
         }
 
         DB::transaction(function () use ($lider, $reasignarA, $por) {
-            $antes = ['es_lider' => true, 'red_id' => $lider->red_id];
+            $antes = ['es_lider' => true];
 
             if ($reasignarA) {
                 $lider->miembros()->update(['lider_id' => $reasignarA->id]);
@@ -160,7 +159,7 @@ class LiderazgoService
                 $lider->miembros()->update(['lider_id' => null]);
             }
 
-            $lider->update(['es_lider' => false, 'red_id' => null]);
+            $lider->update(['es_lider' => false]);
 
             $this->registrarCambio($lider, 'rol_lider', $antes, ['es_lider' => false, 'reasignado_a' => $reasignarA?->id], $por);
         });

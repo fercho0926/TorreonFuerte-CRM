@@ -42,7 +42,7 @@ class SinLiderTest extends TestCase
 
         $this->assertSame($lider->id, $persona->fresh()->lider_id);
         $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'lider']);
-        $this->get(route('sin-lider.index'))->assertViewHas('personas', fn ($p) => $p->total() === 0);
+        $this->get(route('sin-lider.index'))->assertViewHas('pagina', fn ($p) => $p->total() === 0);
     }
 
     public function test_un_lider_no_puede_asignar_personas_desde_la_vista(): void

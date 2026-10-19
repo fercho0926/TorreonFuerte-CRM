@@ -112,7 +112,7 @@
 
 <div class="row">
     @if($personasSinLider !== null)
-        <div class="col-lg-4">
+        <div class="col-lg-6">
             <div class="card card-warning card-outline mb-4">
                 <div class="card-header"><h3 class="card-title"><i class="fas fa-user-clock me-1" aria-hidden="true"></i>Personas sin líder</h3></div>
                 <div class="card-body p-0">
@@ -133,7 +133,7 @@
             </div>
         </div>
     @endif
-    <div class="col-lg-{{ $personasSinLider !== null ? '4' : '6' }}">
+    <div class="col-lg-{{ $personasSinLider !== null ? '6' : '12' }}">
         <div class="card card-success card-outline mb-4">
             <div class="card-header"><h3 class="card-title"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>Personas nuevas</h3></div>
             <div class="card-body p-0">
@@ -147,32 +147,6 @@
                         <li class="list-group-item"><x-ui.vacio mensaje="Aún no hay personas registradas." icono="fa-address-card" /></li>
                     @endforelse
                 </ul>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-{{ $personasSinLider !== null ? '4' : '6' }}">
-        <div class="card card-secondary card-outline mb-4">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-sitemap me-1" aria-hidden="true"></i>Personas por red</h3></div>
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead><tr><th>Red</th><th class="text-end">Personas</th></tr></thead>
-                    <tbody>
-                        @forelse($personasPorRed as $fila)
-                            <tr>
-                                <td>
-                                    @if($fila->red_grupo)
-                                        <a href="{{ route('personas.index', ['red_id' => $fila->red_id]) }}">{{ $fila->red_grupo }}</a>@if($fila->sede_nombre && $resumenSedes) <small class="text-muted">({{ $fila->sede_nombre }})</small>@endif
-                                    @else
-                                        <span class="text-muted">Sin red asignada</span>
-                                    @endif
-                                </td>
-                                <td class="text-end"><x-ui.insignia color="info">{{ $fila->total }}</x-ui.insignia></td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="2"><x-ui.vacio mensaje="Aún no hay personas registradas." icono="fa-address-card" /></td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

@@ -38,7 +38,7 @@ class EscalaSedesTest extends TestCase
 
         // Cada pastor ve exactamente sus 2 personas pastorales, sin importar cuántas sedes haya.
         $this->iniciarSesionComo(User::withoutGlobalScopes()->where('email', 'pastor7@iglesia.co')->first());
-        $this->get(route('personas.index'))->assertOk()->assertViewHas('personas', fn ($p) => $p->total() === 2);
+        $this->get(route('personas.index'))->assertOk()->assertViewHas('pagina', fn ($p) => $p->total() === 2);
     }
 
     public function test_el_listado_de_una_sede_con_1000_personas_responde_paginado_y_rapido(): void
@@ -65,8 +65,8 @@ class EscalaSedesTest extends TestCase
         $inicio = microtime(true);
         $this->get(route('personas.index'))
             ->assertOk()
-            ->assertViewHas('personas', fn ($p) => $p->total() === 1001 && $p->count() === 25 && $p->lastPage() === 41);
-        $this->get(route('personas.index', ['q' => 'Persona500']))->assertViewHas('personas', fn ($p) => $p->total() >= 1);
+            ->assertViewHas('pagina', fn ($p) => $p->total() === 1001 && $p->count() === 25 && $p->lastPage() === 41);
+        $this->get(route('personas.index', ['q' => 'Persona500']))->assertViewHas('pagina', fn ($p) => $p->total() >= 1);
         $segundos = microtime(true) - $inicio;
 
         $this->assertLessThan(2.0, $segundos, 'El listado y la búsqueda con 1.000 personas deben responder en menos de 2 s');

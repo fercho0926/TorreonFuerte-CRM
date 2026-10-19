@@ -69,8 +69,6 @@
             <dd class="col-sm-9">{{ $persona->barrio ?? '—' }} / {{ $persona->ciudad ?? '—' }}</dd>
 
             @if($persona->es_lider)
-                <dt class="col-sm-3">Red</dt>
-                <dd class="col-sm-9"><x-ui.insignia color="info">{{ $persona->redLider?->nombre ?? '—' }}</x-ui.insignia></dd>
             @endif
 
             <dt class="col-sm-3">Líder</dt>

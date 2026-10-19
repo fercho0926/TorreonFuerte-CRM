@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\LideresGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Celula;
 use App\Models\Persona;
-use App\Models\Red;
+use App\Services\BuscadorPersonas;
 use App\Services\LiderazgoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ViewErrorBag;
@@ -14,8 +17,15 @@ use Illuminate\Validation\ValidationException;
 
 class LideresController extends Controller
 {
+    use ServicioGrilla;
+
     public function __construct(private LiderazgoService $liderazgo)
     {
+    }
+
+    protected function grilla(): Grilla
+    {
+        return app(LideresGrilla::class);
     }
 
     public function index(Request $request)
@@ -24,23 +34,7 @@ class LideresController extends Controller
             return $redirect;
         }
 
-        $user = $this->usuarioActual();
-
-        $lideres = $this->alcance()->lideresVisibles($user)
-            ->with('redLider')
-            ->withCount(['miembros', 'celulasLideradas'])
-            ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
-            ->when($request->filled('red_id'), fn ($query) => $query->where('red_id', $request->red_id))
-            ->orderBy('apellidos')
-            ->orderBy('nombres')
-            ->paginate(25)
-            ->withQueryString();
-
-        return view('lideres.index', [
-            'lideres' => $lideres,
-            'redes' => $this->alcance()->redesVisibles($user)->orderBy('nombre')->get(),
-            'filtros' => $request->only(['q', 'red_id']),
-        ]);
+        return view('lideres.index', $this->datosDeLaGrilla($request));
     }
 
     public function show(Persona $lider)
@@ -52,6 +46,7 @@ class LideresController extends Controller
         $this->lider($lider);
 
         $miembros = $lider->miembros()
+            ->with('celulas')
             ->activas()
             ->orderBy('apellidos')
             ->orderBy('nombres')
@@ -65,7 +60,7 @@ class LideresController extends Controller
             ->get();
 
         return view('lideres.show', [
-            'lider' => $lider->load('redLider'),
+            'lider' => $lider,
             'miembros' => $miembros,
             'celulas' => $celulas,
             'ultimaReunion' => $celulas->max('reuniones_max_fecha'),
@@ -80,23 +75,13 @@ class LideresController extends Controller
 
         $this->autorizar('designarLider');
 
-        $user = $this->usuarioActual();
-        $candidatas = collect();
-
-        if ($request->filled('q')) {
-            $candidatas = $this->alcance()->personasVisibles($user)
-                ->where('es_lider', false)
-                ->activas()
-                ->buscar($request->q)
-                ->orderBy('apellidos')->orderBy('nombres')
-                ->limit(25)
-                ->get();
-        }
+        // Tras un error de validación se conserva la persona elegida en el autocompletado.
+        $elegida = $request->old('persona_id')
+            ? $this->alcance()->personasVisibles($this->usuarioActual())->whereKey($request->old('persona_id'))->first()
+            : null;
 
         return view('lideres.designar', [
-            'q' => $request->input('q'),
-            'candidatas' => $candidatas,
-            'redes' => Red::activas()->orderBy('nombre')->get(),
+            'opcionElegida' => $elegida ? [['id' => $elegida->id, 'texto' => $elegida->nombre_completo, 'apoyo' => BuscadorPersonas::formato($elegida)['apoyo']]] : [],
         ]);
     }
 
@@ -110,14 +95,21 @@ class LideresController extends Controller
 
         $data = $request->validate([
             'persona_id' => ['required', app(SedeContext::class)->existe('personas')],
-            'red_id' => ['required', app(SedeContext::class)->existe('redes')],
-        ]);
+        ], ['persona_id.required' => 'Elige a la persona que será líder.']);
 
         $user = $this->usuarioActual();
         $persona = $this->alcance()->personasVisibles($user)->whereKey($data['persona_id'])->first();
         abort_unless($persona, 404);
 
-        $this->liderazgo->designarLider($persona, Red::findOrFail($data['red_id']), $user);
+        if ($persona->estado === 'inactivo') {
+            throw ValidationException::withMessages(['persona_id' => 'No se puede designar a una persona inactiva.']);
+        }
+
+        if ($persona->es_lider) {
+            throw ValidationException::withMessages(['persona_id' => 'Esa persona ya es líder.']);
+        }
+
+        $this->liderazgo->designarLider($persona, $user);
 
         return redirect()->route('lideres.show', $persona)->with('success', 'La persona ahora es líder.');
     }

@@ -81,14 +81,13 @@ class TrasladoPersonaTest extends TestCase
 
     public function test_un_lider_sin_nada_a_cargo_si_se_traslada_y_llega_sin_rol(): void
     {
-        $libre = Persona::factory()->deSede($this->A['sede']->id)->lider($this->A['red']->id)->create(['nombres' => 'LiderLibre']);
+        $libre = Persona::factory()->deSede($this->A['sede']->id)->lider()->create(['nombres' => 'LiderLibre']);
         $this->comoAdminEnSede($this->A['sede']);
 
         $this->post(route('traslados.store', $libre), ['sede_destino_id' => $this->B['sede']->id])->assertSessionHasNoErrors();
 
         $nueva = Persona::withoutGlobalScopes()->where('sede_id', $this->B['sede']->id)->where('nombres', 'LiderLibre')->firstOrFail();
         $this->assertFalse($nueva->es_lider);
-        $this->assertNull($nueva->red_id);
     }
 
     public function test_falla_si_el_documento_ya_existe_en_la_sede_destino(): void

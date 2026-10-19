@@ -48,14 +48,14 @@ class PresentacionPersonasTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_el_listado_incluye_la_vista_de_tarjetas_para_telefono(): void
+    public function test_el_listado_es_una_grilla_adaptable_a_telefono(): void
     {
         $this->comoAdmin();
         Persona::factory()->create();
 
         $this->get(route('personas.index'))
             ->assertOk()
-            ->assertSee('d-md-none', false)
-            ->assertSee('d-none d-md-block', false);
+            ->assertSee('data-grilla="personas"', false)
+            ->assertSee('table-responsive', false);
     }
 }

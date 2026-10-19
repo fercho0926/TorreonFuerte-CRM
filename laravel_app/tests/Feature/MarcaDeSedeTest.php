@@ -18,7 +18,7 @@ class MarcaDeSedeTest extends TestCase
         $sede = $this->crearSede(['nombre' => 'Cocorná']);
         $this->comoPastorDe($sede);
 
-        foreach (['dashboard', 'personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'ministerios.index', 'encuentros.index', 'redes.index', 'sin-lider.index', 'users.index'] as $ruta) {
+        foreach (['dashboard', 'personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'ministerios.index', 'encuentros.index', 'sin-lider.index', 'users.index'] as $ruta) {
             $this->get(route($ruta))
                 ->assertOk()
                 ->assertSee('CRM Admin - <strong class="nombre-sede">Cocorná</strong>', false)

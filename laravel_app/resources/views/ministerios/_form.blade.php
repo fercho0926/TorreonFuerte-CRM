@@ -1,6 +1,7 @@
 @php
     $ministerio = $ministerio ?? null;
-    $seleccionadas = $personasSeleccionadas ?? [];
+    $integrantes = $integrantes ?? collect();
+    $opcionesIntegrantes = \App\Support\Formulario::opciones($integrantes, fn ($p) => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''), fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
     $opcionesEstado = collect(\App\Models\Ministerio::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
     $opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''), fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
 @endphp
@@ -12,6 +13,7 @@
     <x-form.textarea name="descripcion" label="Descripción" :value="$ministerio?->descripcion" ayuda="Opcional: a qué se dedica el ministerio." />
 </x-form.section>
 
-<x-form.section titulo="Integrantes" descripcion="El rol y la fecha de ingreso de cada integrante se editan desde el detalle del ministerio." icono="fa-users" id="seccion-integrantes">
-    <x-form.multiselect name="personas[]" label="Integrantes" :opciones="$opcionesPersona" :seleccionados="$seleccionadas" vacio="No hay personas registradas todavía." />
+<x-form.section titulo="Integrantes" descripcion="Escribe para buscar por nombre, apellido, documento o celular. El rol y la fecha de ingreso se editan desde el detalle del ministerio." icono="fa-users" id="seccion-integrantes">
+    <x-form.multiselect name="personas[]" label="Integrantes" :opciones="$opcionesIntegrantes" :seleccionados="$integrantes->pluck('id')->all()"
+        :fuente="route('personas.buscar')" :filtros="['activas' => 1]" />
 </x-form.section>

@@ -2,7 +2,8 @@
  * Arranque de los formularios: activa los comportamientos en cada <form data-form>.
  * Todo es mejora progresiva: sin este código los formularios siguen funcionando.
  */
-import { iniciarAvisos } from './avisos.js';
+import { avisoBreve, iniciarAvisos } from './avisos.js';
+import { iniciarCopiar } from './copiar.js';
 import { iniciarConfirmaciones } from './confirmar.js';
 import { iniciarDependientes } from './dependientes.js';
 import { iniciarEnvio } from './envio.js';
@@ -58,6 +59,7 @@ export function iniciar() {
     document.querySelectorAll('form[data-form]').forEach(iniciarFormulario);
     iniciarConfirmaciones();
     iniciarAvisos();
+    iniciarCopiar(document, avisoBreve);
 }
 
 if (typeof document !== 'undefined') {

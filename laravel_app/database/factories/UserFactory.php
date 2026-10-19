@@ -28,10 +28,23 @@ class UserFactory extends Factory
             'sede_id' => fn (array $atributos) => ($atributos['role'] ?? 'user') === 'admin' ? null : SedeFactory::idPorDefecto(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'celular' => '3'.fake()->numerify('#########'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /** Cuenta con una clave temporal vigente: debe elegir su contraseña al entrar. */
+    public function conClaveTemporal(?\DateTimeInterface $venceEn = null): static
+    {
+        return $this->state(fn () => ['debe_cambiar_clave' => true, 'clave_vence_en' => $venceEn ?? now()->addDay()]);
+    }
+
+    /** Cuenta con una clave temporal que ya venció. */
+    public function conClaveVencida(): static
+    {
+        return $this->conClaveTemporal(now()->subMinute());
     }
 
     /**

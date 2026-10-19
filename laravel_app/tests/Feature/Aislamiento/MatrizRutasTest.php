@@ -38,6 +38,14 @@ class MatrizRutasTest extends TestCase
     {
         $reunion = CelulaReunion::create(['sede_id' => $this->B['sede']->id, 'celula_id' => $this->B['celula']->id, 'fecha' => now()->toDateString()]);
 
+        $registro = \App\Models\RegistroClave::create([
+            'user_id' => $this->B['liderUser']->id, 'sede_id' => $this->B['sede']->id, 'motivo' => 'alta',
+            'preparada_por' => $this->B['pastor']->id, 'vence_en' => now()->addDay(),
+        ]);
+        $solicitud = \App\Models\SolicitudClave::create([
+            'user_id' => $this->B['liderUser']->id, 'sede_id' => $this->B['sede']->id, 'ultima_solicitud_en' => now(),
+        ]);
+
         return [
             'persona' => $this->B['persona']->id,
             'lider' => $this->B['lider']->id,
@@ -47,9 +55,10 @@ class MatrizRutasTest extends TestCase
             'pago' => $this->B['pago']->id,
             'ministerio' => $this->B['ministerio']->id,
             'encuentro' => $this->B['encuentro']->id,
-            'red' => $this->B['red']->id,
             'user' => $this->B['liderUser']->id,
             'reunion' => $reunion->id,
+            'registro' => $registro->id,
+            'solicitud' => $solicitud->id,
             'sede' => $this->B['sede']->id,
         ];
     }

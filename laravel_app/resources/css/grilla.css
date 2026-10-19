@@ -1,0 +1,29 @@
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+@import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
+
+/* Grilla con aspecto de tabla de PrimeNG: cabecera gris, filtros por columna y paginador redondeado. */
+.grilla-card { border: 1px solid var(--bs-border-color); border-radius: .5rem; overflow: hidden; }
+.grilla-barra { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; padding: .75rem 1rem; border-bottom: 1px solid var(--bs-border-color); }
+.grilla-busqueda { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin: 0; }
+.grilla-busqueda .p-input-icon { position: relative; display: inline-block; min-width: 18rem; }
+.grilla-busqueda .p-input-icon > i { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: var(--bs-secondary-color); }
+.grilla-busqueda .p-input-icon > input { padding-left: 2.25rem; }
+.grilla-acciones { display: flex; gap: .5rem; }
+.grilla-form-js .fm-acciones { display: none; }
+
+.grilla thead th { background: var(--bs-tertiary-bg); font-weight: 600; font-size: .8125rem; color: var(--bs-secondary-color); border-bottom: 1px solid var(--bs-border-color); white-space: nowrap; }
+.grilla thead tr.grilla-filtros th { background: var(--bs-body-bg); padding: .4rem .5rem; font-weight: 400; }
+.grilla thead tr.grilla-filtros + tr { display: none; }
+.grilla tbody td { padding-top: .65rem; padding-bottom: .65rem; }
+.grilla.table-hover > tbody > tr:hover > * { background: var(--bs-tertiary-bg); }
+
+.grilla-card div.dt-container .row { margin: 0; padding: .5rem 1rem; align-items: center; border-top: 1px solid var(--bs-border-color); }
+.grilla-card div.dt-container .dt-length { display: flex; align-items: center; gap: .5rem; }
+.grilla-card div.dt-container .dt-length select { width: auto; display: inline-block; }
+.grilla-card div.dt-container .page-item .page-link { border-radius: 50%; width: 2.25rem; height: 2.25rem; display: inline-flex; align-items: center; justify-content: center; margin: 0 .1rem; border: 0; }
+.grilla-card div.dt-container .page-item.active .page-link { background: var(--bs-primary); color: #fff; }
+.grilla-card div.dt-container .dt-paging .pagination { margin: 0; justify-content: flex-end; }
+.grilla-card div.dt-container .dt-info { color: var(--bs-secondary-color); font-size: .875rem; }
+.grilla-card div.dt-container div.dt-processing { z-index: 2; }
+
+table.dataTable > tbody > tr.child ul.dtr-details { width: 100%; }

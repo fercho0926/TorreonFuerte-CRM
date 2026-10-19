@@ -24,7 +24,7 @@ class EstadosTest extends TestCase
         );
 
         foreach ($estados as $estado) {
-            $this->assertContains(Estados::color($estado), ['success', 'info', 'warning', 'secondary', 'danger', 'primary'], $estado);
+            $this->assertContains(Estados::color($estado), ['success', 'info', 'warning', 'secondary', 'danger', 'primary', 'dark'], $estado);
             $this->assertNotSame('', Estados::etiqueta($estado));
         }
     }

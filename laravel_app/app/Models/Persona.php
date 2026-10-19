@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Celular;
 use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,7 +27,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'lider_id',
     'es_lider',
     'estado',
-    'red_id',
     'inactivado_en',
     'trasladada_a_sede_id',
     'trasladada_en',
@@ -39,6 +39,7 @@ class Persona extends Model
 
     public const ESTADOS = [
         'visitante' => 'Visitante',
+        'celula' => 'En célula',
         'nuevo_creyente' => 'Nuevo creyente',
         'miembro_activo' => 'Miembro activo',
         'inactivo' => 'Inactivo',
@@ -75,10 +76,6 @@ class Persona extends Model
         return $this->hasMany(Persona::class, 'lider_id');
     }
 
-    public function redLider(): BelongsTo
-    {
-        return $this->belongsTo(Red::class, 'red_id');
-    }
 
     public function cambios(): HasMany
     {
@@ -105,9 +102,7 @@ class Persona extends Model
      */
     public function getCelularLimpioAttribute(): ?string
     {
-        $digitos = preg_replace('/\D+/', '', (string) $this->celular);
-
-        return $digitos !== '' ? $digitos : null;
+        return Celular::limpio($this->celular);
     }
 
     /**
@@ -115,9 +110,7 @@ class Persona extends Model
      */
     public function getCelularWhatsappAttribute(): ?string
     {
-        $digitos = $this->celular_limpio;
-
-        return $digitos !== null && strlen($digitos) === 10 ? '57'.$digitos : $digitos;
+        return Celular::whatsapp($this->celular);
     }
 
     public function getNombreCompletoAttribute(): string
@@ -213,7 +206,8 @@ class Persona extends Model
 
     public function scopeSinLider($query)
     {
-        return $query->whereNull('lider_id')->where('es_lider', false)->where('estado', '!=', 'inactivo');
+        // «En célula»: su vínculo es la célula, no un líder directo.
+        return $query->whereNull('lider_id')->where('es_lider', false)->whereNotIn('estado', ['inactivo', 'celula']);
     }
 
     /**

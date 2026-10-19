@@ -2,19 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\PersonasGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Http\Requests\PersonaRequest;
 use App\Models\Persona;
-use App\Models\Red;
+use App\Services\BuscadorPersonas;
 use App\Services\LiderazgoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class PersonasController extends Controller
 {
-    private const POR_PAGINA = 25;
+    use ServicioGrilla;
 
     public function __construct(private LiderazgoService $liderazgo)
     {
+    }
+
+    protected function grilla(): Grilla
+    {
+        return app(PersonasGrilla::class);
     }
 
     public function index(Request $request)
@@ -24,37 +34,81 @@ class PersonasController extends Controller
         }
 
         $user = $this->usuarioActual();
-        $estado = $request->input('estado');
-        $incluirInactivos = $request->boolean('inactivos') || $estado === 'inactivo';
 
-        $personas = $this->alcance()->personasVisibles($user)
-            ->with(['lider', 'redLider'])
-            ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
-            ->when($estado, fn ($query) => $query->where('estado', $estado))
-            ->when(!$incluirInactivos, fn ($query) => $query->activas())
-            ->when($request->filled('lider_id'), fn ($query) => $query->where('lider_id', $request->lider_id))
-            ->when($request->filled('red_id'), function ($query) use ($request) {
-                $query->where(fn ($q) => $q->where('red_id', $request->red_id)
-                    ->orWhereHas('lider', fn ($lider) => $lider->where('red_id', $request->red_id)));
-            })
-            ->orderBy('apellidos')
-            ->orderBy('nombres')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
-
-        return view('personas.index', [
-            'personas' => $personas,
-            'lideres' => $this->alcance()->lideresVisibles($user)->orderBy('apellidos')->orderBy('nombres')->get(),
-            'redes' => $this->alcance()->redesVisibles($user)->orderBy('nombre')->get(),
-            'filtros' => [
-                'q' => $request->input('q'),
-                'estado' => $estado,
-                'red_id' => $request->input('red_id'),
-                'lider_id' => $request->input('lider_id'),
-                'inactivos' => $incluirInactivos,
-            ],
+        return view('personas.index', $this->datosDeLaGrilla($request) + [
             'sinPersonaVinculada' => $user && !$user->tieneAccesoTotal() && !$user->persona_id,
         ]);
+    }
+
+    /** Búsqueda con autocompletado (JSON). Ver contracts/rutas-y-componentes.md. */
+    public function buscar(Request $request, BuscadorPersonas $buscador)
+    {
+        if (!Session::get('is_logged_in')) {
+            return response()->json(['mensaje' => 'Inicia sesión'], 401);
+        }
+
+        $excluir = $request->input('excluir', []);
+        $excluir = is_array($excluir) ? $excluir : explode(',', (string) $excluir);
+
+        $resultado = $buscador->buscar($this->usuarioActual(), [
+            'q' => $request->input('q'),
+            'activas' => $request->boolean('activas', true),
+            'sin_lideres' => $request->boolean('sin_lideres'),
+            'excluir' => $excluir,
+            'pagina' => $request->integer('pagina', 1),
+        ]);
+
+        return response()->json($resultado)->header('Cache-Control', 'no-store, private');
+    }
+
+    /** Alta rápida (por ejemplo desde una célula): queda en estado «En célula». */
+    public function rapida(Request $request)
+    {
+        if (!Session::get('is_logged_in')) {
+            return response()->json(['mensaje' => 'Inicia sesión'], 401);
+        }
+
+        $this->autorizar('crear');
+
+        // Este endpoint responde siempre JSON (el manejador global solo lo hace para /api).
+        $validador = Validator::make($request->all(), [
+            'nombres' => ['required', 'string', 'max:255'],
+            'apellidos' => ['required', 'string', 'max:255'],
+            'celular' => ['nullable', 'string', 'max:20', 'required_without:email'],
+            'email' => ['nullable', 'email', 'max:255', 'required_without:celular'],
+        ], [
+            'celular.required_without' => 'Indica al menos un medio de contacto: celular o correo.',
+            'email.required_without' => 'Indica al menos un medio de contacto: celular o correo.',
+        ]);
+
+        if ($validador->fails()) {
+            return response()->json(['errors' => $validador->errors()->toArray()], 422);
+        }
+
+        $data = $validador->validated();
+
+        $data = array_map(fn ($v) => is_string($v) && trim($v) === '' ? null : $v, $data) + ['estado' => 'celula'];
+        $data['estado'] = 'celula';
+
+        if (!$request->boolean('confirmar_duplicado') && ($duplicada = $this->buscarDuplicada($data, null))) {
+            return response()->json(['duplicado' => ['id' => $duplicada->id, 'nombre' => $duplicada->nombre_completo]], 409);
+        }
+
+        $user = $this->usuarioActual();
+
+        // Un líder que registra personas las deja a su cargo; si no, quedarían fuera de su ámbito.
+        if ($user->isLiderCelula() && $user->persona_id) {
+            $data['lider_id'] = $user->persona_id;
+        }
+
+        $persona = DB::transaction(function () use ($data, $user) {
+            $persona = Persona::create($data);
+            $this->liderazgo->registrarCambio($persona, 'creada', null, ['estado' => $persona->estado, 'lider_id' => $persona->lider_id], $user);
+
+            return $persona;
+        });
+
+        return response()->json(BuscadorPersonas::formato($persona), 201);
     }
 
     public function show(Persona $persona)
@@ -67,7 +121,6 @@ class PersonasController extends Controller
 
         $persona->load([
             'lider',
-            'redLider',
             'miembros' => fn ($query) => $query->orderBy('apellidos')->orderBy('nombres'),
             'celulas.lider',
             'celulasLideradas.miembros',
@@ -197,7 +250,7 @@ class PersonasController extends Controller
                 $this->liderazgo->registrarCambio($persona, 'estado', ['estado' => $estadoAnterior], ['estado' => $persona->estado], $user);
             }
             if (!$eraLider && $persona->es_lider) {
-                $this->liderazgo->registrarCambio($persona, 'rol_lider', ['es_lider' => false], ['es_lider' => true, 'red_id' => $persona->red_id], $user);
+                $this->liderazgo->registrarCambio($persona, 'rol_lider', ['es_lider' => false], ['es_lider' => true], $user);
             }
 
             return $cambiaLider ? $this->liderazgo->cambiarLider($persona, $nuevoLider, $user) : [];
@@ -291,7 +344,7 @@ class PersonasController extends Controller
 
     /**
      * Ajusta los datos validados según los permisos de quien guarda: solo quien puede designar
-     * líderes controla el rol y la red.
+     * líderes controla el rol.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -301,7 +354,7 @@ class PersonasController extends Controller
         unset($data['confirmar_duplicado']);
 
         if (!$this->puede('designarLider')) {
-            unset($data['es_lider'], $data['red_id']);
+            unset($data['es_lider']);
 
             return $data;
         }
@@ -312,8 +365,6 @@ class PersonasController extends Controller
             return $data;
         }
 
-        $data['red_id'] = null;
-
         return $data;
     }
 
@@ -322,16 +373,11 @@ class PersonasController extends Controller
      */
     private function avisarDuplicado(PersonaRequest $request, array $data, ?Persona $actual)
     {
-        if ($request->boolean('confirmar_duplicado') || empty($data['celular'])) {
+        if ($request->boolean('confirmar_duplicado')) {
             return null;
         }
 
-        $duplicada = Persona::query()
-            ->whereRaw('lower(nombres) = ?', [mb_strtolower(trim($data['nombres']))])
-            ->whereRaw('lower(apellidos) = ?', [mb_strtolower(trim($data['apellidos']))])
-            ->where('celular', $data['celular'])
-            ->when($actual, fn ($q) => $q->whereKeyNot($actual->id))
-            ->first();
+        $duplicada = $this->buscarDuplicada($data, $actual);
 
         if (!$duplicada) {
             return null;
@@ -342,6 +388,21 @@ class PersonasController extends Controller
             'nombre' => $duplicada->nombre_completo,
             'puedeVer' => $this->alcance()->puedeVerPersona($this->usuarioActual(), $duplicada),
         ]);
+    }
+
+    /** Persona con el mismo nombre, apellidos y celular (posible duplicado). */
+    private function buscarDuplicada(array $data, ?Persona $actual): ?Persona
+    {
+        if (empty($data['celular'])) {
+            return null;
+        }
+
+        return Persona::query()
+            ->whereRaw('lower(nombres) = ?', [mb_strtolower(trim($data['nombres']))])
+            ->whereRaw('lower(apellidos) = ?', [mb_strtolower(trim($data['apellidos']))])
+            ->where('celular', $data['celular'])
+            ->when($actual, fn ($q) => $q->whereKeyNot($actual->id))
+            ->first();
     }
 
     /**
@@ -362,7 +423,6 @@ class PersonasController extends Controller
         return [
             'lideres' => $lideres,
             'puedeDesignarLider' => $puedeDesignar,
-            'redes' => $puedeDesignar ? Red::activas()->orderBy('nombre')->get() : collect(),
         ];
     }
 }

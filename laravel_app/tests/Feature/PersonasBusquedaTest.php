@@ -34,10 +34,10 @@ class PersonasBusquedaTest extends TestCase
 
         $this->get(route('personas.index', ['lider_id' => $lider->id]))
             ->assertOk()
-            ->assertViewHas('personas', fn ($p) => $p->perPage() === 25 && $p->total() === 31 && $p->count() === 25);
+            ->assertViewHas('pagina', fn ($p) => $p->perPage() === 25 && $p->total() === 31 && $p->count() === 25);
 
         $this->get(route('personas.index', ['lider_id' => $lider->id, 'estado' => 'visitante', 'q' => 'vera']))
-            ->assertViewHas('personas', fn ($p) => $p->total() === 1);
+            ->assertViewHas('pagina', fn ($p) => $p->total() === 1);
     }
 
     public function test_los_inactivos_no_aparecen_por_defecto(): void

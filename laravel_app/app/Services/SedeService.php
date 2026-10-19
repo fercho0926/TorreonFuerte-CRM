@@ -190,7 +190,7 @@ class SedeService
                 return true;
             }
 
-            foreach ([Celula::class, Evento::class, \App\Models\Encuentro::class, \App\Models\Ministerio::class, \App\Models\Red::class] as $modelo) {
+            foreach ([Celula::class, Evento::class, \App\Models\Encuentro::class, \App\Models\Ministerio::class] as $modelo) {
                 if ($modelo::query()->where('sede_id', $sede->id)->exists()) {
                     return true;
                 }

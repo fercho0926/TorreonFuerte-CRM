@@ -4,12 +4,11 @@ namespace App\Services;
 
 use App\Models\Celula;
 use App\Models\Persona;
-use App\Models\Red;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Define qué personas, líderes, células y redes puede ver un usuario según su rol:
+ * Define qué personas, líderes, células puede ver un usuario según su rol:
  * admin y pastor ven todo; un líder ve a sus personas y sus células; el rol "usuario" solo
  * su propio registro. Devuelve consultas (no listas de IDs) para poder paginar y reutilizarlas
  * en selectores.
@@ -92,17 +91,5 @@ class AlcanceService
         }
 
         return $query->whereRaw('1 = 0');
-    }
-
-    /**
-     * Redes que el usuario puede usar en filtros y selectores.
-     */
-    public function redesVisibles(?User $user): Builder
-    {
-        if ($this->tieneAccesoTotal($user)) {
-            return Red::query()->activas();
-        }
-
-        return Red::query()->whereIn('id', $this->lideresVisibles($user)->whereNotNull('personas.red_id')->select('personas.red_id')->toBase());
     }
 }

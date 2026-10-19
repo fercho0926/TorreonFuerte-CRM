@@ -42,9 +42,6 @@
             @include('partials.acciones-contacto', ['persona' => $lider])
         </div>
         <dl class="row">
-            <dt class="col-sm-3">Red</dt>
-            <dd class="col-sm-9"><x-ui.insignia color="primary">{{ $lider->redLider?->nombre ?? '—' }}</x-ui.insignia></dd>
-
             <dt class="col-sm-3">Documento</dt>
             <dd class="col-sm-9">{{ $lider->numero_documento ? $lider->tipo_documento.' '.$lider->numero_documento : '—' }}</dd>
 
@@ -83,50 +80,36 @@
     </div>
 </div>
 
-<div class="card mb-4">
+<div class="card card-primary card-outline mb-4" id="personas-a-cargo">
     <div class="card-header">
-        <h3 class="card-title">Personas a su cargo ({{ $miembros->count() }})</h3>
+        <h3 class="card-title"><i class="fas fa-users me-1" aria-hidden="true"></i>Personas a su cargo <small class="text-muted ms-2">{{ $miembros->count() }}</small></h3>
     </div>
-    <div class="card-body p-0">
-        <div class="d-md-none p-2">
-            @forelse($miembros as $miembro)
-                @include('partials.persona-tarjeta', ['persona' => $miembro])
-            @empty
-                <p class="text-center text-muted my-3">Este líder aún no tiene personas asignadas.</p>
-            @endforelse
-        </div>
-        <div class="d-none d-md-block table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
+    @if($miembros->isEmpty())
+        <div class="card-body"><x-ui.vacio mensaje="Aún no lidera a nadie." icono="fa-user-friends" /></div>
+    @else
+        {{-- Grilla compacta con altura máxima: no alarga la página aunque tenga muchas personas. --}}
+        <div class="card-body table-responsive p-0" style="max-height: 20rem; overflow-y: auto;">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="sticky-top bg-body">
                     <tr>
                         <th>Nombre</th>
                         <th>Estado</th>
                         <th>Celular</th>
-                        <th>Ciudad</th>
-                        <th>Acciones</th>
+                        <th>Célula</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($miembros as $miembro)
+                    @foreach($miembros as $miembro)
                         <tr>
                             <td><a href="{{ route('personas.show', $miembro) }}">{{ $miembro->nombre_completo }}</a></td>
-                            <td>{{ $miembro->estado_etiqueta }}</td>
+                            <td><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
                             <td>{{ $miembro->celular ?? '—' }}</td>
-                            <td>{{ $miembro->ciudad ?? '—' }}</td>
-                            <td>
-                                @puede('editar', $miembro)
-                                    <a href="{{ route('personas.edit', $miembro) }}" class="btn btn-sm btn-primary">Editar</a>
-                                @endpuede
-                            </td>
+                            <td>{{ $miembro->celulas->pluck('nombre')->implode(', ') ?: '—' }}</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center">Este líder aún no tiene personas asignadas.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
-    </div>
+    @endif
 </div>
 @endsection

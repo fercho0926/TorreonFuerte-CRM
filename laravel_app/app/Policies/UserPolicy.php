@@ -36,6 +36,18 @@ class UserPolicy
             && in_array($objetivo->role, self::ROLES_DEL_PASTOR, true);
     }
 
+    /** Generar y enviar una clave temporal: mismo alcance que gestionar la cuenta. */
+    public function gestionarClaves(User $actor, User $objetivo): bool
+    {
+        return $this->gestionar($actor, $objetivo);
+    }
+
+    /** Ver y atender las solicitudes de clave de su alcance. */
+    public function verSolicitudesClave(User $actor): bool
+    {
+        return $this->verUsuarios($actor);
+    }
+
     /**
      * Roles que el actor puede asignar al crear o editar una cuenta.
      *

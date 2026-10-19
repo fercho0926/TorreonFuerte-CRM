@@ -33,7 +33,7 @@ class PastoresIniciaSesionTest extends TestCase
 
             $this->get(route('personas.index'))
                 ->assertOk()
-                ->assertViewHas('personas', fn ($p) => $p->total() === 2 + $indice);
+                ->assertViewHas('pagina', fn ($p) => $p->total() === 2 + $indice);
 
             $this->post(route('personas.store'), ['nombres' => 'Visita', 'apellidos' => 'De '.$correo, 'celular' => '3004445555', 'estado' => 'visitante'])
                 ->assertSessionHasNoErrors();

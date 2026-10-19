@@ -142,6 +142,9 @@
 /* ---------- Selectores (Select2) ---------- */
 
 .fm-campo .select2-container { width: 100% !important; }
+/* Dentro de un grupo con icono, Select2 comparte la fila con el icono en lugar de ocupar todo el ancho. */
+.fm-campo .input-group > .select2-container { flex: 1 1 auto; width: 1% !important; min-width: 0; }
+.fm-campo .input-group > .select2-container + .invalid-feedback { width: 100%; }
 .fm-campo .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
     background: var(--fm-primario-suave); color: var(--fm-primario); border: 0; border-radius: 1rem; padding: .15rem .6rem; font-weight: 600;
 }

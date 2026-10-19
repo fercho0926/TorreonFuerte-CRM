@@ -24,3 +24,16 @@ export function iniciarAvisos() {
         });
     });
 }
+
+/** Aviso breve (toast) con un texto cualquiera, por ejemplo «Mensaje copiado». */
+export function avisoBreve(mensaje) {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: mensaje,
+        showConfirmButton: false,
+        timer: 2500,
+        customClass: { popup: 'fm-aviso-exito' },
+    });
+}

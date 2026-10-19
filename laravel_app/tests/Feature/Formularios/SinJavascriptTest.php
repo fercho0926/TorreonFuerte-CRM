@@ -84,6 +84,6 @@ class SinJavascriptTest extends TestCase
         $this->assertMatchesRegularExpression('/<form method="GET" action="[^"]*personas"[^>]*data-form="1"/', $html);
         $this->assertStringNotContainsString('name="_token"', substr($html, strpos($html, 'method="GET"'), 400));
 
-        $this->get(route('personas.index', ['q' => 'PersonaAlfa']))->assertViewHas('personas', fn ($p) => $p->total() === 1);
+        $this->get(route('personas.index', ['q' => 'PersonaAlfa']))->assertViewHas('pagina', fn ($p) => $p->total() === 1);
     }
 }

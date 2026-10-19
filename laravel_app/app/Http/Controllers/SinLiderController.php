@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\SinLiderGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Persona;
 use App\Services\LiderazgoService;
@@ -10,8 +13,15 @@ use Illuminate\Validation\Rule;
 
 class SinLiderController extends Controller
 {
+    use ServicioGrilla;
+
     public function __construct(private LiderazgoService $liderazgo)
     {
+    }
+
+    protected function grilla(): Grilla
+    {
+        return app(SinLiderGrilla::class);
     }
 
     public function index(Request $request)
@@ -22,21 +32,7 @@ class SinLiderController extends Controller
 
         $this->autorizar('verSinLider');
 
-        $user = $this->usuarioActual();
-
-        $personas = $this->alcance()->personasVisibles($user)
-            ->sinLider()
-            ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
-            ->orderBy('apellidos')
-            ->orderBy('nombres')
-            ->paginate(25)
-            ->withQueryString();
-
-        return view('sin-lider.index', [
-            'personas' => $personas,
-            'lideres' => $this->alcance()->lideresVisibles($user)->orderBy('apellidos')->orderBy('nombres')->get(),
-            'q' => $request->input('q'),
-        ]);
+        return view('sin-lider.index', $this->datosDeLaGrilla($request));
     }
 
     public function asignar(Request $request, Persona $persona)

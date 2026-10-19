@@ -14,7 +14,7 @@ class ListadosTest extends TestCase
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
 
     private const LISTADOS = ['personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'encuentros.index',
-        'ministerios.index', 'redes.index', 'users.index', 'sedes.index', 'sin-lider.index'];
+        'ministerios.index', 'users.index', 'sedes.index', 'sin-lider.index'];
 
     protected function setUp(): void
     {
@@ -69,8 +69,8 @@ class ListadosTest extends TestCase
 
     public function test_el_contador_de_resultados_aparece_en_el_titulo_de_la_tarjeta(): void
     {
-        $this->get(route('personas.index'))->assertSee('resultados', false);
-        $this->get(route('celulas.index'))->assertSee('resultados', false);
+        $this->get(route('personas.index'))->assertSee('data-grilla-contador', false)->assertSeeText('resultado');
+        $this->get(route('celulas.index'))->assertSee('data-grilla-contador', false)->assertSeeText('resultado');
     }
 
     public function test_la_paginacion_usa_bootstrap_5(): void

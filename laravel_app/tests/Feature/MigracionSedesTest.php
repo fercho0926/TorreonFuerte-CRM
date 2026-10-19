@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Persona;
-use App\Models\Red;
 use App\Models\Sede;
 use App\Models\User;
 use App\Support\MigracionSedes;
@@ -60,7 +59,6 @@ class MigracionSedesTest extends TestCase
 
         $pastorPersona = $this->insertarLegado('personas', ['nombres' => 'Pablo', 'apellidos' => 'Pastor', 'tipo_documento' => 'CC', 'numero_documento' => '1', 'estado' => 'miembro_activo']);
         $otra = $this->insertarLegado('personas', ['nombres' => 'Ana', 'apellidos' => 'Miembro', 'tipo_documento' => 'CC', 'numero_documento' => '2', 'estado' => 'miembro_activo', 'lider_id' => $pastorPersona]);
-        $red = $this->insertarLegado('redes', ['nombre' => 'Jóvenes', 'clave' => 'jovenes', 'activa' => 1]);
         $celula = $this->insertarLegado('celulas', ['nombre' => 'Célula 1', 'lider_id' => $pastorPersona, 'estado' => 'activa']);
         $reunion = $this->insertarLegado('celula_reuniones', ['celula_id' => $celula, 'fecha' => now()->toDateString()]);
         $evento = $this->insertarLegado('eventos', ['nombre' => 'Cena', 'tipo' => 'Cena de varones', 'fecha' => now()->addWeek()->toDateString(), 'costo' => 10000]);
@@ -73,7 +71,7 @@ class MigracionSedesTest extends TestCase
         $this->insertarLegado('users', ['name' => 'Admin', 'email' => 'admin@legado.co', 'password' => 'x', 'role' => 'admin']);
         $this->insertarLegado('users', ['name' => 'Pastor', 'email' => 'pastor@legado.co', 'password' => 'x', 'role' => 'pastor', 'persona_id' => $pastorPersona]);
         $this->insertarLegado('users', ['name' => 'Lider', 'email' => 'lider@legado.co', 'password' => 'x', 'role' => 'lider_celula', 'persona_id' => $otra]);
-        $this->assertSame([$red, $reunion], [$red, $reunion]);
+        $this->assertNotNull($reunion);
     }
 
     public function test_todas_las_filas_quedan_en_la_primera_sede_sin_perder_registros(): void
@@ -142,18 +140,15 @@ class MigracionSedesTest extends TestCase
         $this->assertSame(1, Sede::count());
     }
 
-    public function test_tras_el_esquema_endurecido_documento_y_red_se_repiten_entre_sedes(): void
+    public function test_tras_el_esquema_endurecido_el_documento_se_repite_entre_sedes(): void
     {
         $a = $this->crearSede(['nombre' => 'A']);
         $b = $this->crearSede(['nombre' => 'B']);
 
         Persona::factory()->deSede($a->id)->create(['numero_documento' => '555']);
         Persona::factory()->deSede($b->id)->create(['numero_documento' => '555']);
-        Red::create(['sede_id' => $a->id, 'nombre' => 'Jóvenes']);
-        Red::create(['sede_id' => $b->id, 'nombre' => 'Jóvenes']);
 
         $this->assertSame(2, Persona::withoutGlobalScopes()->where('numero_documento', '555')->count());
-        $this->assertSame(2, Red::withoutGlobalScopes()->where('clave', 'jovenes')->count());
 
         // Pero dentro de una misma sede siguen siendo únicos.
         $this->expectException(\Illuminate\Database\QueryException::class);

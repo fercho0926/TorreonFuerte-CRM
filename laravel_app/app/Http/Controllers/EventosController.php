@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\EventosGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Evento;
 use App\Models\EventoPago;
@@ -12,19 +15,20 @@ use Illuminate\Validation\Rule;
 
 class EventosController extends Controller
 {
-    public function index()
+    use ServicioGrilla;
+
+    protected function grilla(): Grilla
+    {
+        return app(EventosGrilla::class);
+    }
+
+    public function index(Request $request)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
-        $eventos = Evento::withCount('inscripciones')
-            ->orderByDesc('fecha')
-            ->get();
-
-        return view('eventos.index', [
-            'eventos' => $eventos,
-        ]);
+        return view('eventos.index', $this->datosDeLaGrilla($request));
     }
 
     public function create()

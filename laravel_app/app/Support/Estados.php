@@ -21,6 +21,7 @@ class Estados
         'planificado' => ['Planificado', 'info'],
         'en_curso' => ['En curso', 'info'],
         'nuevo_creyente' => ['Nuevo creyente', 'info'],
+        'celula' => ['En célula', 'dark'],
         // Atención
         'visitante' => ['Visitante', 'warning'],
         'pendiente' => ['Pendiente', 'warning'],
@@ -30,6 +31,14 @@ class Estados
         'no' => ['No', 'secondary'],
         // Peligro
         'cancelado' => ['Cancelado', 'danger'],
+        // Claves temporales y solicitudes
+        'pendiente_envio' => ['Pendiente de envío', 'warning'],
+        'enviada' => ['Enviada', 'info'],
+        'usada' => ['Usada', 'success'],
+        'reemplazada' => ['Reemplazada', 'secondary'],
+        'descartada' => ['Descartada', 'secondary'],
+        'atendida' => ['Atendida', 'success'],
+        'vencida' => ['Vencida', 'danger'],
         // Rol
         'lider' => ['Líder', 'primary'],
     ];

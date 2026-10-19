@@ -3,6 +3,8 @@
  * con contador. La búsqueda ignora mayúsculas y tildes y también mira el dato de apoyo
  * (documento o celular). Sin JavaScript, el <select> nativo sigue funcionando.
  */
+import { iniciarAltaRapida } from './alta-rapida.js';
+import { configuracionRemota } from './buscador-remoto.js';
 import { normalizar } from './texto.js';
 
 const MINIMO_PARA_BUSCADOR = 10;
@@ -51,7 +53,7 @@ function plantillaResultado(opcion) {
     return contenedor;
 }
 
-function barraMultiple(select, $) {
+function barraMultiple(select, $, remoto = false) {
     const barra = document.createElement('div');
     barra.className = 'fm-multi-barra';
     barra.dataset.multiBarra = '1';
@@ -85,8 +87,24 @@ function barraMultiple(select, $) {
     $(select).on('change', actualizar);
     actualizar();
 
-    barra.append(contador, todos, limpiar);
+    // Con búsqueda remota no hay lista local que «seleccionar»: solo contador y limpiar.
+    if (remoto) barra.append(contador, limpiar);
+    else barra.append(contador, todos, limpiar);
     select.closest('.fm-campo')?.querySelector('.invalid-feedback')?.insertAdjacentElement('beforebegin', barra);
+}
+
+/** Muestra un aviso (con enlace a editar) cuando la persona elegida no tiene documento. */
+function avisoSinDocumento(select, $) {
+    const aviso = document.querySelector(select.dataset.avisoSinDocumento);
+    if (!aviso) return;
+
+    const enlace = aviso.querySelector('a[data-plantilla]');
+    $(select).on('select2:select', (evento) => {
+        const dato = evento.params?.data ?? {};
+        aviso.hidden = !dato.sinDocumento;
+        if (dato.sinDocumento && enlace) enlace.href = enlace.dataset.plantilla.replace('__ID__', dato.id);
+    });
+    $(select).on('select2:clear select2:unselect', () => { aviso.hidden = true; });
 }
 
 export function iniciarSelectores(form) {
@@ -95,23 +113,29 @@ export function iniciarSelectores(form) {
 
     form.querySelectorAll('select').forEach((select) => {
         const multiple = select.multiple;
-        const conBuscador = multiple || select.hasAttribute('data-buscar') || select.options.length > MINIMO_PARA_BUSCADOR;
+        const remoto = Boolean(select.dataset.fuente);
+        const conBuscador = remoto || multiple || select.hasAttribute('data-buscar') || select.options.length > MINIMO_PARA_BUSCADOR;
         if (!conBuscador || select.dataset.sinSelect2 !== undefined) return;
 
         const vacia = Array.from(select.options).find((o) => o.value === '');
 
-        $(select).select2({
+        const base = {
             theme: 'bootstrap-5',
             width: '100%',
-            language: IDIOMA,
+            language: { ...IDIOMA, inputTooShort: () => 'Escribe al menos 2 letras para buscar' },
             matcher,
             templateResult: plantillaResultado,
-            placeholder: vacia?.textContent || (multiple ? 'Escribe para buscar y elegir' : 'Seleccione...'),
+            placeholder: vacia?.textContent || (multiple ? 'Escribe para buscar y elegir' : 'Escribe para buscar…'),
             allowClear: !multiple && !!vacia && !select.required,
             closeOnSelect: !multiple,
             dropdownParent: $(select.closest('.fm-campo') ?? document.body),
-        });
+        };
 
-        if (multiple) barraMultiple(select, $);
+        // Modo remoto: las sugerencias salen del servidor (spec 006).
+        $(select).select2(remoto ? { ...base, ...configuracionRemota(select, $) } : base);
+
+        if (multiple) barraMultiple(select, $, remoto);
+        if (remoto) iniciarAltaRapida(select, $);
+        if (remoto && select.dataset.avisoSinDocumento) avisoSinDocumento(select, $);
     });
 }

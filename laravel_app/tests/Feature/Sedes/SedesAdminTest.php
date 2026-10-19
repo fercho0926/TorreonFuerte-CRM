@@ -58,7 +58,7 @@ class SedesAdminTest extends TestCase
             ->assertSee('Iglesia Central')
             ->assertSee('Pablo Pastor')
             ->assertSee('Paula Pastora')
-            ->assertViewHas('resumen', fn ($r) => $r[$sede->id]['personas'] === 5);
+            ->assertViewHas('pagina', fn ($p) => collect($p->items())->first(fn ($f) => $f['sede']->id === $sede->id)['personas'] === 5);
     }
 
     public function test_el_admin_puede_listar_sedes_estando_en_todas_las_sedes_y_en_una_activa(): void

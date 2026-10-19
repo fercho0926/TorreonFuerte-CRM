@@ -43,12 +43,12 @@ class SedeActivaAdminTest extends TestCase
         $this->get(route('personas.index'))
             ->assertOk()
             ->assertSee('PersonaAlfa')->assertSee('PersonaBeta')
-            ->assertSee('<th>Sede</th>', false)
+            ->assertSee('data-columna="sede"', false)
             ->assertSee('Iglesia Beta')
             ->assertSee('solo consulta');
 
-        foreach (['lideres.index', 'celulas.index', 'encuentros.index', 'eventos.index', 'ministerios.index', 'redes.index'] as $ruta) {
-            $this->get(route($ruta))->assertOk()->assertSee('<th>Sede</th>', false);
+        foreach (['lideres.index', 'celulas.index', 'encuentros.index', 'eventos.index', 'ministerios.index'] as $ruta) {
+            $this->get(route($ruta))->assertOk()->assertSee('data-columna="sede"', false);
         }
     }
 
@@ -60,7 +60,6 @@ class SedeActivaAdminTest extends TestCase
             ->assertForbidden()->assertSee('Elige una sede activa para crear o editar');
         $this->put(route('personas.update', $this->A['persona']), ['nombres' => 'Hack'])->assertForbidden();
         $this->delete(route('eventos.destroy', $this->A['evento']))->assertForbidden();
-        $this->post(route('redes.store'), ['nombre' => 'Nueva'])->assertForbidden();
 
         $this->assertSame(0, Persona::withoutGlobalScopes()->where('nombres', 'Sin')->count());
         $this->assertNotNull($this->A['evento']->fresh());
@@ -74,10 +73,8 @@ class SedeActivaAdminTest extends TestCase
         $this->comoAdminEnSede($this->B['sede']);
 
         $this->post(route('personas.store'), ['nombres' => 'EnBeta', 'apellidos' => 'Nueva', 'celular' => '3001234567', 'estado' => 'visitante'])->assertSessionHasNoErrors();
-        $this->post(route('redes.store'), ['nombre' => 'Red Nueva'])->assertSessionHasNoErrors();
 
         $this->assertSame($this->B['sede']->id, Persona::withoutGlobalScopes()->where('nombres', 'EnBeta')->value('sede_id'));
-        $this->assertSame($this->B['sede']->id, \App\Models\Red::withoutGlobalScopes()->where('nombre', 'Red Nueva')->value('sede_id'));
     }
 
     public function test_el_selector_de_sede_activa_solo_aparece_para_el_admin(): void

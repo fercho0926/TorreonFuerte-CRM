@@ -58,7 +58,6 @@ trait RecorreFormularios
             'ministerio (ficha)' => route('ministerios.show', $this->A['ministerio']),
             'persona (ficha)' => route('personas.show', $this->A['persona']),
             'sede (ficha)' => route('sedes.show', $this->A['sede']),
-            'redes' => route('redes.index'),
             'sin líder' => route('sin-lider.index'),
             'personas (listado)' => route('personas.index'),
             'líderes (listado)' => route('lideres.index'),
@@ -78,12 +77,12 @@ trait RecorreFormularios
     protected function camposEsperados(): array
     {
         return [
-            'persona (crear)' => ['nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento', 'estado', 'tipo_documento', 'numero_documento', 'direccion', 'barrio', 'ciudad', 'lider_id', 'es_lider', 'red_id'],
+            'persona (crear)' => ['nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento', 'estado', 'tipo_documento', 'numero_documento', 'direccion', 'barrio', 'ciudad', 'lider_id', 'es_lider'],
             'célula (crear)' => ['nombre', 'sede', 'estado', 'lider_id', 'co_lider_id', 'dia_reunion', 'hora_reunion', 'lugar_reunion'],
             'encuentro (crear)' => ['nombre', 'fecha_realizacion', 'estado', 'personas[]'],
             'evento (crear)' => ['nombre', 'tipo', 'fecha', 'costo', 'estado', 'personas[]'],
             'ministerio (crear)' => ['nombre', 'estado', 'encargado_id', 'personas[]'],
-            'usuario (crear)' => ['name', 'email', 'password', 'password_confirmation', 'role', 'persona_id'],
+            'usuario (crear)' => ['name', 'email', 'celular', 'role', 'persona_id'],
             'sede (crear)' => ['nombre', 'ciudad', 'direccion', 'telefono', 'email', 'pastor[nombres]', 'pastor[apellidos]', 'pastor[email]', 'pastor[password]', 'pastora[nombres]', 'pastora[apellidos]', 'pastora[email]', 'pastora[password]'],
             'traslado' => ['sede_destino_id'],
         ];

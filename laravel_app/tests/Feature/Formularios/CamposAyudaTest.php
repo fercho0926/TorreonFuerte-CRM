@@ -24,9 +24,7 @@ class CamposAyudaTest extends TestCase
     {
         $html = $this->get(route('personas.create'))->getContent();
 
-        $this->assertSame(1, substr_count($html, 'data-visible-si="es_lider:1"'), 'La red se muestra solo al marcar "es líder"');
         $this->assertSame(2, substr_count($html, 'data-requerido-si="estado:miembro_activo|es_lider:1"'), 'Tipo y número de documento obligatorios según estado o liderazgo');
-        $this->assertMatchesRegularExpression('/<select id="fm-red_id"[^>]*data-requerido-si="es_lider:1"/s', $html);
     }
 
     public function test_celular_documento_y_fecha_ayudan_a_escribir(): void

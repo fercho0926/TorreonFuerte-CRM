@@ -30,8 +30,7 @@ return [
                 ['etiqueta' => 'Sin líder asignado', 'icono' => 'fa-user-clock', 'ruta' => 'sin-lider.index', 'activa_en' => ['sin-lider.*'],
                     'permiso' => ['verSinLider', Persona::class], 'insignia' => 'sinLider'],
                 ['etiqueta' => 'Células', 'icono' => 'fa-people-arrows', 'ruta' => 'celulas.index', 'activa_en' => ['celulas.*']],
-                ['etiqueta' => 'Redes', 'icono' => 'fa-sitemap', 'ruta' => 'redes.index', 'activa_en' => ['redes.*'],
-                    'permiso' => ['gestionarCatalogos', Persona::class]],
+                ['etiqueta' => 'Ministerios', 'icono' => 'fa-hands-helping', 'ruta' => 'ministerios.index', 'activa_en' => ['ministerios.*']],
             ],
         ],
         [
@@ -40,7 +39,6 @@ return [
             'opciones' => [
                 ['etiqueta' => 'Eventos', 'icono' => 'fa-glass-cheers', 'ruta' => 'eventos.index', 'activa_en' => ['eventos.*']],
                 ['etiqueta' => 'Encuentros', 'icono' => 'fa-calendar-check', 'ruta' => 'encuentros.index', 'activa_en' => ['encuentros.*']],
-                ['etiqueta' => 'Ministerios', 'icono' => 'fa-hands-helping', 'ruta' => 'ministerios.index', 'activa_en' => ['ministerios.*']],
             ],
         ],
         [
@@ -51,6 +49,8 @@ return [
                     'permiso' => ['ver', Sede::class]],
                 ['etiqueta' => 'Usuarios', 'icono' => 'fa-users', 'ruta' => 'users.index', 'activa_en' => ['users.*'],
                     'permiso' => ['verUsuarios', User::class]],
+                ['etiqueta' => 'Solicitudes de clave', 'icono' => 'fa-key', 'ruta' => 'solicitudes-clave.index', 'activa_en' => ['solicitudes-clave.*', 'claves.*'],
+                    'permiso' => ['verSolicitudesClave', User::class], 'insignia' => 'solicitudes'],
             ],
         ],
     ],

@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Evento;
 use App\Models\Persona;
 use App\Models\User;
+use App\Services\ClavesTemporales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -28,9 +31,21 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Límite de intentos fallidos por correo y origen (spec 005, research D6).
+        $limite = 'login:'.Str::lower($request->email).'|'.$request->ip();
+        $maximo = (int) config('claves.login_fallos_por_minuto');
+
+        if (RateLimiter::tooManyAttempts($limite, $maximo)) {
+            return back()->withErrors(['email' => 'Demasiados intentos; espera un minuto antes de volver a intentarlo.']);
+        }
+
         $user = User::withoutGlobalScopes()->where('email', $request->email)->first();
 
-        if ($user && Hash::check($request->password, $user->password)) {
+        if ($user && $this->claveCorrecta($user, (string) $request->password)) {
+            if ($user->claveTemporalVencida()) {
+                return back()->withErrors(['email' => 'Tu clave temporal venció; pide una nueva.']);
+            }
+
             if (!$user->esAdmin() && (!$user->sede_id || !$user->sede()->value('activa'))) {
                 return back()->withErrors([
                     'email' => $user->sede_id
@@ -39,16 +54,35 @@ class AuthController extends Controller
                 ]);
             }
 
+            RateLimiter::clear($limite);
+            Session::regenerate();
             Session::put('is_logged_in', true);
             Session::put('user_name', $user->name);
             Session::put('user_id', $user->id);
 
+            // Con clave temporal, el middleware lleva a «Elige tu contraseña».
             return redirect()->route('dashboard');
         }
+
+        RateLimiter::hit($limite, 60);
 
         return back()->withErrors([
             'email' => 'Credenciales incorrectas. Verifica tu correo y contraseña.',
         ]);
+    }
+
+    /**
+     * Valida la contraseña. Con una clave temporal vigente también se acepta escrita sin guion y
+     * en minúsculas (ABCDE-FGHJK = abcdefghjk).
+     */
+    private function claveCorrecta(User $user, string $clave): bool
+    {
+        if (Hash::check($clave, $user->password)) {
+            return true;
+        }
+
+        return $user->debe_cambiar_clave
+            && Hash::check(app(ClavesTemporales::class)->normalizar($clave), $user->password);
     }
 
     public function logout()
@@ -74,15 +108,6 @@ class AuthController extends Controller
         $activeSessions = $esAdmin ? DB::table('sessions')->count() : null;
         $personaCount = Persona::count();
         $liderCount = Persona::lideres()->count();
-
-        $personasPorRed = Persona::query()
-            ->selectRaw('redes.id as red_id, redes.nombre as red_grupo, sedes_red.nombre as sede_nombre, COUNT(*) as total')
-            ->leftJoin('personas as lideres', 'personas.lider_id', '=', 'lideres.id')
-            ->leftJoin('redes', 'redes.id', '=', DB::raw('COALESCE(personas.red_id, lideres.red_id)'))
-            ->leftJoin('sedes as sedes_red', 'sedes_red.id', '=', 'redes.sede_id')
-            ->groupBy('redes.id', 'redes.nombre', 'sedes_red.nombre')
-            ->orderByRaw('redes.nombre IS NULL, redes.nombre')
-            ->get();
 
         $eventos = Evento::with('inscripciones.pagos')->get();
         $eventoCount = $eventos->count();
@@ -110,7 +135,6 @@ class AuthController extends Controller
             'activeSessions' => $activeSessions,
             'personaCount' => $personaCount,
             'liderCount' => $liderCount,
-            'personasPorRed' => $personasPorRed,
             'eventoCount' => $eventoCount,
             'totalEsperadoEventos' => $totalEsperadoEventos,
             'totalRecaudadoEventos' => $totalRecaudadoEventos,

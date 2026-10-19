@@ -9,7 +9,6 @@ use App\Models\EventoPago;
 use App\Models\EventoPersona;
 use App\Models\Ministerio;
 use App\Models\Persona;
-use App\Models\Red;
 use App\Models\Sede;
 use App\Models\User;
 use App\Services\SedeContext;
@@ -35,13 +34,13 @@ class DatabaseSeeder extends Seeder
         // El administrador del sistema no pertenece a ninguna sede.
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
-            ['name' => 'Administrador', 'role' => 'admin', 'sede_id' => null, 'password' => 'password']
+            ['name' => 'Administrador', 'role' => 'admin', 'sede_id' => null, 'celular' => '3000000000', 'password' => 'password']
         );
 
         $sedes = [
-            ['clave' => 'centro', 'nombre' => 'Torreón Fuerte Centro', 'ciudad' => 'Torreón', 'red' => 'Jóvenes', 'lugar' => 'Centro'],
-            ['clave' => 'norte', 'nombre' => 'Torreón Fuerte Norte', 'ciudad' => 'Gómez Palacio', 'red' => 'Matrimonios', 'lugar' => 'Norte'],
-            ['clave' => 'sur', 'nombre' => 'Torreón Fuerte Sur', 'ciudad' => 'Lerdo', 'red' => 'Mujeres', 'lugar' => 'Sur'],
+            ['clave' => 'centro', 'nombre' => 'Torreón Fuerte Centro', 'ciudad' => 'Torreón', 'lugar' => 'Centro'],
+            ['clave' => 'norte', 'nombre' => 'Torreón Fuerte Norte', 'ciudad' => 'Gómez Palacio', 'lugar' => 'Norte'],
+            ['clave' => 'sur', 'nombre' => 'Torreón Fuerte Sur', 'ciudad' => 'Lerdo', 'lugar' => 'Sur'],
         ];
 
         foreach ($sedes as $i => $d) {
@@ -61,15 +60,13 @@ class DatabaseSeeder extends Seeder
      */
     private function datosDeLaSede(Sede $sede, array $d, int $indice): void
     {
-        $red = Red::firstOrCreate(['sede_id' => $sede->id, 'clave' => strtolower($d['red'])], ['nombre' => $d['red']]);
-
         $lider = Persona::firstOrCreate(
             ['sede_id' => $sede->id, 'nombres' => 'Lider', 'apellidos' => ucfirst($d['clave'])],
-            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true, 'red_id' => $red->id]
+            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true]
         );
         User::updateOrCreate(
             ['email' => "lider.{$d['clave']}@example.com"],
-            ['name' => $lider->nombre_completo, 'role' => 'lider_celula', 'persona_id' => $lider->id, 'sede_id' => $sede->id, 'password' => 'password']
+            ['name' => $lider->nombre_completo, 'role' => 'lider_celula', 'persona_id' => $lider->id, 'sede_id' => $sede->id, 'celular' => $lider->celular, 'password' => 'password']
         );
 
         $miembro = Persona::firstOrCreate(

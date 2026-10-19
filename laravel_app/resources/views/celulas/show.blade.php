@@ -45,10 +45,10 @@
 </div>
 
 @if($puedeAdministrar)
-    <x-form.layout :action="route('celulas.miembros.store', $celula)" modo="incrustado" guardar="Agregar miembro" icono="fa-user-plus" :leyenda="false">
-        <x-form.section titulo="Agregar miembro" descripcion="Solo aparecen personas cuyo líder directo es el líder o co-líder de esta célula." icono="fa-user-plus" id="seccion-agregar">
-            <x-form.select name="persona_id" label="Persona" icono="fa-user" :required="true" col="col-md-8" buscar vacio="Seleccione una persona..."
-                :opciones="\App\Support\Formulario::opciones($personasSinAsignar, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null))" />
+    <x-form.layout :action="route('celulas.miembros.store', $celula)" modo="incrustado" guardar="Agregar integrantes" icono="fa-user-plus" :leyenda="false">
+        <x-form.section titulo="Agregar integrantes" descripcion="Escribe para buscar por nombre, apellido, documento o celular. Si la persona aún no existe, créala desde aquí: quedará «En célula»." icono="fa-user-plus" id="seccion-agregar">
+            <x-form.multiselect name="personas[]" label="Personas" icono="fa-users" :required="true" :opciones="[]" :seleccionados="[]"
+                :fuente="route('personas.buscar')" :filtros="['activas' => 1, 'excluir' => $celula->miembros->pluck('id')->implode(',')]" :crear="route('personas.rapida')" />
         </x-form.section>
     </x-form.layout>
 @endif
@@ -64,6 +64,7 @@
                     <th>Nombre completo</th>
                     <th>Documento</th>
                     <th>Celular</th>
+                    <th>Estado</th>
                     @if($puedeAdministrar)
                         <th>Acciones</th>
                     @endif
@@ -75,6 +76,7 @@
                         <td>{{ $miembro->nombre_completo }}</td>
                         <td>{{ $miembro->tipo_documento }} {{ $miembro->numero_documento }}</td>
                         <td>{{ $miembro->celular ?? '—' }}</td>
+                        <td><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
                         @if($puedeAdministrar)
                             <td>
                                 <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a esta persona de la célula?"
@@ -84,7 +86,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $puedeAdministrar ? 4 : 3 }}" class="text-center">Esta célula aún no tiene miembros asignados.</td>
+                        <td colspan="{{ $puedeAdministrar ? 5 : 4 }}"><x-ui.vacio mensaje="Esta célula aún no tiene integrantes." icono="fa-users" /></td>
                     </tr>
                 @endforelse
             </tbody>

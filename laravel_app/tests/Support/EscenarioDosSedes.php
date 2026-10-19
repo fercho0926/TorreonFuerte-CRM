@@ -9,13 +9,12 @@ use App\Models\EventoPago;
 use App\Models\EventoPersona;
 use App\Models\Ministerio;
 use App\Models\Persona;
-use App\Models\Red;
 use App\Models\Sede;
 use App\Models\User;
 
 /**
  * Arma dos sedes (A y B) con datos de nombres distintivos para detectar fugas entre ellas.
- * Cada sede tiene pastor, líder, persona a cargo, célula, red, evento con inscripción y
+ * Cada sede tiene pastor, líder, persona a cargo, célula, evento con inscripción y
  * pago, encuentro y ministerio. Requiere los traits IniciaSesion y ConSedes.
  */
 trait EscenarioDosSedes
@@ -40,8 +39,6 @@ trait EscenarioDosSedes
         $sede = Sede::factory()->create(['nombre' => "Iglesia {$etiqueta}", 'ciudad' => "Ciudad {$etiqueta}"]);
         $id = $sede->id;
 
-        $red = Red::create(['sede_id' => $id, 'nombre' => "Red {$etiqueta}"]);
-
         $pastorPersona = Persona::factory()->deSede($id)->create(['nombres' => "Pastor{$etiqueta}", 'apellidos' => 'Principal']);
         $pastor = User::factory()->create([
             'role' => 'pastor', 'persona_id' => $pastorPersona->id, 'sede_id' => $id,
@@ -49,7 +46,7 @@ trait EscenarioDosSedes
         ]);
         $sede->update(['pastor_persona_id' => $pastorPersona->id]);
 
-        $lider = Persona::factory()->deSede($id)->lider($red->id)->create(['nombres' => "Lider{$etiqueta}", 'apellidos' => 'Guia']);
+        $lider = Persona::factory()->deSede($id)->lider()->create(['nombres' => "Lider{$etiqueta}", 'apellidos' => 'Guia']);
         $liderUser = User::factory()->create(['role' => 'lider_celula', 'persona_id' => $lider->id, 'sede_id' => $id]);
         $persona = Persona::factory()->deSede($id)->create(['nombres' => "Persona{$etiqueta}", 'apellidos' => 'Miembro', 'lider_id' => $lider->id]);
 
@@ -69,6 +66,6 @@ trait EscenarioDosSedes
             'sede_id' => $id, 'nombre' => "Encuentro {$etiqueta}", 'fecha_realizacion' => now()->toDateString(), 'estado' => 'planificado',
         ]);
 
-        return compact('sede', 'red', 'pastorPersona', 'pastor', 'lider', 'liderUser', 'persona', 'celula', 'evento', 'inscripcion', 'pago', 'ministerio', 'encuentro');
+        return compact('sede', 'pastorPersona', 'pastor', 'lider', 'liderUser', 'persona', 'celula', 'evento', 'inscripcion', 'pago', 'ministerio', 'encuentro');
     }
 }

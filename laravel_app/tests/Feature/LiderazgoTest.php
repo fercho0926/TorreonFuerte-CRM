@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Celula;
 use App\Models\Persona;
-use App\Models\Red;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
@@ -17,24 +16,21 @@ class LiderazgoTest extends TestCase
     {
         $this->comoAdmin();
         $persona = Persona::factory()->create(['nombres' => 'Rosa']);
-        $red = Red::create(['nombre' => 'Mujeres']);
 
-        $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id, 'red_id' => $red->id])
+        $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id])
             ->assertRedirect(route('lideres.show', $persona));
 
         $this->assertSame(1, Persona::where('nombres', 'Rosa')->count());
         $persona->refresh();
         $this->assertTrue($persona->es_lider);
-        $this->assertSame($red->id, $persona->red_id);
     }
 
     public function test_designar_exige_documento(): void
     {
         $this->comoAdmin();
         $persona = Persona::factory()->visitante()->create();
-        $red = Red::create(['nombre' => 'Mujeres']);
 
-        $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id, 'red_id' => $red->id])
+        $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id])
             ->assertSessionHasErrors('persona_id');
         $this->assertFalse($persona->fresh()->es_lider);
     }

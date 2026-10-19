@@ -90,7 +90,7 @@ class AlcancePorRolTest extends TestCase
 
         $this->post(route('personas.store'), [
             'nombres' => 'Intento', 'apellidos' => 'Lider', 'celular' => '3001230000', 'estado' => 'visitante',
-            'es_lider' => 1, 'red_id' => $this->liderA->red_id,
+            'es_lider' => 1,
         ])->assertSessionHasNoErrors();
 
         $this->assertFalse(Persona::where('nombres', 'Intento')->firstOrFail()->es_lider);
@@ -102,7 +102,7 @@ class AlcancePorRolTest extends TestCase
         $this->escenario();
         $this->iniciarSesionComo($this->crearUsuario('user', $this->personaA));
 
-        $this->get(route('personas.index'))->assertViewHas('personas', fn ($p) => $p->total() === 1 && $p->first()->is($this->personaA));
+        $this->get(route('personas.index'))->assertViewHas('pagina', fn ($p) => $p->total() === 1 && $p->first()->is($this->personaA));
     }
 
     public function test_un_usuario_sin_persona_vinculada_ve_un_mensaje_claro(): void

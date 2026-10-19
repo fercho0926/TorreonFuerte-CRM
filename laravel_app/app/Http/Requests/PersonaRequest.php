@@ -25,7 +25,7 @@ class PersonaRequest extends FormRequest
             'confirmar_duplicado' => $this->boolean('confirmar_duplicado'),
         ]);
 
-        foreach (['numero_documento', 'tipo_documento', 'celular', 'email', 'lider_id', 'red_id'] as $campo) {
+        foreach (['numero_documento', 'tipo_documento', 'celular', 'email', 'lider_id'] as $campo) {
             if ($this->has($campo) && trim((string) $this->input($campo)) === '') {
                 $this->merge([$campo => null]);
             }
@@ -59,7 +59,6 @@ class PersonaRequest extends FormRequest
             'ciudad' => ['nullable', 'string', 'max:255'],
             'lider_id' => ['nullable', app(SedeContext::class)->existe('personas')->where('es_lider', true)->whereNull('deleted_at')],
             'es_lider' => ['boolean'],
-            'red_id' => ['nullable', 'required_if:es_lider,1', app(SedeContext::class)->existe('redes')],
             'confirmar_duplicado' => ['boolean'],
         ];
     }
@@ -72,7 +71,6 @@ class PersonaRequest extends FormRequest
             'numero_documento.required_if' => 'El documento es obligatorio para miembros activos y líderes.',
             'tipo_documento.required_if' => 'El tipo de documento es obligatorio para miembros activos y líderes.',
             'lider_id.exists' => 'El líder elegido no existe o ya no es líder.',
-            'red_id.required_if' => 'Elige la red del líder.',
         ];
     }
 }

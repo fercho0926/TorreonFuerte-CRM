@@ -2,6 +2,8 @@
     $celula = $celula ?? null;
     $opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
     $opcionesEstado = collect(\App\Models\Celula::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
+    $integrantes = $integrantes ?? collect();
+    $opcionesIntegrantes = \App\Support\Formulario::opciones($integrantes, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
     $opcionesDia = collect(\App\Models\Celula::DIAS)->map(fn ($d) => ['id' => $d, 'texto' => $d])->all();
 @endphp
 
@@ -20,4 +22,11 @@
     <x-form.select name="dia_reunion" label="Día de reunión" icono="fa-calendar-day" :opciones="$opcionesDia" :value="$celula?->dia_reunion" vacio="Sin definir" col="col-md-4" />
     <x-form.input name="hora_reunion" label="Hora de reunión" type="time" icono="fa-clock" :value="$celula?->hora_reunion ? substr($celula->hora_reunion, 0, 5) : ''" col="col-md-4" />
     <x-form.input name="lugar_reunion" label="Lugar de reunión" icono="fa-map-pin" :value="$celula?->lugar_reunion" col="col-md-4" maxlength="255" />
+</x-form.section>
+
+<x-form.section titulo="Integrantes" descripcion="Personas que asisten a esta célula. Escribe para buscar por nombre, apellido, documento o celular; si aún no existe, créala desde aquí." icono="fa-users" id="seccion-integrantes">
+    <input type="hidden" name="integrantes_presente" value="1">
+    <x-form.multiselect name="integrantes[]" label="Integrantes" :opciones="$opcionesIntegrantes" :seleccionados="$integrantes->pluck('id')->all()" icono="fa-users"
+        :fuente="route('personas.buscar')" :filtros="['activas' => 1]" :crear="route('personas.rapida')"
+        ayuda="Las personas «En célula» aún no son parte de la iglesia, pero así se les da seguimiento." />
 </x-form.section>

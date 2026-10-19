@@ -31,9 +31,10 @@ class AvisosTest extends TestCase
 
     public function test_el_error_permanece_visible_y_no_se_marca_como_aviso_que_se_cierra(): void
     {
-        $html = $this->followingRedirects()->post(route('celulas.miembros.store', $this->A['celula']), ['persona_id' => $this->A['pastorPersona']->id])->getContent();
+        $this->A['liderUser']->forceFill(['celular' => null])->save();
+        $html = $this->followingRedirects()->post(route('users.clave.store', $this->A['liderUser']))->getContent();
 
-        $this->assertMatchesRegularExpression('/<div class="alert alert-danger" role="alert">\s*Solo puedes agregar personas/', $html);
+        $this->assertMatchesRegularExpression('/<div class="alert alert-danger" role="alert">\s*.* no tiene celular de WhatsApp/', $html);
         $this->assertStringNotContainsString('data-aviso="exito"', $html);
     }
 

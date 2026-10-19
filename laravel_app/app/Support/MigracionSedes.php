@@ -15,7 +15,6 @@ class MigracionSedes
     /** Tablas de datos de la iglesia que llevan sede_id (users se trata aparte). */
     public const TABLAS = [
         'personas',
-        'redes',
         'celulas',
         'celula_reuniones',
         'encuentros',

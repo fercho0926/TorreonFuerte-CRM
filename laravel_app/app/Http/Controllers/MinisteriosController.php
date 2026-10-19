@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\MinisteriosGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Ministerio;
 use App\Models\Persona;
@@ -10,20 +13,20 @@ use Illuminate\Validation\Rule;
 
 class MinisteriosController extends Controller
 {
-    public function index()
+    use ServicioGrilla;
+
+    protected function grilla(): Grilla
+    {
+        return app(MinisteriosGrilla::class);
+    }
+
+    public function index(Request $request)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
-        $ministerios = Ministerio::with('encargado')
-            ->withCount('integrantes')
-            ->orderBy('nombre')
-            ->get();
-
-        return view('ministerios.index', [
-            'ministerios' => $ministerios,
-        ]);
+        return view('ministerios.index', $this->datosDeLaGrilla($request));
     }
 
     public function create()
@@ -34,6 +37,7 @@ class MinisteriosController extends Controller
 
         return view('ministerios.create', [
             'personas' => $this->personasDisponibles(),
+            'integrantes' => $this->integrantesParaFormulario(null, request()),
         ]);
     }
 
@@ -44,7 +48,7 @@ class MinisteriosController extends Controller
         }
 
         $data = $this->validateData($request);
-        $personaIds = $request->input('personas', []);
+        $personaIds = $this->integrantesPermitidos($request, null);
 
         $ministerio = Ministerio::create($data);
         $ministerio->integrantes()->sync($personaIds);
@@ -76,7 +80,7 @@ class MinisteriosController extends Controller
         return view('ministerios.edit', [
             'ministerio' => $ministerio,
             'personas' => $this->personasDisponibles(),
-            'personasSeleccionadas' => $ministerio->integrantes()->pluck('personas.id')->all(),
+            'integrantes' => $this->integrantesParaFormulario($ministerio, request()),
         ]);
     }
 
@@ -87,7 +91,7 @@ class MinisteriosController extends Controller
         }
 
         $data = $this->validateData($request);
-        $personaIds = $request->input('personas', []);
+        $personaIds = $this->integrantesPermitidos($request, $ministerio);
 
         $ministerio->update($data);
         // sync() con IDs simples conserva el rol/fecha_ingreso de quienes ya estaban.
@@ -134,6 +138,40 @@ class MinisteriosController extends Controller
         }
 
         return redirect()->route('ministerios.show', $ministerio)->with('success', 'Integrantes actualizados correctamente.');
+    }
+
+    /**
+     * Personas que se muestran ya seleccionadas: lo enviado antes (si hubo un error de validación)
+     * o los integrantes actuales. El resto se busca con el autocompletado.
+     */
+    private function integrantesParaFormulario(?Ministerio $ministerio, Request $request)
+    {
+        $ids = $request->old('personas', $ministerio ? $ministerio->integrantes()->pluck('personas.id')->all() : []);
+
+        return Persona::query()->whereIn('personas.id', (array) $ids)->orderBy('apellidos')->orderBy('nombres')->get();
+    }
+
+    /**
+     * Ids de integrantes que se pueden guardar: las personas nuevas deben estar activas y dentro del
+     * alcance de quien guarda; quienes ya eran integrantes se conservan aunque hoy estén inactivas.
+     *
+     * @return array<int, int>
+     */
+    private function integrantesPermitidos(Request $request, ?Ministerio $ministerio): array
+    {
+        $ids = array_values(array_unique(array_map('intval', (array) $request->input('personas', []))));
+        $actuales = $ministerio ? $ministerio->integrantes()->pluck('personas.id')->all() : [];
+        $nuevas = array_diff($ids, $actuales);
+
+        $permitidas = $nuevas
+            ? $this->alcance()->personasVisibles($this->usuarioActual())->activas()->whereIn('personas.id', $nuevas)->pluck('personas.id')->all()
+            : [];
+
+        if (count($permitidas) !== count($nuevas)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['personas' => 'Algunas personas no se pueden añadir: están inactivas o fuera de tu alcance.']);
+        }
+
+        return $ids;
     }
 
     private function personasDisponibles()

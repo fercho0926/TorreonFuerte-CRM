@@ -54,7 +54,7 @@ class AislamientoCelulasTest extends TestCase
         $this->post(route('celulas.reuniones.store', $this->B['celula']), ['fecha' => now()->toDateString()])->assertNotFound();
 
         // Una persona de otra sede no entra a una célula propia.
-        $this->post(route('celulas.miembros.store', $this->A['celula']), ['persona_id' => $this->B['persona']->id])->assertSessionHasErrors('persona_id');
+        $this->post(route('celulas.miembros.store', $this->A['celula']), ['personas' => [$this->B['persona']->id]])->assertSessionHasErrors('personas.0');
         $this->assertFalse($this->A['celula']->miembros()->whereKey($this->B['persona']->id)->exists());
     }
 

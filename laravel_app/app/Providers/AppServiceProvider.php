@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Persona;
+use App\Models\SolicitudClave;
 use App\Models\User;
 use App\Services\AlcanceService;
 use App\Services\SedeContext;
@@ -64,10 +65,15 @@ class AppServiceProvider extends ServiceProvider
                 ? $alcance->personasVisibles($user)->sinLider()->count()
                 : 0;
 
+            // Solicitudes de clave pendientes dentro del alcance de quien administra (insignia del menú).
+            $solicitudesPendientes = $user && Gate::forUser($user)->allows('verSolicitudesClave', User::class)
+                ? SolicitudClave::pendientes()->where('ultima_solicitud_en', '>=', now()->subHours((int) config('claves.solicitud_vence_horas')))->count()
+                : 0;
+
             $view->with([
                 'usuarioActual' => $user,
                 'rolEtiqueta' => $user ? (User::ROLE_LABELS[$user->role] ?? $user->role) : null,
-                'menu' => Menu::secciones($user, ['sinLider' => $sinLider]),
+                'menu' => Menu::secciones($user, ['sinLider' => $sinLider, 'solicitudes' => $solicitudesPendientes]),
             ]);
         });
     }

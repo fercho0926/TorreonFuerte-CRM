@@ -42,11 +42,11 @@
     <x-form.section :titulo="'Integrantes ('.$ministerio->integrantes->count().')'" descripcion="Rol y fecha de ingreso de cada integrante." icono="fa-users" id="seccion-integrantes">
         <div class="col-12">
             <x-form.lista-asistencia name="integrantes[]" :interruptor="false" vacio="Este ministerio aún no tiene integrantes. Agrégalos desde &quot;Editar&quot;."
-                :columnas="['Red']"
+                :columnas="['Celular']"
                 :filas="$ministerio->integrantes->map(fn ($p) => [
                     'id' => $p->id,
                     'nombre' => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''),
-                    'extra' => ['Red' => $p->redLider?->nombre ?? $p->lider?->redLider?->nombre ?? '—'],
+                    'extra' => ['Celular' => $p->celular ?? '—'],
                     'campos' => [
                         ['etiqueta' => 'Rol en el ministerio', 'name' => 'rol['.$p->id.']', 'valor' => $p->pivot->rol, 'tipo' => 'texto', 'ejemplo' => 'Ej. Coordinador, Integrante...'],
                         ['etiqueta' => 'Fecha de ingreso', 'name' => 'fecha_ingreso['.$p->id.']', 'valor' => $p->pivot->fecha_ingreso, 'tipo' => 'fecha'],

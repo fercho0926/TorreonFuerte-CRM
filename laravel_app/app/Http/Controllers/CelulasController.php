@@ -2,32 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Grillas\Grilla;
+use App\Grillas\CelulasGrilla;
+use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Celula;
 use App\Models\CelulaReunion;
 use App\Models\Persona;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CelulasController extends Controller
 {
-    public function index()
+    use ServicioGrilla;
+
+    protected function grilla(): Grilla
+    {
+        return app(CelulasGrilla::class);
+    }
+
+    public function index(Request $request)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
-        $celulas = $this->alcance()->celulasVisibles($this->usuarioActual())
-            ->with(['lider', 'coLider'])
-            ->withCount('miembros')
-            ->orderBy('nombre')
-            ->get();
-
-        $user = $this->usuarioActual();
-
-        return view('celulas.index', [
-            'celulas' => $celulas,
-            'puedeGestionarEstructura' => $user && $user->tieneAccesoTotal(),
+        return view('celulas.index', $this->datosDeLaGrilla($request) + [
+            'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal(),
         ]);
     }
 
@@ -43,6 +46,7 @@ class CelulasController extends Controller
 
         return view('celulas.create', [
             'personas' => $this->personasDisponibles(),
+            'integrantes' => $this->integrantesParaFormulario(null, request()),
         ]);
     }
 
@@ -57,8 +61,12 @@ class CelulasController extends Controller
         }
 
         $data = $this->validateData($request);
+        $integrantes = $this->validarIntegrantes($request, null);
 
-        Celula::create($data);
+        DB::transaction(function () use ($data, $integrantes) {
+            $celula = Celula::create($data);
+            $this->sincronizarIntegrantes($celula, $integrantes);
+        });
 
         return redirect()->route('celulas.index')->with('success', 'Célula creada correctamente.');
     }
@@ -81,8 +89,6 @@ class CelulasController extends Controller
             'celula' => $celula,
             'puedeAdministrar' => $this->puedeAdministrarCelula($celula),
             'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal(),
-            'personasSinAsignar' => $this->candidatosAMiembro($celula)
-                ->reject(fn (Persona $persona) => $celula->miembros->contains('id', $persona->id)),
         ]);
     }
 
@@ -99,6 +105,7 @@ class CelulasController extends Controller
         return view('celulas.edit', [
             'celula' => $celula,
             'personas' => $this->personasDisponibles(),
+            'integrantes' => $this->integrantesParaFormulario($celula, request()),
         ]);
     }
 
@@ -113,8 +120,16 @@ class CelulasController extends Controller
         }
 
         $data = $this->validateData($request, $celula);
+        $integrantes = $this->validarIntegrantes($request, $celula);
 
-        $celula->update($data);
+        DB::transaction(function () use ($celula, $data, $integrantes) {
+            $celula->update($data);
+
+            // Solo se sincroniza si el formulario envió la sección de integrantes.
+            if ($integrantes !== null) {
+                $this->sincronizarIntegrantes($celula, $integrantes);
+            }
+        });
 
         return redirect()->route('celulas.show', $celula)->with('success', 'Célula actualizada correctamente.');
     }
@@ -144,23 +159,32 @@ class CelulasController extends Controller
             return redirect()->route('dashboard');
         }
 
-        $data = $request->validate([
-            'persona_id' => ['required', app(SedeContext::class)->existe('personas')],
-        ]);
-
-        // El líder directo es la fuente de verdad: solo pueden ser miembros de la célula las
-        // personas cuyo líder directo es el líder o el co-líder de la célula.
-        $persona = Persona::findOrFail($data['persona_id']);
-        if (!in_array($persona->lider_id, array_filter([$celula->lider_id, $celula->co_lider_id]), true)) {
-            return redirect()->route('celulas.show', $celula)
-                ->with('error', 'Solo puedes agregar personas cuyo líder directo sea el líder o co-líder de la célula. Cambia primero su líder en la ficha de la persona.');
+        // Acepta una lista (`personas[]`) o, por compatibilidad, un solo `persona_id`.
+        if ($request->filled('persona_id') && !$request->has('personas')) {
+            $request->merge(['personas' => [$request->input('persona_id')]]);
         }
 
-        $celula->miembros()->syncWithoutDetaching([
-            $persona->id => ['fecha_ingreso' => now()->format('Y-m-d')],
-        ]);
+        $data = $request->validate([
+            'personas' => ['required', 'array', 'min:1'],
+            'personas.*' => ['integer', app(SedeContext::class)->existe('personas')],
+        ], ['personas.required' => 'Elige al menos una persona.', 'personas.min' => 'Elige al menos una persona.']);
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Persona agregada a la célula.');
+        // Ser integrante de una célula no depende del líder directo y no lo cambia (spec 006).
+        $anteriores = $celula->miembros()->pluck('personas.id')->all();
+        $nuevas = array_diff(array_map('intval', $data['personas']), $anteriores);
+        $permitidas = $nuevas
+            ? $this->alcance()->personasVisibles($this->usuarioActual())->activas()->whereIn('personas.id', $nuevas)->pluck('personas.id')->all()
+            : [];
+
+        if (count($permitidas) !== count($nuevas)) {
+            throw ValidationException::withMessages(['personas' => 'Algunas personas no se pueden añadir: están inactivas o fuera de tu alcance.']);
+        }
+
+        $this->sincronizarIntegrantes($celula, array_values(array_unique(array_merge($anteriores, array_map('intval', $data['personas'])))));
+
+        $agregadas = count(array_diff($data['personas'], $anteriores));
+
+        return redirect()->route('celulas.show', $celula)->with('success', $agregadas === 1 ? 'Persona agregada a la célula.' : "{$agregadas} personas agregadas a la célula.");
     }
 
     public function quitarMiembro(Celula $celula, Persona $persona)
@@ -268,16 +292,68 @@ class CelulasController extends Controller
     }
 
     /**
-     * Personas que pueden unirse a la célula: las que tienen como líder directo al líder
-     * o al co-líder de la célula.
+     * Personas que se muestran ya seleccionadas en el formulario: lo enviado antes (si hubo un
+     * error de validación) o los integrantes actuales de la célula.
      */
-    private function candidatosAMiembro(Celula $celula)
+    private function integrantesParaFormulario(?Celula $celula, Request $request)
     {
-        return Persona::query()
-            ->whereIn('lider_id', array_filter([$celula->lider_id, $celula->co_lider_id]))
-            ->activas()
-            ->orderBy('apellidos')->orderBy('nombres')
-            ->get();
+        $ids = $request->old('integrantes', $celula ? $celula->miembros()->pluck('personas.id')->all() : []);
+
+        return Persona::query()->whereIn('personas.id', (array) $ids)->orderBy('apellidos')->orderBy('nombres')->get();
+    }
+
+    /**
+     * Valida los integrantes enviados. Devuelve null si el formulario no incluyó la sección
+     * (para no borrar integrantes por error) o la lista de ids válidos.
+     *
+     * @return array<int, int>|null
+     */
+    private function validarIntegrantes(Request $request, ?Celula $celula): ?array
+    {
+        if (!$request->has('integrantes_presente') && !$request->has('integrantes')) {
+            return null;
+        }
+
+        $request->validate([
+            'integrantes' => ['nullable', 'array'],
+            'integrantes.*' => ['integer', app(SedeContext::class)->existe('personas')],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', (array) $request->input('integrantes', []))));
+        $actuales = $celula ? $celula->miembros()->pluck('personas.id')->all() : [];
+
+        // Las personas nuevas deben estar activas y dentro del alcance de quien guarda.
+        $nuevas = array_diff($ids, $actuales);
+        $permitidas = $nuevas
+            ? $this->alcance()->personasVisibles($this->usuarioActual())->activas()->whereIn('personas.id', $nuevas)->pluck('personas.id')->all()
+            : [];
+
+        if (count($permitidas) !== count($nuevas)) {
+            throw ValidationException::withMessages(['integrantes' => 'Algunas personas no se pueden añadir: están inactivas o fuera de tu alcance.']);
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Deja como integrantes exactamente a los ids indicados: conserva la fecha de ingreso de quien ya
+     * estaba, añade a las nuevas con la fecha de hoy y retira al resto. Nunca toca el líder directo.
+     *
+     * @param  array<int, int>  $ids
+     */
+    private function sincronizarIntegrantes(Celula $celula, array $ids): void
+    {
+        $actuales = $celula->miembros()->pluck('personas.id')->all();
+
+        $nuevas = array_diff($ids, $actuales);
+        if ($nuevas) {
+            $celula->miembros()->attach(array_fill_keys($nuevas, ['fecha_ingreso' => now()->toDateString()]));
+        }
+
+        $retiradas = array_diff($actuales, $ids);
+        if ($retiradas) {
+            $celula->miembros()->detach($retiradas);
+        }
     }
 
     private function validateData(Request $request, ?Celula $celula = null): array

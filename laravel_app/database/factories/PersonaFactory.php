@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Persona;
-use App\Models\Red;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -32,23 +31,23 @@ class PersonaFactory extends Factory
         return $this->state(fn () => ['estado' => 'visitante', 'tipo_documento' => null, 'numero_documento' => null]);
     }
 
+    /** Persona que asiste a una célula y aún no es parte de la iglesia. */
+    public function enCelula(): static
+    {
+        return $this->state(fn () => ['estado' => 'celula', 'tipo_documento' => null, 'numero_documento' => null]);
+    }
+
     public function inactiva(): static
     {
         return $this->state(fn () => ['estado' => 'inactivo', 'inactivado_en' => now()]);
     }
 
     /**
-     * Persona con rol de líder; la red se crea en su misma sede si no se indican.
+     * Persona con rol de líder.
      */
-    public function lider(?int $redId = null): static
+    public function lider(): static
     {
-        return $this->state(fn () => [
-            'es_lider' => true,
-            'red_id' => $redId ?? fn (array $atributos) => Red::create([
-                'sede_id' => $atributos['sede_id'],
-                'nombre' => 'Red '.fake()->unique()->word().fake()->numerify('##'),
-            ])->id,
-        ]);
+        return $this->state(fn () => ['es_lider' => true]);
     }
 
     public function deSede(int $sedeId): static

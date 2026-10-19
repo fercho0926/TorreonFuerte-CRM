@@ -11,10 +11,12 @@
         ayuda="Debe ser único en todo el sistema." />
 </x-form.section>
 
-<x-form.section titulo="Acceso" descripcion="Contraseña y rol que define lo que puede hacer." icono="fa-key" id="seccion-acceso">
-    <x-form.input name="password" :label="$editando ? 'Contraseña nueva (opcional)' : 'Contraseña'" type="password" icono="fa-lock" :required="!$editando" minlength="6"
-        ayuda="Mínimo 6 caracteres." />
-    <x-form.input name="password_confirmation" label="Confirmar contraseña" type="password" icono="fa-lock" :required="!$editando" />
+<x-form.section titulo="WhatsApp" descripcion="Aquí se envía la clave temporal para que la persona entre; tú nunca escribes ni ves su contraseña." icono="fa-comment-dots" id="seccion-whatsapp">
+    <x-form.input name="celular" label="Celular de WhatsApp" type="tel" icono="fa-phone" :required="false" :value="$user?->celular" mascara="celular" maxlength="20" ejemplo="310 555 9999"
+        :ayuda="$editando ? 'Necesario para enviarle una clave nueva.' : 'Si lo dejas vacío se usa el celular de la persona vinculada. Con él se genera la clave y se abre WhatsApp.'" />
+</x-form.section>
+
+<x-form.section titulo="Acceso" descripcion="Rol que define lo que puede hacer." icono="fa-user-shield" id="seccion-acceso">
     <x-form.select name="role" label="Rol" icono="fa-user-shield" :required="true" :opciones="$opcionesRol" :value="$user?->role ?? 'user'" :vacio="null" />
     @if($sedes->isNotEmpty() && !$editando)
         <x-form.select name="sede_id" label="Sede" icono="fa-church" :opciones="$sedes->map(fn ($s) => ['id' => $s->id, 'texto' => $s->nombre])->all()" :value="$sedeEfectivaId"

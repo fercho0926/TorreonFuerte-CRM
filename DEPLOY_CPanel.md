@@ -175,3 +175,5 @@ Ingresa con:
 - Si estás en producción, mantén `APP_DEBUG=false`.
 - La interfaz (AdminLTE 4 + Bootstrap 5) se compila con `npm install && npm run build` dentro de `laravel_app/`; sube la carpeta `laravel_app/public/build` junto con el resto. Define `APP_SISTEMA` en `.env` si quieres otro nombre en pestañas y pie.
 - Después de subir cambios en vistas, ejecuta `php artisan view:clear && php artisan view:cache` para que las pantallas respondan más rápido.
+- Esta versión añade migraciones (columnas `celular`, `debe_cambiar_clave` y `clave_vence_en` en `users`, y las tablas `solicitudes_clave` y `registros_clave`): ejecuta `php artisan migrate`. Los usuarios existentes conservan su contraseña; para enviarles una clave nueva hay que completar su celular de WhatsApp.
+- Esta versión añade la migración `2026_10_25_000001_drop_redes` (retira la tabla `redes` y la columna `personas.red_id`; no se pierde ninguna persona): haz una copia de la base antes de ejecutar `php artisan migrate`.

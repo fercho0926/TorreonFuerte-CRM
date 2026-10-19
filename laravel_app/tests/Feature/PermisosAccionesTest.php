@@ -27,12 +27,12 @@ class PermisosAccionesTest extends TestCase
             ->assertSee('Editar');
     }
 
-    public function test_el_pastor_ve_designar_y_el_menu_de_catalogos(): void
+    public function test_el_pastor_ve_designar_y_sin_lider(): void
     {
         $this->comoPastor();
 
         $this->get(route('lideres.index'))->assertSee('Designar líder');
-        $this->get(route('personas.index'))->assertSee('Redes')->assertSee('Sin líder asignado');
+        $this->get(route('personas.index'))->assertSee('Sin líder asignado');
     }
 
     public function test_acciones_no_permitidas_responden_403_con_mensaje_claro(): void
@@ -49,7 +49,6 @@ class PermisosAccionesTest extends TestCase
             ->assertForbidden()
             ->assertSee('No tienes permiso para esta acción');
 
-        $this->get(route('redes.index'))->assertForbidden();
     }
 
     public function test_la_bitacora_solo_se_muestra_a_admin_y_pastor(): void

@@ -20,7 +20,8 @@ class MigracionRedesZonas
     {
         $resultado = ['redes' => 0, 'usuarios_convertidos' => 0, 'personas' => 0, 'conflictos' => []];
 
-        if (Schema::hasColumn('personas', 'red')) {
+        // El catálogo de redes ya no existe (spec 006): solo se migra el texto legado si la tabla sigue ahí.
+        if (Schema::hasColumn('personas', 'red') && Schema::hasTable('redes')) {
             $resultado['redes'] = self::migrarRedes();
         }
 
