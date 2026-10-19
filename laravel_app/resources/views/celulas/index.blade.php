@@ -36,7 +36,7 @@
                     <th>Reunión</th>
                     <th>Estado</th>
                     <th>Miembros</th>
-                    <th>Acciones</th>
+                    @todasLasSedes<th>Sede</th>@endtodasLasSedes<th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,6 +52,7 @@
                             <span class="badge badge-{{ $celula->estado === 'activa' ? 'success' : 'secondary' }}">{{ ucfirst($celula->estado) }}</span>
                         </td>
                         <td><span class="badge badge-info">{{ $celula->miembros_count }}</span></td>
+                        @todasLasSedes<td>{{ $celula->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
                         <td>
                             <a href="{{ route('celulas.show', $celula) }}" class="btn btn-sm btn-info">Ver</a>
                             @if($puedeGestionarEstructura)

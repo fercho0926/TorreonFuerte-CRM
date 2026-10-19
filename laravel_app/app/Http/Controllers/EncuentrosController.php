@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SedeContext;
 use App\Models\Encuentro;
 use App\Models\Persona;
 use Illuminate\Http\Request;
@@ -115,7 +116,7 @@ class EncuentrosController extends Controller
 
         $data = $request->validate([
             'asistio' => ['array'],
-            'asistio.*' => ['integer', Rule::exists('personas', 'id')],
+            'asistio.*' => ['integer', app(SedeContext::class)->existe('personas')],
             'valor_pagado' => ['array'],
             'valor_pagado.*' => ['nullable', 'numeric', 'min:0'],
         ]);
@@ -148,7 +149,7 @@ class EncuentrosController extends Controller
             'estado' => ['required', Rule::in(Encuentro::ESTADOS)],
             'notas' => ['nullable', 'string'],
             'personas' => ['nullable', 'array'],
-            'personas.*' => ['integer', Rule::exists('personas', 'id')],
+            'personas.*' => ['integer', app(SedeContext::class)->existe('personas')],
         ]);
 
         unset($data['personas']);

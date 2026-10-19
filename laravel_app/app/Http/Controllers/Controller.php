@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Celula;
-use App\Models\Persona;
 use App\Models\User;
+use App\Services\AlcanceService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 
 abstract class Controller
 {
+    public const MENSAJE_SIN_PERMISO = 'No tienes permiso para esta acción';
+
     protected function ensureLoggedIn(): ?RedirectResponse
     {
         if (!Session::get('is_logged_in')) {
@@ -36,7 +38,7 @@ abstract class Controller
 
     /**
      * Restringe la gestión (crear/editar/eliminar) de estructura de liderazgo
-     * (células, etc.) a quienes tienen visión amplia: admin, pastor o líder de zona.
+     * (células, etc.) a quienes tienen visión amplia: admin o pastor.
      */
     protected function ensurePuedeGestionarEstructura(): ?RedirectResponse
     {
@@ -45,111 +47,60 @@ abstract class Controller
             return redirect()->route('login');
         }
 
-        if (!$user->tieneAccesoTotal() && !$user->isLiderZona()) {
+        if (!$user->tieneAccesoTotal()) {
             return redirect()->route('dashboard');
         }
 
         return null;
     }
 
+    /**
+     * Usuario autenticado; se consulta una sola vez por petición.
+     */
     protected function usuarioActual(): ?User
     {
+        return self::usuarioDeLaPeticion();
+    }
+
+    public static function usuarioDeLaPeticion(): ?User
+    {
+        $atributos = request()->attributes;
         $userId = Session::get('user_id');
 
-        return $userId ? User::with('persona')->find($userId) : null;
+        if ($atributos->has('usuario_actual') && $atributos->get('usuario_actual_id') === $userId) {
+            return $atributos->get('usuario_actual');
+        }
+
+        // Se carga sin filtro de sede: el propio filtro necesita saber quién es el usuario.
+        $user = $userId
+            ? User::withoutGlobalScopes()->with(['persona' => fn ($q) => $q->withoutGlobalScopes()])->find($userId)
+            : null;
+        $atributos->set('usuario_actual', $user);
+        $atributos->set('usuario_actual_id', $userId);
+
+        return $user;
+    }
+
+    protected function alcance(): AlcanceService
+    {
+        return app(AlcanceService::class);
+    }
+
+    protected function puede(string $habilidad, mixed $argumento = Persona::class): bool
+    {
+        $user = $this->usuarioActual();
+        if (!$user) {
+            return false;
+        }
+
+        return Gate::forUser($user)->allows($habilidad, $argumento);
     }
 
     /**
-     * IDs de personas que el usuario autenticado puede ver, según su rol en la
-     * jerarquía (pastor/admin ven todo, líder de zona ve sus células, líder de
-     * célula ve solo la suya). Devuelve null cuando no hay restricción.
-     *
-     * @return array<int>|null
+     * Responde 403 con un mensaje claro cuando el usuario no tiene la habilidad.
      */
-    protected function personasVisiblesIds(): ?array
+    protected function autorizar(string $habilidad, mixed $argumento = Persona::class): void
     {
-        $user = $this->usuarioActual();
-
-        if (!$user || $user->tieneAccesoTotal()) {
-            return null;
-        }
-
-        if (!$user->persona_id) {
-            return [];
-        }
-
-        $miPersonaId = $user->persona_id;
-
-        if ($user->isLiderCelula()) {
-            $celulas = Celula::where('lider_id', $miPersonaId)
-                ->orWhere('co_lider_id', $miPersonaId)
-                ->with('miembros:id')
-                ->get();
-
-            $ids = $celulas->flatMap(fn (Celula $celula) => $celula->miembros->pluck('id'))
-                ->push($miPersonaId)
-                ->merge($celulas->pluck('lider_id'))
-                ->merge($celulas->pluck('co_lider_id'));
-
-            return $ids->filter()->unique()->values()->all();
-        }
-
-        if ($user->isLiderZona()) {
-            $liderIds = Persona::where('lider_id', $miPersonaId)->pluck('id');
-
-            $celulas = Celula::whereIn('lider_id', $liderIds)
-                ->orWhereIn('co_lider_id', $liderIds)
-                ->with('miembros:id')
-                ->get();
-
-            $ids = $celulas->flatMap(fn (Celula $celula) => $celula->miembros->pluck('id'))
-                ->merge($celulas->pluck('lider_id'))
-                ->merge($celulas->pluck('co_lider_id'))
-                ->merge($liderIds)
-                ->push($miPersonaId);
-
-            return $ids->filter()->unique()->values()->all();
-        }
-
-        // Rol 'user' sin liderazgo asignado: solo su propio registro, si existe.
-        return [$miPersonaId];
-    }
-
-    /**
-     * IDs de células visibles para el usuario autenticado. Null = sin restricción.
-     *
-     * @return array<int>|null
-     */
-    protected function celulasVisiblesIds(): ?array
-    {
-        $user = $this->usuarioActual();
-
-        if (!$user || $user->tieneAccesoTotal()) {
-            return null;
-        }
-
-        if (!$user->persona_id) {
-            return [];
-        }
-
-        $miPersonaId = $user->persona_id;
-
-        if ($user->isLiderCelula()) {
-            return Celula::where('lider_id', $miPersonaId)
-                ->orWhere('co_lider_id', $miPersonaId)
-                ->pluck('id')
-                ->all();
-        }
-
-        if ($user->isLiderZona()) {
-            $liderIds = Persona::where('lider_id', $miPersonaId)->pluck('id');
-
-            return Celula::whereIn('lider_id', $liderIds)
-                ->orWhereIn('co_lider_id', $liderIds)
-                ->pluck('id')
-                ->all();
-        }
-
-        return [];
+        abort_unless($this->puede($habilidad, $argumento), 403, self::MENSAJE_SIN_PERMISO);
     }
 }

@@ -31,7 +31,7 @@
                     <th>Costo</th>
                     <th>Estado</th>
                     <th>Inscritos</th>
-                    <th>Acciones</th>
+                    @todasLasSedes<th>Sede</th>@endtodasLasSedes<th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,6 +50,7 @@
                             <span class="badge badge-{{ $badge }}">{{ ucfirst($evento->estado) }}</span>
                         </td>
                         <td><span class="badge badge-secondary">{{ $evento->inscripciones_count }}</span></td>
+                        @todasLasSedes<td>{{ $evento->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
                         <td>
                             <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-info">Ver</a>
                             <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-sm btn-warning">Editar</a>

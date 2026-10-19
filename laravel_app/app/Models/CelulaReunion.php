@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-#[Fillable(['celula_id', 'fecha', 'tema', 'notas'])]
+#[Fillable(['sede_id', 'celula_id', 'fecha', 'tema', 'notas'])]
 class CelulaReunion extends Model
 {
+    use PerteneceASede;
+
     protected $table = 'celula_reuniones';
 
     /**

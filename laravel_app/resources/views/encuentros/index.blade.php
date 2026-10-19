@@ -30,7 +30,7 @@
                     <th>Valor</th>
                     <th>Estado</th>
                     <th>Participantes</th>
-                    <th>Acciones</th>
+                    @todasLasSedes<th>Sede</th>@endtodasLasSedes<th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,6 +48,7 @@
                             <span class="badge badge-{{ $badge }}">{{ ucfirst($encuentro->estado) }}</span>
                         </td>
                         <td><span class="badge badge-secondary">{{ $encuentro->personas_count }}</span></td>
+                        @todasLasSedes<td>{{ $encuentro->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
                         <td>
                             <a href="{{ route('encuentros.show', $encuentro) }}" class="btn btn-sm btn-info">Ver</a>
                             <a href="{{ route('encuentros.edit', $encuentro) }}" class="btn btn-sm btn-warning">Editar</a>

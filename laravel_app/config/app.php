@@ -68,6 +68,12 @@ return [
     'timezone' => 'UTC',
 
     /*
+    | Nombre de la primera sede, a la que se asignan los datos existentes al activar el modelo
+    | multi-sede (ver App\Support\MigracionSedes).
+    */
+    'sede_inicial' => env('SEDE_INICIAL', 'Sede principal'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------

@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
+    'sede_id',
     'nombres',
     'apellidos',
     'tipo_documento',
@@ -22,13 +25,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'ciudad',
     'lider_id',
     'es_lider',
-    'red',
+    'estado',
+    'red_id',
+    'zona_id',
+    'inactivado_en',
+    'trasladada_a_sede_id',
+    'trasladada_en',
 ])]
 class Persona extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, PerteneceASede;
 
     public const TIPOS_DOCUMENTO = ['CC', 'TI', 'CE', 'Pasaporte'];
+
+    public const ESTADOS = [
+        'visitante' => 'Visitante',
+        'nuevo_creyente' => 'Nuevo creyente',
+        'miembro_activo' => 'Miembro activo',
+        'inactivo' => 'Inactivo',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -40,6 +55,8 @@ class Persona extends Model
         return [
             'fecha_nacimiento' => 'date',
             'es_lider' => 'boolean',
+            'inactivado_en' => 'datetime',
+            'trasladada_en' => 'datetime',
         ];
     }
 
@@ -57,6 +74,56 @@ class Persona extends Model
     public function miembros(): HasMany
     {
         return $this->hasMany(Persona::class, 'lider_id');
+    }
+
+    public function redLider(): BelongsTo
+    {
+        return $this->belongsTo(Red::class, 'red_id');
+    }
+
+    public function zona(): BelongsTo
+    {
+        return $this->belongsTo(Zona::class, 'zona_id');
+    }
+
+    public function cambios(): HasMany
+    {
+        return $this->hasMany(PersonaCambio::class)->latest('created_at')->latest('id');
+    }
+
+    public function getEstadoEtiquetaAttribute(): string
+    {
+        return self::ESTADOS[$this->estado] ?? (string) $this->estado;
+    }
+
+    public function getEdadAttribute(): ?int
+    {
+        return $this->fecha_nacimiento?->age;
+    }
+
+    public function getFechaNacimientoLegibleAttribute(): ?string
+    {
+        return $this->fecha_nacimiento?->locale('es')->translatedFormat('j \d\e F \d\e Y');
+    }
+
+    /**
+     * Celular solo con dígitos, para los enlaces de llamada y de WhatsApp.
+     */
+    public function getCelularLimpioAttribute(): ?string
+    {
+        $digitos = preg_replace('/\D+/', '', (string) $this->celular);
+
+        return $digitos !== '' ? $digitos : null;
+    }
+
+    /**
+     * Número para wa.me: si es un celular local de 10 dígitos se antepone el indicativo de Colombia.
+     */
+    public function getCelularWhatsappAttribute(): ?string
+    {
+        $digitos = $this->celular_limpio;
+
+        return $digitos !== null && strlen($digitos) === 10 ? '57'.$digitos : $digitos;
     }
 
     public function getNombreCompletoAttribute(): string
@@ -123,5 +190,50 @@ class Persona extends Model
     public function scopeLideres($query)
     {
         return $query->where('es_lider', true);
+    }
+
+    /**
+     * Busca por texto parcial en nombres, apellidos, documento y celular. Cada palabra debe
+     * coincidir con alguno de esos campos, por lo que "ana pérez" encuentra a Ana Pérez.
+     */
+    public function scopeBuscar($query, ?string $texto)
+    {
+        foreach (preg_split('/\s+/', trim((string) $texto), -1, PREG_SPLIT_NO_EMPTY) as $palabra) {
+            $like = '%'.str_replace(['%', '_'], '', $palabra).'%';
+
+            $query->where(function ($q) use ($like) {
+                $q->where('nombres', 'like', $like)
+                    ->orWhere('apellidos', 'like', $like)
+                    ->orWhere('numero_documento', 'like', $like)
+                    ->orWhere('celular', 'like', $like);
+            });
+        }
+
+        return $query;
+    }
+
+    public function scopeActivas($query)
+    {
+        return $query->where('estado', '!=', 'inactivo');
+    }
+
+    public function scopeSinLider($query)
+    {
+        return $query->whereNull('lider_id')->where('es_lider', false)->where('estado', '!=', 'inactivo');
+    }
+
+    /**
+     * Indica si la persona tiene historial que impide eliminarla definitivamente.
+     */
+    public function tieneHistorial(): bool
+    {
+        return $this->encuentros()->exists()
+            || $this->inscripcionesEventos()->exists()
+            || $this->celulas()->exists()
+            || $this->ministerios()->exists()
+            || $this->celulasLideradas()->exists()
+            || $this->celulasCoLideradas()->exists()
+            || $this->ministeriosLiderados()->exists()
+            || $this->miembros()->exists();
     }
 }

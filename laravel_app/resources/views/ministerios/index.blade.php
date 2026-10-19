@@ -28,7 +28,7 @@
                     <th>Encargado</th>
                     <th>Estado</th>
                     <th>Integrantes</th>
-                    <th>Acciones</th>
+                    @todasLasSedes<th>Sede</th>@endtodasLasSedes<th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +41,7 @@
                             <span class="badge badge-{{ $ministerio->estado === 'activo' ? 'success' : 'secondary' }}">{{ ucfirst($ministerio->estado) }}</span>
                         </td>
                         <td><span class="badge badge-info">{{ $ministerio->integrantes_count }}</span></td>
+                        @todasLasSedes<td>{{ $ministerio->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
                         <td>
                             <a href="{{ route('ministerios.show', $ministerio) }}" class="btn btn-sm btn-info">Ver</a>
                             <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-sm btn-warning">Editar</a>

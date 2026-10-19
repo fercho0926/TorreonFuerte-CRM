@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Fillable([
+    'sede_id',
     'nombre',
     'descripcion',
     'encargado_id',
@@ -16,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 ])]
 class Ministerio extends Model
 {
-    use HasFactory;
+    use HasFactory, PerteneceASede;
 
     public const ESTADOS = ['activo', 'inactivo'];
 

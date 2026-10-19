@@ -7,6 +7,12 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\LideresController;
 use App\Http\Controllers\MinisteriosController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Controllers\RedesController;
+use App\Http\Controllers\SedeActivaController;
+use App\Http\Controllers\SedesController;
+use App\Http\Controllers\SinLiderController;
+use App\Http\Controllers\TrasladosController;
+use App\Http\Controllers\ZonasController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,15 +34,46 @@ Route::post('/personas', [PersonasController::class, 'store'])->name('personas.s
 Route::get('/personas/{persona}', [PersonasController::class, 'show'])->name('personas.show');
 Route::get('/personas/{persona}/edit', [PersonasController::class, 'edit'])->name('personas.edit');
 Route::put('/personas/{persona}', [PersonasController::class, 'update'])->name('personas.update');
+Route::get('/personas/{persona}/trasladar', [TrasladosController::class, 'create'])->name('traslados.create');
+Route::post('/personas/{persona}/trasladar', [TrasladosController::class, 'store'])->name('traslados.store');
+Route::post('/personas/{persona}/inactivar', [PersonasController::class, 'inactivar'])->name('personas.inactivar');
+Route::post('/personas/{persona}/reactivar', [PersonasController::class, 'reactivar'])->name('personas.reactivar');
 Route::delete('/personas/{persona}', [PersonasController::class, 'destroy'])->name('personas.destroy');
 
 Route::get('/lideres', [LideresController::class, 'index'])->name('lideres.index');
-Route::get('/lideres/create', [LideresController::class, 'create'])->name('lideres.create');
-Route::post('/lideres', [LideresController::class, 'store'])->name('lideres.store');
+Route::get('/lideres/designar', [LideresController::class, 'designar'])->name('lideres.designar');
+Route::post('/lideres/designar', [LideresController::class, 'storeDesignar'])->name('lideres.designar.store');
 Route::get('/lideres/{lider}', [LideresController::class, 'show'])->name('lideres.show');
-Route::get('/lideres/{lider}/edit', [LideresController::class, 'edit'])->name('lideres.edit');
-Route::put('/lideres/{lider}', [LideresController::class, 'update'])->name('lideres.update');
+Route::get('/lideres/{lider}/quitar', [LideresController::class, 'quitar'])->name('lideres.quitar');
 Route::delete('/lideres/{lider}', [LideresController::class, 'destroy'])->name('lideres.destroy');
+
+Route::post('/sede-activa', [SedeActivaController::class, 'update'])->name('sede-activa.update');
+
+Route::get('/sedes', [SedesController::class, 'index'])->name('sedes.index');
+Route::get('/sedes/create', [SedesController::class, 'create'])->name('sedes.create');
+Route::post('/sedes', [SedesController::class, 'store'])->name('sedes.store');
+Route::get('/sedes/{sede}', [SedesController::class, 'show'])->name('sedes.show');
+Route::get('/sedes/{sede}/edit', [SedesController::class, 'edit'])->name('sedes.edit');
+Route::put('/sedes/{sede}', [SedesController::class, 'update'])->name('sedes.update');
+Route::get('/sedes/{sede}/pastores', [SedesController::class, 'pastores'])->name('sedes.pastores');
+Route::put('/sedes/{sede}/pastores', [SedesController::class, 'updatePastores'])->name('sedes.pastores.update');
+Route::post('/sedes/{sede}/desactivar', [SedesController::class, 'desactivar'])->name('sedes.desactivar');
+Route::post('/sedes/{sede}/reactivar', [SedesController::class, 'reactivar'])->name('sedes.reactivar');
+Route::delete('/sedes/{sede}', [SedesController::class, 'destroy'])->name('sedes.destroy');
+
+Route::get('/sin-lider', [SinLiderController::class, 'index'])->name('sin-lider.index');
+Route::post('/sin-lider/{persona}/asignar', [SinLiderController::class, 'asignar'])->name('sin-lider.asignar');
+
+Route::get('/redes', [RedesController::class, 'index'])->name('redes.index');
+Route::post('/redes', [RedesController::class, 'store'])->name('redes.store');
+Route::put('/redes/{red}', [RedesController::class, 'update'])->name('redes.update');
+Route::post('/redes/{red}/fusionar', [RedesController::class, 'fusionar'])->name('redes.fusionar');
+Route::delete('/redes/{red}', [RedesController::class, 'destroy'])->name('redes.destroy');
+
+Route::get('/zonas', [ZonasController::class, 'index'])->name('zonas.index');
+Route::post('/zonas', [ZonasController::class, 'store'])->name('zonas.store');
+Route::put('/zonas/{zona}', [ZonasController::class, 'update'])->name('zonas.update');
+Route::delete('/zonas/{zona}', [ZonasController::class, 'destroy'])->name('zonas.destroy');
 
 Route::get('/encuentros', [EncuentrosController::class, 'index'])->name('encuentros.index');
 Route::get('/encuentros/create', [EncuentrosController::class, 'create'])->name('encuentros.create');

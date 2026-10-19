@@ -1,58 +1,88 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Torreón Fuerte CRM
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación Laravel. Todo el código vive en [laravel_app/](laravel_app/); la raíz solo contiene los archivos de despliegue a cPanel ([DEPLOY_CPanel.md](DEPLOY_CPanel.md), [DEPLOY_CPanel_Automation.md](DEPLOY_CPanel_Automation.md), [deploy-cpanel.ps1](deploy-cpanel.ps1)).
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.2+ con Composer
+- Node.js y npm
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Primera vez (instalación)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```powershell
+cd laravel_app
+composer setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`composer setup` ejecuta `composer install`, crea el `.env` desde `.env.example` si no existe, genera la `APP_KEY`, corre las migraciones y hace `npm install` + `npm run build`.
 
-## Contributing
+Por defecto usa SQLite (`database/database.sqlite`). Si usas otra base de datos, ajusta las variables `DB_*` en `laravel_app/.env`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Iniciar en local
 
-## Code of Conduct
+Desde `laravel_app/`:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```powershell
+composer dev
+```
 
-## Security Vulnerabilities
+Levanta en paralelo el servidor (http://127.0.0.1:8000), el worker de colas, los logs (`pail`) y Vite.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+> `pail` requiere la extensión `pcntl`, que no existe en Windows. Si `composer dev` falla por eso, usa dos terminales:
 
-## License
+```powershell
+php artisan serve   # terminal 1 → http://127.0.0.1:8000
+npm run dev         # terminal 2 → Vite
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Comandos útiles
+
+```powershell
+php artisan migrate          # aplicar migraciones
+php artisan migrate:fresh --seed   # reiniciar la base de datos con seeders
+php artisan test             # correr las pruebas
+npm run build                # compilar assets para producción
+```
+
+## Personas, líderes y alcance por rol
+
+Vocabulario único en toda la aplicación:
+
+- **Líder**: persona que cuida de otras y dirige células (un solo nivel; antes "líder de red" y "líder de célula").
+- **Red**: agrupación temática del líder (Jóvenes, Matrimonios…). Se administra en el menú *Redes*.
+- **Zona**: sector geográfico opcional que agrupa líderes (sirve para filtrar). Se administra en *Zonas*.
+
+El **líder directo** de cada persona es la fuente de verdad; la célula es opcional y solo puede ser una célula de ese líder. Las personas sin líder aparecen en *Sin líder asignado* (admin y pastor).
+
+Cada usuario solo ve las personas, líderes, redes, zonas y células de su ámbito: admin y pastor ven todo y el líder (`lider_celula`) ve solo a sus personas y células.
+
+### Migración desde la versión anterior
+
+Al ejecutar `php artisan migrate` sobre datos existentes: las redes escritas a mano se normalizan en el catálogo de redes (sin duplicados por mayúsculas, tildes o espacios), los usuarios con el rol retirado `lider_zona` pasan a `lider_celula`, todas las personas existentes quedan como *miembro activo* y los miembros de célula sin líder toman el líder de la célula (los conflictos se registran en el log). La columna de texto `red` se elimina en la última migración (`2026_10_21_…`): haz una copia de la base de datos antes de migrar en producción.
+
+### Usuarios de ejemplo (`php artisan migrate:fresh --seed`)
+
+`admin@example.com` (ve todas las sedes) y, por cada sede sembrada (`centro`, `norte`, `sur`), `pastor.<sede>@example.com`, `pastora.<sede>@example.com` y `lider.<sede>@example.com`; contraseña `password`.
+
+## Multi-sede (varias iglesias)
+
+El CRM sirve a varias iglesias (**sedes**) en una sola base de datos. Cada sede tiene sus propias personas, líderes, redes, zonas, células, encuentros, eventos (con pagos) y ministerios, y **nunca ve los de otra**.
+
+- **Administrador del sistema (`admin`)**: único con visión total. Crea y administra sedes (menú *Sedes*), elige en la barra superior la **sede activa** o *Todas las sedes* (solo consulta: para crear o editar hay que elegir una sede) y ve el resumen global por sede en el tablero.
+- **Pastor y pastora (`pastor`)**: mismos permisos, limitados a su sede. Gestionan catálogos y usuarios de su sede, pero solo crean cuentas de **líder** y **usuario**; las cuentas de pastor y admin las crea o cambia el admin.
+- **Líder y usuario**: como antes, dentro de su sede. Cada usuario no admin pertenece a **una sola sede**.
+- **Alta de sede**: el admin crea la sede, el pastor y la pastora en una sola operación atómica (si algo falla no queda nada). Desactivar una sede impide el inicio de sesión de sus usuarios y deja sus datos en solo lectura; las sedes con datos no se eliminan.
+- **Traslado de personas** (solo admin): se crea un registro nuevo en la sede destino (sin líder, célula ni ministerios) y el de origen queda inactivo con su historial. Antes hay que reasignar lo que la persona dirige.
+- **Aislamiento**: toda tabla de datos de la iglesia lleva `sede_id` y su modelo usa el trait `PerteneceASede` (filtro global que falla cerrado). Una prueba automática exige el trait en cada tabla con `sede_id` y otra recorre todas las rutas con IDs de otra sede.
+
+### Migrar una instalación de una sola iglesia
+
+1. **Haz una copia de la base de datos.**
+2. `php artisan migrate`. Las migraciones `2026_10_22_*` crean las sedes, añaden `sede_id`, **asignan todos los datos existentes a una primera sede** (su nombre sale de `SEDE_INICIAL` en `.env`, por defecto "Sede principal"), dejan a los pastores actuales como pastores de esa sede (solo el admin conserva la visión total) y vuelven `sede_id` obligatoria.
+3. Entra como admin, renombra la primera sede si hace falta y crea las demás desde *Sedes*.
+
+> ⚠️ `php artisan migrate:fresh` borra la base indicada en `.env`. Para probar sin riesgo usa una base temporal: `DB_DATABASE=<ruta>\prueba.sqlite php artisan migrate:fresh --seed`.
+
+## Despliegue
+
+Ver [DEPLOY_CPanel.md](DEPLOY_CPanel.md) y [DEPLOY_CPanel_Automation.md](DEPLOY_CPanel_Automation.md).

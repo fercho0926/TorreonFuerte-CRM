@@ -5,6 +5,42 @@
 @section('page-title', 'Panel de administración')
 
 @section('content')
+@if($resumenSedes)
+    <div class="card card-outline card-primary">
+        <div class="card-header"><h3 class="card-title">Resumen por sede</h3></div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Sede</th><th>Estado</th><th>Personas</th><th>Líderes</th><th>Células</th><th>Eventos próximos</th><th>Recaudo de eventos</th></tr>
+                </thead>
+                <tbody>
+                    @foreach($resumenSedes as $fila)
+                        <tr>
+                            <td><a href="{{ route('sedes.show', $fila['sede']) }}">{{ $fila['sede']->nombre }}</a></td>
+                            <td>{{ $fila['sede']->activa ? 'Activa' : 'Inactiva' }}</td>
+                            <td>{{ $fila['personas'] }}</td>
+                            <td>{{ $fila['lideres'] }}</td>
+                            <td>{{ $fila['celulas'] }}</td>
+                            <td>{{ $fila['eventos_proximos'] }}</td>
+                            <td>${{ number_format($fila['recaudo'], 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr class="font-weight-bold">
+                        <td colspan="2">Total global (todas las sedes)</td>
+                        <td>{{ $resumenSedes->sum('personas') }}</td>
+                        <td>{{ $resumenSedes->sum('lideres') }}</td>
+                        <td>{{ $resumenSedes->sum('celulas') }}</td>
+                        <td>{{ $resumenSedes->sum('eventos_proximos') }}</td>
+                        <td>${{ number_format($resumenSedes->sum('recaudo'), 2) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <p class="text-muted small">Las tarjetas de abajo suman <strong>todas las sedes</strong>. Elige una sede activa en la barra superior para ver una sola.</p>
+@endif
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
@@ -22,7 +58,7 @@
         <div class="small-box bg-primary">
             <div class="inner">
                 <h3>{{ $liderCount }}</h3>
-                <p>Líderes de red</p>
+                <p>Líderes</p>
             </div>
             <div class="icon">
                 <i class="fas fa-user-tie"></i>
@@ -44,7 +80,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ $activeSessions }}</h3>
+                <h3>{{ $activeSessions ?? '—' }}</h3>
                 <p>Sesiones activas</p>
             </div>
             <div class="icon">
@@ -71,7 +107,7 @@
                     <tr>
                         <td>
                             @if($fila->red_grupo)
-                                <a href="{{ route('personas.index', ['red' => $fila->red_grupo]) }}">{{ $fila->red_grupo }}</a>
+                                <a href="{{ route('personas.index', ['red_id' => $fila->red_id]) }}">{{ $fila->red_grupo }}</a>@if($fila->sede_nombre && $resumenSedes) <small class="text-muted">({{ $fila->sede_nombre }})</small>@endif
                             @else
                                 <span class="text-muted">Sin red asignada</span>
                             @endif

@@ -25,6 +25,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'sede_id' => fn (array $atributos) => ($atributos['role'] ?? 'user') === 'admin' ? null : SedeFactory::idPorDefecto(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),

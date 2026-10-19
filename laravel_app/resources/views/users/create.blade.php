@@ -34,12 +34,25 @@
             <div class="form-group">
                 <label>Rol</label>
                 <select name="role" class="form-control @error('role') is-invalid @enderror" required>
-                    @foreach(\App\Models\User::ROLE_LABELS as $valor => $etiqueta)
+                    @foreach($roles as $valor => $etiqueta)
                         <option value="{{ $valor }}" {{ old('role', 'user') == $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                     @endforeach
                 </select>
                 @error('role')<span class="invalid-feedback">{{ $message }}</span>@enderror
             </div>
+            @if($sedes->isNotEmpty())
+                <div class="form-group">
+                    <label>Sede</label>
+                    <select name="sede_id" class="form-control @error('sede_id') is-invalid @enderror">
+                        <option value="">— Sede activa{{ $sedeEfectivaId ? '' : ' (elige una)' }} —</option>
+                        @foreach($sedes as $sede)
+                            <option value="{{ $sede->id }}" {{ (string) old('sede_id', $sedeEfectivaId) === (string) $sede->id ? 'selected' : '' }}>{{ $sede->nombre }}</option>
+                        @endforeach
+                    </select>
+                    @error('sede_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    <small class="form-text text-muted">Los administradores del sistema no pertenecen a ninguna sede.</small>
+                </div>
+            @endif
             <div class="form-group">
                 <label>Persona vinculada</label>
                 <select name="persona_id" class="form-control @error('persona_id') is-invalid @enderror">

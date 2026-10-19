@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SedeContext;
 use App\Models\Ministerio;
 use App\Models\Persona;
 use Illuminate\Http\Request;
@@ -145,13 +146,13 @@ class MinisteriosController extends Controller
         $data = $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
-            'encargado_id' => ['nullable', Rule::exists('personas', 'id')],
+            'encargado_id' => ['nullable', app(SedeContext::class)->existe('personas')],
             'estado' => ['required', Rule::in(Ministerio::ESTADOS)],
             'personas' => ['nullable', 'array'],
-            'personas.*' => ['integer', Rule::exists('personas', 'id')],
+            'personas.*' => ['integer', app(SedeContext::class)->existe('personas')],
         ]);
 
-        $data['encargado_id'] = $data['encargado_id'] ?: null;
+        $data['encargado_id'] = ($data['encargado_id'] ?? null) ?: null;
         unset($data['personas']);
 
         return $data;

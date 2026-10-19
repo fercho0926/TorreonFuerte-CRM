@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SedeContext;
 use App\Models\Celula;
 use App\Models\CelulaReunion;
 use App\Models\Persona;
@@ -16,11 +17,9 @@ class CelulasController extends Controller
             return $redirect;
         }
 
-        $visiblesIds = $this->celulasVisiblesIds();
-
-        $celulas = Celula::with(['lider', 'coLider'])
+        $celulas = $this->alcance()->celulasVisibles($this->usuarioActual())
+            ->with(['lider', 'coLider'])
             ->withCount('miembros')
-            ->when($visiblesIds !== null, fn ($query) => $query->whereIn('id', $visiblesIds))
             ->orderBy('nombre')
             ->get();
 
@@ -28,7 +27,7 @@ class CelulasController extends Controller
 
         return view('celulas.index', [
             'celulas' => $celulas,
-            'puedeGestionarEstructura' => $user && ($user->tieneAccesoTotal() || $user->isLiderZona()),
+            'puedeGestionarEstructura' => $user && $user->tieneAccesoTotal(),
         ]);
     }
 
@@ -81,8 +80,8 @@ class CelulasController extends Controller
         return view('celulas.show', [
             'celula' => $celula,
             'puedeAdministrar' => $this->puedeAdministrarCelula($celula),
-            'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal() || $this->usuarioActual()?->isLiderZona(),
-            'personasSinAsignar' => $this->personasDisponibles()
+            'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal(),
+            'personasSinAsignar' => $this->candidatosAMiembro($celula)
                 ->reject(fn (Persona $persona) => $celula->miembros->contains('id', $persona->id)),
         ]);
     }
@@ -146,15 +145,20 @@ class CelulasController extends Controller
         }
 
         $data = $request->validate([
-            'persona_id' => ['required', Rule::exists('personas', 'id')],
+            'persona_id' => ['required', app(SedeContext::class)->existe('personas')],
         ]);
+
+        // El líder directo es la fuente de verdad: solo pueden ser miembros de la célula las
+        // personas cuyo líder directo es el líder o el co-líder de la célula.
+        $persona = Persona::findOrFail($data['persona_id']);
+        if (!in_array($persona->lider_id, array_filter([$celula->lider_id, $celula->co_lider_id]), true)) {
+            return redirect()->route('celulas.show', $celula)
+                ->with('error', 'Solo puedes agregar personas cuyo líder directo sea el líder o co-líder de la célula. Cambia primero su líder en la ficha de la persona.');
+        }
 
         $celula->miembros()->syncWithoutDetaching([
-            $data['persona_id'] => ['fecha_ingreso' => now()->format('Y-m-d')],
+            $persona->id => ['fecha_ingreso' => now()->format('Y-m-d')],
         ]);
-
-        // Mantiene sincronizado el "líder de célula" clásico de Personas con la célula real.
-        Persona::whereKey($data['persona_id'])->update(['lider_id' => $celula->lider_id]);
 
         return redirect()->route('celulas.show', $celula)->with('success', 'Persona agregada a la célula.');
     }
@@ -169,11 +173,8 @@ class CelulasController extends Controller
             return redirect()->route('dashboard');
         }
 
+        // La persona conserva su líder directo; solo deja de pertenecer a esta célula.
         $celula->miembros()->detach($persona->id);
-
-        if ($persona->lider_id === $celula->lider_id) {
-            $persona->update(['lider_id' => null]);
-        }
 
         return redirect()->route('celulas.show', $celula)->with('success', 'Persona retirada de la célula.');
     }
@@ -193,7 +194,7 @@ class CelulasController extends Controller
             'tema' => ['nullable', 'string', 'max:255'],
             'notas' => ['nullable', 'string'],
             'asistio' => ['array'],
-            'asistio.*' => ['integer', Rule::exists('personas', 'id')],
+            'asistio.*' => ['integer', app(SedeContext::class)->existe('personas')],
         ]);
 
         $reunion = CelulaReunion::create([
@@ -232,9 +233,7 @@ class CelulasController extends Controller
 
     private function ensurePuedeVerCelula(Celula $celula)
     {
-        $visiblesIds = $this->celulasVisiblesIds();
-
-        if ($visiblesIds !== null && !in_array($celula->id, $visiblesIds, true)) {
+        if (!$this->alcance()->celulasVisibles($this->usuarioActual())->whereKey($celula->id)->exists()) {
             return redirect()->route('dashboard')->with('error', 'No tienes acceso a esta célula.');
         }
 
@@ -253,12 +252,6 @@ class CelulasController extends Controller
             return true;
         }
 
-        if ($user->isLiderZona()) {
-            $visiblesIds = $this->celulasVisiblesIds() ?? [];
-
-            return in_array($celula->id, $visiblesIds, true);
-        }
-
         if ($user->isLiderCelula()) {
             return $celula->lider_id === $user->persona_id || $celula->co_lider_id === $user->persona_id;
         }
@@ -268,15 +261,31 @@ class CelulasController extends Controller
 
     private function personasDisponibles()
     {
-        return Persona::orderBy('apellidos')->orderBy('nombres')->get();
+        return $this->alcance()->personasVisibles($this->usuarioActual())
+            ->activas()
+            ->orderBy('apellidos')->orderBy('nombres')
+            ->get();
+    }
+
+    /**
+     * Personas que pueden unirse a la célula: las que tienen como líder directo al líder
+     * o al co-líder de la célula.
+     */
+    private function candidatosAMiembro(Celula $celula)
+    {
+        return Persona::query()
+            ->whereIn('lider_id', array_filter([$celula->lider_id, $celula->co_lider_id]))
+            ->activas()
+            ->orderBy('apellidos')->orderBy('nombres')
+            ->get();
     }
 
     private function validateData(Request $request, ?Celula $celula = null): array
     {
         return $request->validate([
             'nombre' => ['required', 'string', 'max:255'],
-            'lider_id' => ['required', Rule::exists('personas', 'id')],
-            'co_lider_id' => ['nullable', Rule::exists('personas', 'id')],
+            'lider_id' => ['required', app(SedeContext::class)->existe('personas')],
+            'co_lider_id' => ['nullable', app(SedeContext::class)->existe('personas')],
             'sede' => ['nullable', 'string', 'max:255'],
             'dia_reunion' => ['nullable', Rule::in(Celula::DIAS)],
             'hora_reunion' => ['nullable', 'date_format:H:i'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Persona;
 use Database\Factories\UserFactory;
@@ -12,20 +13,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'persona_id'])]
+#[Fillable(['sede_id', 'name', 'email', 'password', 'role', 'persona_id'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    use PerteneceASede;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    public const ROLES = ['admin', 'pastor', 'lider_zona', 'lider_celula', 'user'];
+    public const ROLES = ['admin', 'pastor', 'lider_celula', 'user'];
 
     public const ROLE_LABELS = [
         'admin' => 'Administrador del sistema',
         'pastor' => 'Pastor (ve todo)',
-        'lider_zona' => 'Líder de zona/red',
-        'lider_celula' => 'Líder de célula',
+        'lider_celula' => 'Líder',
         'user' => 'Usuario',
     ];
 
@@ -47,6 +49,24 @@ class User extends Authenticatable
         return $this->belongsTo(Persona::class);
     }
 
+    /**
+     * Los administradores del sistema no pertenecen a ninguna sede: ven todas.
+     */
+    public function exigeSede(): bool
+    {
+        return $this->role !== 'admin';
+    }
+
+    public function sedeEsObligatoria(): bool
+    {
+        return false;
+    }
+
+    public function esAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -55,11 +75,6 @@ class User extends Authenticatable
     public function isPastor(): bool
     {
         return $this->role === 'pastor';
-    }
-
-    public function isLiderZona(): bool
-    {
-        return $this->role === 'lider_zona';
     }
 
     public function isLiderCelula(): bool

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
+    'sede_id',
     'nombre',
     'lider_id',
     'co_lider_id',
@@ -21,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Celula extends Model
 {
-    use HasFactory;
+    use HasFactory, PerteneceASede;
 
     public const ESTADOS = ['activa', 'inactiva'];
 

@@ -71,7 +71,7 @@
                         <tr>
                             <td>{{ $persona->nombre_completo }}</td>
                             <td>{{ $persona->tipo_documento }} {{ $persona->numero_documento }}</td>
-                            <td>{{ $persona->red ?? $persona->lider?->red ?? '—' }}</td>
+                            <td>{{ $persona->redLider?->nombre ?? $persona->lider?->redLider?->nombre ?? '—' }}</td>
                             <td>
                                 <input type="checkbox" name="asistio[]" value="{{ $persona->id }}" {{ $persona->pivot->asistio ? 'checked' : '' }}>
                             </td>

@@ -28,9 +28,17 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::withoutGlobalScopes()->where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
+            if (!$user->esAdmin() && (!$user->sede_id || !$user->sede()->value('activa'))) {
+                return back()->withErrors([
+                    'email' => $user->sede_id
+                        ? 'Tu sede está inactiva; contacta al administrador.'
+                        : 'Tu cuenta aún no está asociada a una sede; contacta al administrador.',
+                ]);
+            }
+
             Session::put('is_logged_in', true);
             Session::put('user_name', $user->name);
             Session::put('user_id', $user->id);
@@ -56,16 +64,24 @@ class AuthController extends Controller
             return redirect()->route('login');
         }
 
+        $actor = $this->usuarioActual();
+        $esAdmin = (bool) $actor?->esAdmin();
+        $contexto = app(\App\Services\SedeContext::class);
+        $global = $esAdmin && $contexto->estaEnTodas();
+
         $userCount = User::count();
-        $activeSessions = DB::table('sessions')->count();
+        // El total de sesiones abiertas mezcla todas las sedes: solo se muestra al administrador.
+        $activeSessions = $esAdmin ? DB::table('sessions')->count() : null;
         $personaCount = Persona::count();
         $liderCount = Persona::lideres()->count();
 
         $personasPorRed = Persona::query()
-            ->selectRaw('COALESCE(personas.red, lideres.red) as red_grupo, COUNT(*) as total')
+            ->selectRaw('redes.id as red_id, redes.nombre as red_grupo, sedes_red.nombre as sede_nombre, COUNT(*) as total')
             ->leftJoin('personas as lideres', 'personas.lider_id', '=', 'lideres.id')
-            ->groupByRaw('COALESCE(personas.red, lideres.red)')
-            ->orderByRaw('red_grupo IS NULL, red_grupo')
+            ->leftJoin('redes', 'redes.id', '=', DB::raw('COALESCE(personas.red_id, lideres.red_id)'))
+            ->leftJoin('sedes as sedes_red', 'sedes_red.id', '=', 'redes.sede_id')
+            ->groupBy('redes.id', 'redes.nombre', 'sedes_red.nombre')
+            ->orderByRaw('redes.nombre IS NULL, redes.nombre')
             ->get();
 
         $eventos = Evento::with('inscripciones.pagos')->get();
@@ -90,6 +106,8 @@ class AuthController extends Controller
             'totalEsperadoEventos' => $totalEsperadoEventos,
             'totalRecaudadoEventos' => $totalRecaudadoEventos,
             'proximosEventos' => $proximosEventos,
+            // Resumen por sede y totales globales rotulados (solo admin en "Todas las sedes").
+            'resumenSedes' => $global ? app(\App\Services\SedeService::class)->resumen() : null,
         ]);
     }
 }

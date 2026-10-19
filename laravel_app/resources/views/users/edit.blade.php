@@ -35,7 +35,7 @@
             <div class="form-group">
                 <label>Rol</label>
                 <select name="role" class="form-control @error('role') is-invalid @enderror">
-                    @foreach(\App\Models\User::ROLE_LABELS as $valor => $etiqueta)
+                    @foreach($roles as $valor => $etiqueta)
                         <option value="{{ $valor }}" {{ old('role', $user->role) == $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                     @endforeach
                 </select>

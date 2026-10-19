@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SedeContext;
 use App\Models\Evento;
 use App\Models\EventoPago;
 use App\Models\EventoPersona;
@@ -120,7 +121,7 @@ class EventosController extends Controller
         }
 
         $data = $request->validate([
-            'persona_id' => ['required', Rule::exists('personas', 'id')],
+            'persona_id' => ['required', app(SedeContext::class)->existe('personas')],
             'costo_individual' => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -211,7 +212,7 @@ class EventosController extends Controller
             'estado' => ['required', Rule::in(Evento::ESTADOS)],
             'descripcion' => ['nullable', 'string'],
             'personas' => ['nullable', 'array'],
-            'personas.*' => ['integer', Rule::exists('personas', 'id')],
+            'personas.*' => ['integer', app(SedeContext::class)->existe('personas')],
         ]);
 
         unset($data['personas']);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Representa la inscripción de una persona a un evento, junto con el
  * historial de abonos (pagos) que haya hecho para cubrir el costo.
  */
-#[Fillable(['evento_id', 'persona_id', 'costo_individual'])]
+#[Fillable(['sede_id', 'evento_id', 'persona_id', 'costo_individual'])]
 class EventoPersona extends Model
 {
+    use PerteneceASede;
+
     protected $table = 'evento_persona';
 
     /**

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'AdminLTE Panel')</title>
+    <title>@yield('title', 'AdminLTE Panel')@if($sedeActual) · {{ $sedeActual->nombre }}@endif</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="hold-transition sidebar-mini">
@@ -17,7 +17,26 @@
                 <a href="{{ route('dashboard') }}" class="nav-link">Inicio</a>
             </li>
         </ul>
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ml-auto align-items-center">
+            @if($esAdminSede)
+                <li class="nav-item mr-2">
+                    <form method="POST" action="{{ route('sede-activa.update') }}" class="form-inline">
+                        @csrf
+                        <label class="mr-1 mb-0 small text-muted" for="sede-activa">Sede activa</label>
+                        <select id="sede-activa" name="sede_id" class="form-control form-control-sm" onchange="this.form.submit()">
+                            <option value="" {{ $enTodasLasSedes ? 'selected' : '' }}>Todas las sedes</option>
+                            @foreach($sedesSelector as $opcion)
+                                <option value="{{ $opcion->id }}" {{ $sedeActual?->id === $opcion->id ? 'selected' : '' }}>{{ $opcion->nombre }}{{ $opcion->activa ? '' : ' (inactiva)' }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </li>
+                @if($enTodasLasSedes)
+                    <li class="nav-item mr-2"><span class="badge badge-warning">Todas las sedes: solo consulta</span></li>
+                @endif
+            @elseif($sedeActual)
+                <li class="nav-item mr-3"><span class="navbar-text font-weight-bold"><i class="fas fa-church"></i> {{ $sedeActual->nombre }}</span></li>
+            @endif
             <li class="nav-item">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -29,7 +48,7 @@
 
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <span class="brand-text font-weight-light">CRM Admin</span>
+            <span class="brand-text font-weight-light">CRM Admin{!! $sedeActual ? ' - <strong>'.e($sedeActual->nombre).'</strong>' : '' !!}</span>
         </a>
         <div class="sidebar">
             <nav class="mt-2">
@@ -52,6 +71,36 @@
                             <p>Líderes</p>
                         </a>
                     </li>
+                    @puede('ver', \App\Models\Sede::class)
+                    <li class="nav-item">
+                        <a href="{{ route('sedes.index') }}" class="nav-link @if(request()->routeIs('sedes.*')) active @endif">
+                            <i class="nav-icon fas fa-church"></i>
+                            <p>Sedes</p>
+                        </a>
+                    </li>
+                    @endpuede
+                    @puede('verSinLider')
+                    <li class="nav-item">
+                        <a href="{{ route('sin-lider.index') }}" class="nav-link @if(request()->routeIs('sin-lider.*')) active @endif">
+                            <i class="nav-icon fas fa-user-clock"></i>
+                            <p>Sin líder asignado @if($sinLiderPendientes > 0)<span class="badge badge-warning right">{{ $sinLiderPendientes }}</span>@endif</p>
+                        </a>
+                    </li>
+                    @endpuede
+                    @puede('gestionarCatalogos')
+                    <li class="nav-item">
+                        <a href="{{ route('redes.index') }}" class="nav-link @if(request()->routeIs('redes.*')) active @endif">
+                            <i class="nav-icon fas fa-sitemap"></i>
+                            <p>Redes</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('zonas.index') }}" class="nav-link @if(request()->routeIs('zonas.*')) active @endif">
+                            <i class="nav-icon fas fa-map-marked-alt"></i>
+                            <p>Zonas</p>
+                        </a>
+                    </li>
+                    @endpuede
                     <li class="nav-item">
                         <a href="{{ route('celulas.index') }}" class="nav-link @if(request()->routeIs('celulas.*')) active @endif">
                             <i class="nav-icon fas fa-people-arrows"></i>
@@ -76,16 +125,35 @@
                             <p>Ministerios</p>
                         </a>
                     </li>
+                    @puede('verUsuarios', \App\Models\User::class)
                     <li class="nav-item">
-                        <a href="{{ route('users.index') }}" class="nav-link @if(request()->routeIs('users.index')) active @endif">
+                        <a href="{{ route('users.index') }}" class="nav-link @if(request()->routeIs('users.*')) active @endif">
                             <i class="nav-icon fas fa-users"></i>
                             <p>Usuarios</p>
                         </a>
                     </li>
+                    @endpuede
                 </ul>
             </nav>
         </div>
     </aside>
+
+    @if($sedeActual)
+        {{-- Marca de agua con el nombre de la sede en la que se está trabajando (todas las páginas). --}}
+        <style>
+            .marca-agua-sede {
+                position: fixed; inset: 0; z-index: 0; pointer-events: none;
+                display: flex; align-items: flex-end; justify-content: center; overflow: hidden; padding-bottom: 7vh;
+            }
+            .marca-agua-sede span {
+                text-transform: uppercase; white-space: nowrap;
+                font-weight: 800; font-size: clamp(2rem, 8vw, 7rem); letter-spacing: .05em;
+                color: rgba(0, 0, 0, .05); user-select: none;
+            }
+            .content-wrapper .content-header, .content-wrapper .content { position: relative; z-index: 1; }
+        </style>
+        <div class="marca-agua-sede" aria-hidden="true"><span>{{ $sedeActual->nombre }}</span></div>
+    @endif
 
     <div class="content-wrapper">
         <section class="content-header">

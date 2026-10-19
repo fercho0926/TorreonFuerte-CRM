@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\PerteneceASede;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['evento_persona_id', 'monto', 'fecha_pago', 'notas'])]
+#[Fillable(['sede_id', 'evento_persona_id', 'monto', 'fecha_pago', 'notas'])]
 class EventoPago extends Model
 {
+    use PerteneceASede;
+
     protected $table = 'evento_pagos';
 
     /**

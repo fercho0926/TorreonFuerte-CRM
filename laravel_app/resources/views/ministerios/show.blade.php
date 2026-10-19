@@ -68,7 +68,7 @@
                                     <span class="badge badge-primary">Líder</span>
                                 @endif
                             </td>
-                            <td>{{ $persona->red ?? $persona->lider?->red ?? '—' }}</td>
+                            <td>{{ $persona->redLider?->nombre ?? $persona->lider?->redLider?->nombre ?? '—' }}</td>
                             <td>
                                 <input type="text" name="rol[{{ $persona->id }}]" class="form-control form-control-sm" value="{{ $persona->pivot->rol }}" placeholder="Ej. Coordinador, Integrante...">
                             </td>
