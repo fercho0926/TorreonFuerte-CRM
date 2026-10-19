@@ -51,6 +51,7 @@ Se revisaron los módulos de Personas y Líderes tal como existen hoy (listados,
 - Q: ¿Cuál es la fuente de verdad del vínculo persona–líder frente a la pertenencia a una célula? → A: El líder directo manda: toda persona tiene un líder; la célula es un grupo de reunión opcional dentro de ese líder.
 - Q: ¿Quién es responsable de una persona sin líder (visitante nuevo o migrada)? → A: Una vista "Sin líder asignado" para asignarlas a un líder (ver cambio de decisión: solo pastor y administrador).
 - Cambio de decisión (2026-10-19, durante la implementación): se elimina el concepto de **líder de zona** (rol de usuario, supervisión y ámbito por zona). La **zona** queda como sector geográfico opcional sin supervisor. La vista "Sin líder asignado" es solo para pastor y administrador.
+- Cambio de decisión (2026-10-19, posterior): se elimina por completo el concepto de **zona** (módulo, campo `personas.zona_id`, filtros y selectores). Una migración lo retira de las bases existentes. Las referencias a zonas en estos documentos son históricas.
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 

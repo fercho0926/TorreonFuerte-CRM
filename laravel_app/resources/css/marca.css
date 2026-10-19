@@ -1,0 +1,63 @@
+/*
+ * Identidad propia sobre AdminLTE: marca de agua con el nombre de la sede (abajo, sin inclinación)
+ * y recorte con puntos suspensivos de nombres de sede largos en la barra y el menú.
+ */
+
+.marca-agua-sede {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    padding-bottom: 7vh;
+}
+
+.marca-agua-sede span {
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-weight: 800;
+    font-size: clamp(2rem, 8vw, 7rem);
+    letter-spacing: .05em;
+    color: rgba(0, 0, 0, .05);
+    user-select: none;
+}
+
+.app-main .app-content-header,
+.app-main .app-content {
+    position: relative;
+    z-index: 1;
+}
+
+.nombre-sede {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+/* Foco de teclado siempre visible (FR-018): contorno claro sobre el menú oscuro y azul en el resto. */
+a:focus-visible,
+button:focus-visible,
+.nav-link:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.app-sidebar a:focus-visible,
+.app-sidebar .nav-link:focus-visible {
+    outline-color: #fff;
+    outline-offset: -2px;
+}
+
+/* Área de pulsación cómoda en las acciones de fila (≥ 36 px de lado). */
+.table .btn-sm {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+}

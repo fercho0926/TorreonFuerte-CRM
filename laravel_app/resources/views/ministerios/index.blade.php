@@ -4,23 +4,19 @@
 
 @section('page-title', 'Ministerios')
 
+@section('page-actions')
+    <a href="{{ route('ministerios.create') }}" class="btn btn-primary">Crear ministerio</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('ministerios.create') }}" class="btn btn-primary">Crear ministerio</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
-        <h3 class="card-title">Listado de ministerios</h3>
+        <h3 class="card-title">Listado de ministerios <small class="text-muted ms-2">{{ $ministerios->count() }} resultados</small></h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -38,24 +34,16 @@
                         <td>{{ $ministerio->nombre }}</td>
                         <td>{{ $ministerio->encargado?->nombre_completo ?? '—' }}</td>
                         <td>
-                            <span class="badge badge-{{ $ministerio->estado === 'activo' ? 'success' : 'secondary' }}">{{ ucfirst($ministerio->estado) }}</span>
+                            <x-ui.estado :valor="$ministerio->estado" />
                         </td>
-                        <td><span class="badge badge-info">{{ $ministerio->integrantes_count }}</span></td>
+                        <td><x-ui.insignia color="info">{{ $ministerio->integrantes_count }}</x-ui.insignia></td>
                         @todasLasSedes<td>{{ $ministerio->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
-                        <td>
-                            <a href="{{ route('ministerios.show', $ministerio) }}" class="btn btn-sm btn-info">Ver</a>
-                            <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-sm btn-warning">Editar</a>
-                            <form action="{{ route('ministerios.destroy', $ministerio) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este ministerio?')">Eliminar</button>
-                            </form>
+                        <td class="text-end text-nowrap">
+                            <x-ui.acciones-fila :ver="route('ministerios.show', $ministerio)" :editar="route('ministerios.edit', $ministerio)" :eliminar="route('ministerios.destroy', $ministerio)" eliminar-titulo="¿Eliminar este ministerio?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$ministerio->nombre" />
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No hay ministerios registrados.</td>
-                    </tr>
+                    <tr><td colspan="6"><x-ui.vacio mensaje="No hay ministerios registrados." /></td></tr>
                 @endforelse
             </tbody>
         </table>

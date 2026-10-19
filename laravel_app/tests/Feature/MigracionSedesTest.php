@@ -6,7 +6,6 @@ use App\Models\Persona;
 use App\Models\Red;
 use App\Models\Sede;
 use App\Models\User;
-use App\Models\Zona;
 use App\Support\MigracionSedes;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -62,7 +61,6 @@ class MigracionSedesTest extends TestCase
         $pastorPersona = $this->insertarLegado('personas', ['nombres' => 'Pablo', 'apellidos' => 'Pastor', 'tipo_documento' => 'CC', 'numero_documento' => '1', 'estado' => 'miembro_activo']);
         $otra = $this->insertarLegado('personas', ['nombres' => 'Ana', 'apellidos' => 'Miembro', 'tipo_documento' => 'CC', 'numero_documento' => '2', 'estado' => 'miembro_activo', 'lider_id' => $pastorPersona]);
         $red = $this->insertarLegado('redes', ['nombre' => 'Jóvenes', 'clave' => 'jovenes', 'activa' => 1]);
-        $this->insertarLegado('zonas', ['nombre' => 'Norte', 'clave' => 'norte', 'activa' => 1]);
         $celula = $this->insertarLegado('celulas', ['nombre' => 'Célula 1', 'lider_id' => $pastorPersona, 'estado' => 'activa']);
         $reunion = $this->insertarLegado('celula_reuniones', ['celula_id' => $celula, 'fecha' => now()->toDateString()]);
         $evento = $this->insertarLegado('eventos', ['nombre' => 'Cena', 'tipo' => 'Cena de varones', 'fecha' => now()->addWeek()->toDateString(), 'costo' => 10000]);
@@ -144,7 +142,7 @@ class MigracionSedesTest extends TestCase
         $this->assertSame(1, Sede::count());
     }
 
-    public function test_tras_el_esquema_endurecido_documento_red_y_zona_se_repiten_entre_sedes(): void
+    public function test_tras_el_esquema_endurecido_documento_y_red_se_repiten_entre_sedes(): void
     {
         $a = $this->crearSede(['nombre' => 'A']);
         $b = $this->crearSede(['nombre' => 'B']);
@@ -153,12 +151,9 @@ class MigracionSedesTest extends TestCase
         Persona::factory()->deSede($b->id)->create(['numero_documento' => '555']);
         Red::create(['sede_id' => $a->id, 'nombre' => 'Jóvenes']);
         Red::create(['sede_id' => $b->id, 'nombre' => 'Jóvenes']);
-        Zona::create(['sede_id' => $a->id, 'nombre' => 'Norte']);
-        Zona::create(['sede_id' => $b->id, 'nombre' => 'Norte']);
 
         $this->assertSame(2, Persona::withoutGlobalScopes()->where('numero_documento', '555')->count());
         $this->assertSame(2, Red::withoutGlobalScopes()->where('clave', 'jovenes')->count());
-        $this->assertSame(2, Zona::withoutGlobalScopes()->where('clave', 'norte')->count());
 
         // Pero dentro de una misma sede siguen siendo únicos.
         $this->expectException(\Illuminate\Database\QueryException::class);

@@ -65,7 +65,6 @@ class CoherenciaCelulaLiderTest extends TestCase
             'celular' => $a->celular,
             'es_lider' => 1,
             'red_id' => $a->red_id,
-            'zona_id' => $a->zona_id,
             'lider_id' => $b->id,
         ])->assertSessionHasErrors('lider_id');
 

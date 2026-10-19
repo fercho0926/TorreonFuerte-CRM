@@ -1,0 +1,197 @@
+/*
+ * Formularios modernos: tarjetas por sección, etiqueta encima, ícono a la izquierda y error debajo.
+ * Se apoya en las variables de color de Bootstrap 5 / AdminLTE 4 (sin colores fijos) y se aplica a
+ * todos los formularios construidos con los componentes <x-form.*>.
+ */
+
+:root {
+    --fm-primario: var(--bs-primary);
+    --fm-primario-suave: var(--bs-primary-bg-subtle);
+    --fm-ok: var(--bs-success);
+    --fm-error: var(--bs-danger);
+    --fm-borde: var(--bs-border-color);
+    --fm-texto: var(--bs-body-color);
+    --fm-suave: var(--bs-secondary-color);
+    --fm-radio: .75rem;
+    --fm-sombra: 0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .05);
+    --fm-alto-control: 2.75rem; /* ≥ 44 px: cómodo al tacto */
+}
+
+/* ---------- Contenedor y secciones ---------- */
+
+.fm-form { position: relative; }
+
+.fm-leyenda { font-size: .85rem; color: var(--fm-suave); margin-bottom: 1rem; }
+.fm-leyenda .fm-req-marca { color: var(--fm-error); font-weight: 700; }
+
+.fm-seccion {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--fm-borde);
+    border-radius: var(--fm-radio);
+    box-shadow: var(--fm-sombra);
+    margin-bottom: 1.25rem;
+    transition: opacity .2s ease, max-height .25s ease;
+}
+
+.fm-seccion__cab {
+    display: flex; align-items: center; gap: .85rem;
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--fm-borde);
+}
+.fm-seccion__ico {
+    flex: 0 0 auto; width: 2.5rem; height: 2.5rem; border-radius: .65rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--fm-primario-suave); color: var(--fm-primario); font-size: 1.05rem;
+}
+.fm-seccion__titulo { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--fm-texto); }
+.fm-seccion__desc { margin: .1rem 0 0; font-size: .85rem; color: var(--fm-suave); }
+.fm-seccion__cuerpo { padding: 1.25rem 1.25rem .25rem; }
+
+/* ---------- Campos ---------- */
+
+.fm-campo { margin-bottom: 1.1rem; }
+.fm-campo > label, .fm-campo .fm-etiqueta { display: block; margin-bottom: .35rem; font-weight: 600; font-size: .9rem; color: var(--fm-texto); }
+.fm-req::after { content: ' *'; color: var(--fm-error); font-weight: 700; }
+
+.fm-campo .input-group-text {
+    background: var(--bs-tertiary-bg); border-color: var(--fm-borde); color: var(--fm-suave); min-width: 2.75rem; justify-content: center;
+}
+.fm-campo .form-control, .fm-campo .form-select, .fm-campo .select2-container--bootstrap-5 .select2-selection {
+    min-height: var(--fm-alto-control); border-color: var(--fm-borde); border-radius: .5rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.fm-campo textarea.form-control { min-height: 6rem; }
+.fm-campo .input-group > .form-control:not(:first-child), .fm-campo .input-group > .select2-container:not(:first-child) .select2-selection { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.fm-campo .input-group > .input-group-text:first-child { border-top-left-radius: .5rem; border-bottom-left-radius: .5rem; }
+.fm-campo .form-control:focus { border-color: var(--fm-primario); box-shadow: 0 0 0 .2rem rgba(var(--bs-primary-rgb), .15); }
+
+.fm-ayuda { display: block; margin-top: .3rem; font-size: .8rem; color: var(--fm-suave); }
+
+.fm-campo .form-control.is-valid { border-color: var(--fm-ok); background-image: none; }
+.fm-campo .form-control.is-invalid { border-color: var(--fm-error); background-image: none; }
+.fm-campo .invalid-feedback { display: block; color: var(--fm-error); font-size: .82rem; margin-top: .3rem; }
+.fm-campo .invalid-feedback:empty { display: none; }
+.fm-campo .fm-ok { display: none; color: var(--fm-ok); font-size: .8rem; margin-top: .3rem; }
+.fm-campo.is-valido .fm-ok { display: block; }
+
+/* ---------- Interruptor ---------- */
+
+.fm-switch { display: flex; align-items: center; min-height: var(--fm-alto-control); }
+.fm-switch .form-check-label { font-weight: 600; cursor: pointer; padding-top: .1rem; }
+
+/* ---------- Dependientes (mostrar/ocultar con transición) ---------- */
+
+[data-visible-si] { transition: opacity .2s ease; }
+.fm-oculto { display: none !important; }
+.fm-aparece { animation: fm-aparece .2s ease; }
+@keyframes fm-aparece { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Resumen de errores ---------- */
+
+.fm-resumen { border-left: 4px solid var(--fm-error); border-radius: .5rem; }
+.fm-resumen ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+.fm-resumen a { color: inherit; text-decoration: underline; }
+
+/* ---------- Barra de acciones fija ---------- */
+
+.fm-acciones {
+    position: sticky; bottom: 0; z-index: 2;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .6rem;
+    margin: 1.25rem -1px 0; padding: .85rem 1.25rem;
+    background: rgba(var(--bs-body-bg-rgb), .96); backdrop-filter: blur(4px);
+    border: 1px solid var(--fm-borde); border-radius: var(--fm-radio) var(--fm-radio) 0 0;
+    box-shadow: 0 -4px 12px rgba(16, 24, 40, .06);
+}
+.fm-acciones .btn { min-height: var(--fm-alto-control); padding-left: 1.25rem; padding-right: 1.25rem; border-radius: .5rem; font-weight: 600; }
+.fm-acciones__nota { margin-right: auto; font-size: .85rem; color: var(--fm-suave); }
+
+/* Botón con progreso */
+.btn.fm-enviando { pointer-events: none; opacity: .85; }
+.fm-spinner {
+    display: inline-block; width: 1em; height: 1em; margin-right: .5rem; vertical-align: -.15em;
+    border: .15em solid currentColor; border-right-color: transparent; border-radius: 50%; animation: fm-giro .7s linear infinite;
+}
+@keyframes fm-giro { to { transform: rotate(360deg); } }
+
+/* ---------- Modo incrustado y filtro ---------- */
+
+.fm-form[data-modo='incrustado'] .fm-seccion { box-shadow: none; margin-bottom: .75rem; }
+.fm-form[data-modo='incrustado'] .fm-seccion__cab { padding: .65rem 1rem; }
+.fm-form[data-modo='incrustado'] .fm-seccion__cuerpo { padding: .85rem 1rem .1rem; }
+.fm-form[data-modo='incrustado'] .fm-acciones, .fm-form[data-modo='filtro'] .fm-acciones {
+    position: static; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; justify-content: flex-start;
+}
+.fm-form[data-modo='filtro'] .fm-seccion { box-shadow: none; }
+
+.fm-form[data-modo='login'] .fm-seccion { box-shadow: none; border: 0; margin-bottom: .5rem; }
+.fm-form[data-modo='login'] .fm-seccion__cuerpo { padding: .5rem 0 0; }
+.fm-form[data-modo='login'] .fm-acciones { position: static; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; justify-content: stretch; }
+.fm-form[data-modo='login'] .fm-acciones .btn { width: 100%; }
+
+/* ---------- Lista de asistencia: tabla en computador, tarjetas con interruptor en teléfono ---------- */
+
+.fm-persona-card {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    padding: .75rem 1rem; margin-bottom: .5rem; background: var(--bs-body-bg);
+    border: 1px solid var(--fm-borde); border-radius: .65rem;
+}
+.fm-persona-card__nombre { font-weight: 600; color: var(--fm-texto); }
+.fm-persona-card__apoyo { font-size: .8rem; color: var(--fm-suave); }
+.fm-persona-card .form-switch { transform: scale(1.35); transform-origin: right center; margin-right: .6rem; }
+.fm-lista-total { font-size: .85rem; color: var(--fm-suave); margin-bottom: .5rem; }
+
+/* ---------- Selectores (Select2) ---------- */
+
+.fm-campo .select2-container { width: 100% !important; }
+.fm-campo .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+    background: var(--fm-primario-suave); color: var(--fm-primario); border: 0; border-radius: 1rem; padding: .15rem .6rem; font-weight: 600;
+}
+.fm-campo .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove { color: var(--fm-primario); margin-right: .35rem; }
+.fm-apoyo-opcion { display: block; font-size: .78rem; color: var(--fm-suave); }
+.fm-multi-barra { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .4rem; font-size: .82rem; }
+.fm-multi-barra .btn-link { padding: 0; font-size: .82rem; }
+.fm-multi-contador { color: var(--fm-suave); margin-right: auto; }
+
+/* ---------- Avisos y marca de agua ---------- */
+
+.fm-avisos { position: fixed; top: 4rem; right: 1rem; z-index: 1060; max-width: 22rem; }
+
+/* ---------- Teléfono ---------- */
+
+@media (max-width: 575.98px) {
+    .fm-seccion__cab { padding: .85rem 1rem; }
+    .fm-seccion__cuerpo { padding: 1rem 1rem .1rem; }
+    .fm-acciones { padding: .75rem 1rem; justify-content: stretch; }
+    .fm-acciones .btn { flex: 1 1 auto; }
+    .fm-acciones__nota { flex: 1 0 100%; }
+    .fm-avisos { left: 1rem; right: 1rem; max-width: none; }
+}
+
+/* ---------- Lista de asistencia: la misma tabla se vuelve tarjetas en teléfono ---------- */
+
+@media (max-width: 767.98px) {
+    .fm-lista__tabla, .fm-lista__tabla tbody, .fm-lista__tabla tr, .fm-lista__tabla td { display: block; width: 100%; }
+    .fm-lista__tabla thead { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+    .fm-lista__fila {
+        display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem .75rem;
+        margin-bottom: .5rem; padding: .75rem 1rem; background: var(--bs-body-bg); border: 1px solid var(--fm-borde); border-radius: .65rem;
+    }
+    .fm-lista__tabla td { border: 0 !important; padding: 0 !important; width: auto; }
+    .fm-lista__tabla td:first-child { flex: 1 1 60%; }
+    .fm-lista__tabla td[data-etiqueta]:not(:first-child):not(.fm-lista__marca)::before {
+        content: attr(data-etiqueta) ': '; font-weight: 600; color: var(--fm-suave); font-size: .8rem;
+    }
+    .fm-lista__marca { margin-left: auto; }
+    .fm-lista__marca .form-switch { transform: scale(1.4); transform-origin: right center; margin-right: .75rem; }
+    .fm-lista__marca .form-check-label { min-width: 2.5rem; min-height: 1.5rem; }
+}
+
+.fm-lista__campo input { min-width: 8rem; }
+@media (max-width: 767.98px) { .fm-lista__campo { flex: 1 1 100%; } .fm-lista__campo input { width: 100%; } }
+
+/* ---------- Modo línea / filtro: campos en una fila ---------- */
+.fm-linea .fm-campo { margin-bottom: .5rem; }
+.fm-linea > .fm-seccion { flex: 1 1 100%; }
+.fm-form[data-modo='linea'] .fm-acciones { display: inline-flex; margin-left: .5rem; padding: 0; }
+.fm-form[data-modo='linea'] { display: block; }
+.fm-form[data-modo='linea'], .fm-form[data-modo='filtro'] { margin-bottom: .5rem; }
+.fm-form[data-modo='linea'] .fm-campo .form-control, .fm-form[data-modo='linea'] .btn { min-height: 2.25rem; }

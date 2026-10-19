@@ -5,20 +5,20 @@ import { getBufferTemplate } from "./positioning";
 
 export { EventRuler };
 
-var EventRuler = {
+const EventRuler = {
   on: function (input, eventName, eventHandler) {
     const $ = input.inputmask.dependencyLib;
 
     let ev = function (e) {
       if (e.originalEvent) {
-        e = e.originalEvent || e; // get original event from jquery evenbt
+        e = e.originalEvent || e; // get original event from jquery event
         arguments[0] = e;
       }
       // console.log(e.type);
-      let that = this,
-        args,
+      const that = this,
         inputmask = that.inputmask,
         opts = inputmask ? inputmask.opts : undefined;
+      let args;
       if (inputmask === undefined && this.nodeName !== "FORM") {
         // happens when cloning an object with jquery.clone
         const imOpts = $.data(that, "_inputmask_opts");
@@ -45,6 +45,23 @@ var EventRuler = {
               return e.preventDefault();
             }
 
+            // #2855
+            // Prevent duplicate input processing between keyEvent and inputFallBackEvent
+            // This fixes Chinese IME duplication issue on Safari where both events fire for the same input
+            // if (
+            //   inputmask.lastInputEvent &&
+            //   Date.now() - inputmask.lastInputEvent.time < 10 &&
+            //   inputmask.lastInputEvent.data === e.data
+            // ) {
+            //   return;
+            // }
+            // Mark input as processed to prevent duplicate handling by keyEvent
+            // This fixes Chinese IME duplication issue on Safari #2855
+            inputmask.lastInputEvent = {
+              time: Date.now(),
+              data: e.data
+            };
+
             // if (mobile) { //this causes problem see #2220
             // 	args = arguments;
             // 	setTimeout(function () { //needed for caret selection when entering a char on Android 8 - #1818
@@ -53,6 +70,17 @@ var EventRuler = {
             // 	}, 0);
             // 	return false;
             // }
+            break;
+          case "keydown":
+            // Prevent duplicate input processing between keyEvent and inputFallBackEvent #2855
+            // This fixes Chinese IME duplication issue on Safari where both events fire for the same input
+            if (
+              inputmask.lastInputEvent &&
+              Date.now() - inputmask.lastInputEvent.time < 10 &&
+              inputmask.lastInputEvent.data === e.key
+            ) {
+              return false;
+            }
             break;
           case "click":
           case "focus":
@@ -81,7 +109,7 @@ var EventRuler = {
               }
               eventHandler.apply(that, args);
             }, 0);
-            return /* false */; // #2423
+            return; /* false */ // #2423
         }
         const returnVal = eventHandler.apply(that, arguments);
         if (returnVal === false) {
@@ -91,37 +119,19 @@ var EventRuler = {
         return returnVal;
       }
     };
-    if (["submit", "reset"].includes(eventName)) {
+    // add inputmask namespace to event
+    eventName = `${eventName}.inputmask`;
+    if (["submit.inputmask", "reset.inputmask"].includes(eventName)) {
       ev = ev.bind(input); // bind creates a new eventhandler (wrap)
       if (input.form !== null) $(input.form).on(eventName, ev);
     } else {
       $(input).on(eventName, ev);
     }
-
-    // keep instance of the event
-    input.inputmask.events[eventName] = input.inputmask.events[eventName] || [];
-    input.inputmask.events[eventName].push(ev);
   },
   off: function (input, event) {
-    if (input.inputmask && input.inputmask.events) {
+    if (input.inputmask) {
       const $ = input.inputmask.dependencyLib;
-      let events = input.inputmask.events;
-      if (event) {
-        events = [];
-        events[event] = input.inputmask.events[event];
-      }
-      for (const eventName in events) {
-        const evArr = events[eventName];
-        while (evArr.length > 0) {
-          const ev = evArr.pop();
-          if (["submit", "reset"].includes(eventName)) {
-            if (input.form !== null) $(input.form).off(eventName, ev);
-          } else {
-            $(input).off(eventName, ev);
-          }
-        }
-        delete input.inputmask.events[eventName];
-      }
+      $(input).off(event || ".inputmask");
     }
   }
 };

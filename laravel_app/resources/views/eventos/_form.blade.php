@@ -1,90 +1,26 @@
 @php
     $evento = $evento ?? null;
+    $opcionesTipo = collect(\App\Models\Evento::TIPOS)->map(fn ($t) => ['id' => $t, 'texto' => $t])->all();
+    $opcionesEstado = collect(\App\Models\Evento::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
 @endphp
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Nombre del evento</label>
-            <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre', $evento?->nombre) }}" placeholder="Ej. Cena de varones 2026" required>
-            @error('nombre')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Tipo</label>
-            <select name="tipo" class="form-control @error('tipo') is-invalid @enderror" required>
-                <option value="">Seleccione...</option>
-                @foreach(\App\Models\Evento::TIPOS as $tipo)
-                    <option value="{{ $tipo }}" {{ old('tipo', $evento?->tipo) == $tipo ? 'selected' : '' }}>{{ $tipo }}</option>
-                @endforeach
-            </select>
-            @error('tipo')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Fecha</label>
-            <input type="date" name="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old('fecha', optional($evento?->fecha)->format('Y-m-d')) }}" required>
-            @error('fecha')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-</div>
+<x-form.section titulo="Datos del evento" descripcion="Qué evento es, cuándo y dónde." icono="fa-glass-cheers" id="seccion-evento">
+    <x-form.input name="nombre" label="Nombre del evento" icono="fa-heading" :required="true" ejemplo="Ej. Cena de varones 2026" :value="$evento?->nombre" maxlength="255" />
+    <x-form.select name="tipo" label="Tipo" icono="fa-tags" :required="true" :opciones="$opcionesTipo" :value="$evento?->tipo" col="col-md-3" />
+    <x-form.date name="fecha" label="Fecha" :required="true" :value="$evento?->fecha" col="col-md-3" />
+    <x-form.input name="lugar" label="Lugar" icono="fa-map-marker-alt" :value="$evento?->lugar" col="col-md-6" maxlength="255" />
+    <x-form.select name="estado" label="Estado" icono="fa-toggle-on" :required="true" :opciones="$opcionesEstado" :value="$evento?->estado ?? 'planificado'" :vacio="null" col="col-md-6" />
+    <x-form.textarea name="descripcion" label="Descripción" :value="$evento?->descripcion" ayuda="Opcional: detalles del evento." />
+</x-form.section>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Lugar</label>
-            <input type="text" name="lugar" class="form-control @error('lugar') is-invalid @enderror" value="{{ old('lugar', $evento?->lugar) }}">
-            @error('lugar')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Costo por persona</label>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">$</span>
-                </div>
-                <input type="number" step="0.01" min="0" name="costo" class="form-control @error('costo') is-invalid @enderror" value="{{ old('costo', $evento?->costo ?? 0) }}" required>
-            </div>
-            @error('costo')<span class="invalid-feedback">{{ $message }}</span>@enderror
-            <small class="form-text text-muted">Se puede ajustar por persona o pagar en varios abonos desde el detalle del evento.</small>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Estado</label>
-            <select name="estado" class="form-control @error('estado') is-invalid @enderror" required>
-                @foreach(\App\Models\Evento::ESTADOS as $estado)
-                    <option value="{{ $estado }}" {{ old('estado', $evento?->estado ?? 'planificado') == $estado ? 'selected' : '' }}>{{ ucfirst($estado) }}</option>
-                @endforeach
-            </select>
-            @error('estado')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-</div>
-
-<div class="form-group">
-    <label>Descripción</label>
-    <textarea name="descripcion" class="form-control @error('descripcion') is-invalid @enderror" rows="3">{{ old('descripcion', $evento?->descripcion) }}</textarea>
-    @error('descripcion')<span class="invalid-feedback">{{ $message }}</span>@enderror
-</div>
+<x-form.section titulo="Costo" descripcion="Cuánto cuesta por persona." icono="fa-dollar-sign" id="seccion-costo">
+    <x-form.money name="costo" label="Costo por persona" :required="true" :value="$evento?->costo ?? 0"
+        ayuda="Se puede ajustar por persona o pagar en varios abonos desde el detalle del evento." />
+</x-form.section>
 
 @if(isset($personas))
-    <div class="form-group">
-        <label>Personas a inscribir</label>
-        <div class="border rounded p-2" style="max-height: 280px; overflow-y: auto;">
-            @forelse($personas as $persona)
-                <div class="form-check">
-                    <input type="checkbox" name="personas[]" value="{{ $persona->id }}" class="form-check-input" id="persona-{{ $persona->id }}"
-                        {{ in_array($persona->id, old('personas', [])) ? 'checked' : '' }}>
-                    <label class="form-check-label" for="persona-{{ $persona->id }}">{{ $persona->nombre_completo }}</label>
-                </div>
-            @empty
-                <p class="text-muted mb-0">No hay personas registradas todavía.</p>
-            @endforelse
-        </div>
-        <small class="form-text text-muted">Podrás inscribir más personas después, desde el detalle del evento.</small>
-    </div>
+    @php($opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null)))
+    <x-form.section titulo="Inscritos" descripcion="Personas a inscribir ahora; podrás inscribir más desde el detalle del evento." icono="fa-user-plus" id="seccion-inscritos">
+        <x-form.multiselect name="personas[]" label="Personas a inscribir" :opciones="$opcionesPersona" vacio="No hay personas registradas todavía." />
+    </x-form.section>
 @endif

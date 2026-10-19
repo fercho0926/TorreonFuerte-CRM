@@ -4,24 +4,17 @@
 
 @section('page-title', 'Detalle de la célula')
 
+@section('page-actions')
+    @if($puedeGestionarEstructura)
+        <a href="{{ route('celulas.edit', $celula) }}" class="btn btn-primary">Editar</a>
+    @endif
+    <a href="{{ route('celulas.index') }}" class="btn btn-outline-secondary">Volver</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        @if($puedeGestionarEstructura)
-            <a href="{{ route('celulas.edit', $celula) }}" class="btn btn-warning">Editar</a>
-        @endif
-        <a href="{{ route('celulas.index') }}" class="btn btn-secondary">Volver</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
-<div class="card card-primary">
+<div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $celula->nombre }}</h3>
     </div>
@@ -45,40 +38,27 @@
 
             <dt class="col-sm-3">Estado</dt>
             <dd class="col-sm-9">
-                <span class="badge badge-{{ $celula->estado === 'activa' ? 'success' : 'secondary' }}">{{ ucfirst($celula->estado) }}</span>
+                <x-ui.estado :valor="$celula->estado" />
             </dd>
         </dl>
     </div>
 </div>
 
 @if($puedeAdministrar)
-    <div class="card card-outline card-secondary mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Agregar miembro</h3>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('celulas.miembros.store', $celula) }}" class="form-inline">
-                @csrf
-                <div class="form-group mr-2">
-                    <select name="persona_id" class="form-control" required>
-                        <option value="">Seleccione una persona...</option>
-                        @foreach($personasSinAsignar as $persona)
-                            <option value="{{ $persona->id }}">{{ $persona->nombre_completo }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Agregar</button>
-            </form>
-        </div>
-    </div>
+    <x-form.layout :action="route('celulas.miembros.store', $celula)" modo="incrustado" guardar="Agregar miembro" icono="fa-user-plus" :leyenda="false">
+        <x-form.section titulo="Agregar miembro" descripcion="Solo aparecen personas cuyo líder directo es el líder o co-líder de esta célula." icono="fa-user-plus" id="seccion-agregar">
+            <x-form.select name="persona_id" label="Persona" icono="fa-user" :required="true" col="col-md-8" buscar vacio="Seleccione una persona..."
+                :opciones="\App\Support\Formulario::opciones($personasSinAsignar, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null))" />
+        </x-form.section>
+    </x-form.layout>
 @endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Miembros ({{ $celula->miembros->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Nombre completo</th>
@@ -97,11 +77,8 @@
                         <td>{{ $miembro->celular ?? '—' }}</td>
                         @if($puedeAdministrar)
                             <td>
-                                <form action="{{ route('celulas.miembros.destroy', [$celula, $miembro]) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Quitar a esta persona de la célula?')">Quitar</button>
-                                </form>
+                                <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a esta persona de la célula?"
+                                    :mensaje="$miembro->nombre_completo.' dejará de pertenecer a esta célula; su historial se conserva.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
                             </td>
                         @endif
                     </tr>
@@ -116,56 +93,27 @@
 </div>
 
 @if($puedeAdministrar)
-    <div class="card card-outline card-secondary mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Registrar reunión</h3>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('celulas.reuniones.store', $celula) }}">
-                @csrf
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Fecha</label>
-                            <input type="date" name="fecha" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label>Tema</label>
-                            <input type="text" name="tema" class="form-control" placeholder="Ej. Estudio de Efesios 1">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Notas</label>
-                    <textarea name="notas" class="form-control" rows="2"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Asistencia</label>
-                    <div class="border rounded p-2" style="max-height: 220px; overflow-y: auto;">
-                        @forelse($celula->miembros as $miembro)
-                            <div class="form-check">
-                                <input type="checkbox" name="asistio[]" value="{{ $miembro->id }}" class="form-check-input" id="asiste-{{ $miembro->id }}" checked>
-                                <label class="form-check-label" for="asiste-{{ $miembro->id }}">{{ $miembro->nombre_completo }}</label>
-                            </div>
-                        @empty
-                            <p class="text-muted mb-0">Agrega miembros a la célula antes de registrar asistencia.</p>
-                        @endforelse
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" {{ $celula->miembros->isEmpty() ? 'disabled' : '' }}>Guardar reunión</button>
-            </form>
-        </div>
-    </div>
+    <x-form.layout :action="route('celulas.reuniones.store', $celula)" modo="incrustado" guardar="Guardar reunión" icono="fa-save" :deshabilitar="$celula->miembros->isEmpty()" :leyenda="false">
+        <x-form.section titulo="Registrar reunión" descripcion="Fecha, tema y quiénes asistieron." icono="fa-calendar-check" id="seccion-reunion">
+            <x-form.date name="fecha" label="Fecha" :required="true" :value="now()->format('Y-m-d')" col="col-md-4" max="hoy" />
+            <x-form.input name="tema" label="Tema" icono="fa-comment-dots" ejemplo="Ej. Estudio de Efesios 1" col="col-md-8" maxlength="255" />
+            <x-form.textarea name="notas" label="Notas" :rows="2" />
+            <div class="col-12">
+                <label class="fm-etiqueta">Asistencia</label>
+                <x-form.lista-asistencia name="asistio[]" etiqueta="Asistió" vacio="Agrega miembros a la célula antes de registrar asistencia."
+                    :filas="$celula->miembros->map(fn ($m) => ['id' => $m->id, 'nombre' => $m->nombre_completo, 'apoyo' => $m->celular])->all()"
+                    :marcados="$celula->miembros->pluck('id')->all()" />
+            </div>
+        </x-form.section>
+    </x-form.layout>
 @endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Historial de reuniones ({{ $celula->reuniones->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -181,14 +129,11 @@
                     <tr>
                         <td>{{ $reunion->fecha->format('Y-m-d') }}</td>
                         <td>{{ $reunion->tema ?? '—' }}</td>
-                        <td><span class="badge badge-info">{{ $reunion->totalAsistio() }} / {{ $reunion->asistentes->count() }}</span></td>
+                        <td><x-ui.insignia color="info">{{ $reunion->totalAsistio() }} / {{ $reunion->asistentes->count() }}</x-ui.insignia></td>
                         @if($puedeAdministrar)
                             <td>
-                                <form action="{{ route('celulas.reuniones.destroy', [$celula, $reunion]) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-outline-danger" onclick="return confirm('¿Eliminar esta reunión?')">Eliminar</button>
-                                </form>
+                                <x-form.confirm :action="route('celulas.reuniones.destroy', [$celula, $reunion])" method="DELETE" titulo="¿Eliminar esta reunión?"
+                                    mensaje="Se borrará la reunión y su registro de asistencia." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="sm">Eliminar</x-form.confirm>
                             </td>
                         @endif
                     </tr>

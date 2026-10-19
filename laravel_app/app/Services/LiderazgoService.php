@@ -7,7 +7,6 @@ use App\Models\Persona;
 use App\Models\PersonaCambio;
 use App\Models\Red;
 use App\Models\User;
-use App\Models\Zona;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -100,18 +99,18 @@ class LiderazgoService
         return $celulas->pluck('nombre')->all();
     }
 
-    public function designarLider(Persona $persona, Red $red, ?Zona $zona = null, ?User $por = null): Persona
+    public function designarLider(Persona $persona, Red $red, ?User $por = null): Persona
     {
         if (!$persona->numero_documento) {
             throw ValidationException::withMessages(['persona_id' => 'Para designar un líder la persona debe tener documento de identidad registrado.']);
         }
 
-        return DB::transaction(function () use ($persona, $red, $zona, $por) {
-            $antes = ['es_lider' => $persona->es_lider, 'red_id' => $persona->red_id, 'zona_id' => $persona->zona_id];
+        return DB::transaction(function () use ($persona, $red, $por) {
+            $antes = ['es_lider' => $persona->es_lider, 'red_id' => $persona->red_id];
 
-            $persona->update(['es_lider' => true, 'red_id' => $red->id, 'zona_id' => $zona?->id]);
+            $persona->update(['es_lider' => true, 'red_id' => $red->id]);
 
-            $this->registrarCambio($persona, 'rol_lider', $antes, ['es_lider' => true, 'red_id' => $red->id, 'zona_id' => $zona?->id], $por);
+            $this->registrarCambio($persona, 'rol_lider', $antes, ['es_lider' => true, 'red_id' => $red->id], $por);
 
             return $persona;
         });
@@ -151,7 +150,7 @@ class LiderazgoService
         }
 
         DB::transaction(function () use ($lider, $reasignarA, $por) {
-            $antes = ['es_lider' => true, 'red_id' => $lider->red_id, 'zona_id' => $lider->zona_id];
+            $antes = ['es_lider' => true, 'red_id' => $lider->red_id];
 
             if ($reasignarA) {
                 $lider->miembros()->update(['lider_id' => $reasignarA->id]);
@@ -161,7 +160,7 @@ class LiderazgoService
                 $lider->miembros()->update(['lider_id' => null]);
             }
 
-            $lider->update(['es_lider' => false, 'red_id' => null, 'zona_id' => null]);
+            $lider->update(['es_lider' => false, 'red_id' => null]);
 
             $this->registrarCambio($lider, 'rol_lider', $antes, ['es_lider' => false, 'reasignado_a' => $reasignarA?->id], $por);
         });

@@ -42,7 +42,19 @@ php artisan migrate          # aplicar migraciones
 php artisan migrate:fresh --seed   # reiniciar la base de datos con seeders
 php artisan test             # correr las pruebas
 npm run build                # compilar assets para producción
+npm test                     # pruebas de JavaScript (Vitest)
 ```
+
+## Interfaz (AdminLTE 4)
+
+El panel usa **AdminLTE 4 sobre Bootstrap 5** (Font Awesome para los iconos; Select2, Flatpickr y SweetAlert2 en los formularios). Desde `laravel_app/`: `npm install`, luego `npm run dev` (desarrollo) o `npm run build` (producción: se genera `public/build`, que es lo que se sube al hosting).
+
+- **Menú lateral y migas de pan**: se definen en un solo archivo, `laravel_app/config/menu.php` (secciones y opciones con etiqueta, icono, ruta, patrón de ruta activa y permiso). Para añadir un módulo al menú basta con agregar su opción ahí.
+- **Plantilla de pantalla**: las vistas extienden `layouts.admin` y definen `title`, `page-title`, `content` y, opcionalmente, `page-actions` (botones del encabezado) y `breadcrumbs`.
+- **Componentes de presentación** (`resources/views/components/ui/`): `<x-ui.tarjeta>`, `<x-ui.estado>` (insignia de estado con el esquema único de colores de `App\Support\Estados`), `<x-ui.insignia>`, `<x-ui.vacio>`, `<x-ui.acciones-fila>` y `<x-ui.caja>` (caja de resumen). Los formularios usan `<x-form.*>`.
+- El nombre del sistema que se ve en pestañas y pie se configura con `APP_SISTEMA` en `.env` (por defecto «CRM Torreón Fuerte»).
+- Una prueba (`ClasesBootstrapTest`) falla si alguien vuelve a usar clases de Bootstrap 4 / AdminLTE 3.
+- En producción, `php artisan view:cache` reduce el tiempo de respuesta de las pantallas.
 
 ## Personas, líderes y alcance por rol
 
@@ -50,11 +62,10 @@ Vocabulario único en toda la aplicación:
 
 - **Líder**: persona que cuida de otras y dirige células (un solo nivel; antes "líder de red" y "líder de célula").
 - **Red**: agrupación temática del líder (Jóvenes, Matrimonios…). Se administra en el menú *Redes*.
-- **Zona**: sector geográfico opcional que agrupa líderes (sirve para filtrar). Se administra en *Zonas*.
 
 El **líder directo** de cada persona es la fuente de verdad; la célula es opcional y solo puede ser una célula de ese líder. Las personas sin líder aparecen en *Sin líder asignado* (admin y pastor).
 
-Cada usuario solo ve las personas, líderes, redes, zonas y células de su ámbito: admin y pastor ven todo y el líder (`lider_celula`) ve solo a sus personas y células.
+Cada usuario solo ve las personas, líderes, redes y células de su ámbito: admin y pastor ven todo y el líder (`lider_celula`) ve solo a sus personas y células.
 
 ### Migración desde la versión anterior
 
@@ -66,7 +77,7 @@ Al ejecutar `php artisan migrate` sobre datos existentes: las redes escritas a m
 
 ## Multi-sede (varias iglesias)
 
-El CRM sirve a varias iglesias (**sedes**) en una sola base de datos. Cada sede tiene sus propias personas, líderes, redes, zonas, células, encuentros, eventos (con pagos) y ministerios, y **nunca ve los de otra**.
+El CRM sirve a varias iglesias (**sedes**) en una sola base de datos. Cada sede tiene sus propias personas, líderes, redes, células, encuentros, eventos (con pagos) y ministerios, y **nunca ve los de otra**.
 
 - **Administrador del sistema (`admin`)**: único con visión total. Crea y administra sedes (menú *Sedes*), elige en la barra superior la **sede activa** o *Todas las sedes* (solo consulta: para crear o editar hay que elegir una sede) y ve el resumen global por sede en el tablero.
 - **Pastor y pastora (`pastor`)**: mismos permisos, limitados a su sede. Gestionan catálogos y usuarios de su sede, pero solo crean cuentas de **líder** y **usuario**; las cuentas de pastor y admin las crea o cambia el admin.

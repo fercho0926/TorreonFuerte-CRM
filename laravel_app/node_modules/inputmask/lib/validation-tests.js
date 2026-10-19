@@ -1,5 +1,6 @@
 import Inputmask from "./inputmask";
 import { getLastValidPosition, seekNext } from "./positioning";
+import { casing } from "./validation";
 
 export {
   determineTestTemplate,
@@ -15,7 +16,9 @@ export {
 function getLocator(tst, align) {
   // need to align the locators to be correct
   let locator = (
-    tst.alternation != undefined ? tst.mloc[getDecisionTaker(tst)] : tst.locator
+    tst.alternation != undefined
+      ? tst.mloc[`${getDecisionTaker(tst)}:${tst.alternation}`] || tst.locator
+      : tst.locator
   ).join("");
   if (locator !== "") {
     locator = locator.split(":")[0]; // strip off alternation marker
@@ -27,8 +30,8 @@ function getLocator(tst, align) {
 function getDecisionTaker(tst) {
   let decisionTaker = tst.locator[tst.alternation];
   if (typeof decisionTaker === "string" && decisionTaker.length > 0) {
-    // no decision taken ~ take first one as decider
-    decisionTaker = decisionTaker.split(",")[0];
+    // no decision taken ~ take smallest as decider
+    decisionTaker = decisionTaker.split(",").sort((a, b) => a - b)[0];
   }
   return decisionTaker !== undefined ? decisionTaker.toString() : "";
 }
@@ -51,12 +54,17 @@ function getPlaceholder(pos, test, returnPL) {
       const lvp = getLastValidPosition.call(inputmask, pos),
         nextPos = seekNext.call(inputmask, lvp);
       return (returnPL ? pos <= nextPos : pos < nextPos)
-        ? opts.staticDefinitionSymbol && test.static
-          ? test.nativeDef
-          : test.def
+        ? casing.call(
+            inputmask,
+            opts.staticDefinitionSymbol && test.static
+              ? test.nativeDef
+              : test.def,
+            test,
+            pos
+          )
         : typeof test.placeholder === "function"
-        ? test.placeholder(opts)
-        : test.placeholder;
+          ? test.placeholder(opts)
+          : test.placeholder;
     } else {
       return typeof test.placeholder === "function"
         ? test.placeholder(opts)
@@ -89,7 +97,7 @@ function getPlaceholder(pos, test, returnPL) {
             staticAlternations.push(tests[i]);
             if (tests[i].match.static === true) prevTest = tests[i];
             if (staticAlternations.length > 1) {
-              if (/[0-9a-bA-Z]/.test(staticAlternations[0].match.def)) {
+              if (/[0-9a-zA-Z]/.test(staticAlternations[0].match.def)) {
                 return opts.placeholder.charAt(pos % opts.placeholder.length);
               }
             }
@@ -118,14 +126,14 @@ function getMaskTemplate(
   const inputmask = this,
     opts = this.opts,
     maskset = this.maskset,
-    greedy = opts.greedy;
+    greedy = opts.greedy,
+    maskTemplate = [];
   if (clearOptionalTail && opts.greedy) {
     opts.greedy = false;
     inputmask.maskset.tests = {};
   }
   minimalPos = minimalPos || 0;
-  let maskTemplate = [],
-    ndxIntlzr,
+  let ndxIntlzr,
     pos = 0,
     test,
     testPos,
@@ -152,8 +160,8 @@ function getMaskTemplate(
         includeMode === true
           ? testPos.input
           : includeMode === false
-          ? test.nativeDef
-          : getPlaceholder.call(inputmask, pos, test)
+            ? test.nativeDef
+            : getPlaceholder.call(inputmask, pos, test)
       );
     } else {
       testPos = getTestTemplate.call(inputmask, pos, ndxIntlzr, pos - 1);
@@ -163,8 +171,8 @@ function getMaskTemplate(
         noJit === true
           ? false
           : opts.jitMasking !== false
-          ? opts.jitMasking
-          : test.jit;
+            ? opts.jitMasking
+            : test.jit;
       // check for groupSeparator is a hack for the numerics as we don't want the render of the groupSeparator beforehand
       jitRenderStatic =
         (jitRenderStatic ||
@@ -232,16 +240,24 @@ function getTestTemplate(pos, ndxIntlzr, tstPs) {
 
 // tobe put on prototype?
 function determineTestTemplate(pos, tests) {
-  let inputmask = this,
-    opts = this.opts,
-    lenghtOffset = 0,
+  const inputmask = this,
+    opts = inputmask.opts,
     optionalityLevel = determineOptionalityLevel(pos, tests);
+
   pos = pos > 0 ? pos - 1 : 0;
-  let altTest = getTest.call(inputmask, pos),
-    targetLocator = getLocator(altTest),
+  const longestLocator = Math.max(
+      ...tests.map((tst) =>
+        tst.locator === undefined ? 0 : tst.locator.length
+      )
+    ),
+    prevTest = getTest.call(inputmask, pos),
+    prevLocator = getLocator(prevTest, longestLocator);
+
+  let lenghtOffset = 0,
     tstLocator,
     closest,
     bestMatch;
+
   if (
     opts.greedy &&
     tests.length > 1 &&
@@ -253,8 +269,9 @@ function determineTestTemplate(pos, tests) {
   for (let ndx = 0; ndx < tests.length - lenghtOffset; ndx++) {
     // find best matching
     const tst = tests[ndx];
-    tstLocator = getLocator(tst, targetLocator.length);
-    const distance = Math.abs(tstLocator - targetLocator);
+    tstLocator = getLocator(tst, longestLocator);
+    const distance = Number(tstLocator) - Number(prevLocator); // find the closest match to the previous one
+    // console.log("distance", distance, tstLocator, prevLocator);
 
     if (
       tst.unMatchedAlternationStopped !== true ||
@@ -366,6 +383,7 @@ function getTests(pos, ndxIntlzr, tstPs) {
     ndxInitializer = ndxIntlzr ? ndxIntlzr.slice() : [0],
     matches = [],
     insertStop = false,
+    insertStopFromAlternation = false,
     latestMatch,
     cacheDependency = ndxIntlzr ? ndxIntlzr.join("") : "",
     unMatchedAlternation = false;
@@ -387,9 +405,18 @@ function getTests(pos, ndxIntlzr, tstPs) {
                 latestMatch,
                 tokenGroup.matches[ndx - 1]
               );
-            } else if (Object.prototype.hasOwnProperty.call(match, "matches"))
+            } else if (Object.prototype.hasOwnProperty.call(match, "matches")) {
               firstMatch = isFirstMatch(latestMatch, match);
-            if (firstMatch) return false;
+            }
+            if (firstMatch) {
+              if (
+                tokenGroup.matches[ndx + 1] &&
+                tokenGroup.matches[ndx + 1].isQuantifier
+              ) {
+                firstMatch = ndx === 0;
+              }
+              return false;
+            }
 
             return true;
           });
@@ -398,52 +425,87 @@ function getTests(pos, ndxIntlzr, tstPs) {
       }
 
       function resolveNdxInitializer(pos, alternateNdx, targetAlternation) {
-        let bestMatch, indexPos;
+        let bestMatch,
+          distance,
+          locator,
+          newAlternateMloc,
+          alternateMloc = `${alternateNdx}:${targetAlternation}`;
 
         if (maskset.tests[pos] || maskset.validPositions[pos]) {
           (maskset.validPositions[pos]
             ? [maskset.validPositions[pos]]
             : maskset.tests[pos]
           ).every(function (lmnt, ndx) {
-            if (lmnt.mloc[alternateNdx]) {
+            if (lmnt.mloc[alternateMloc]) {
               bestMatch = lmnt;
               return false; // break
             }
-            const alternation =
-                targetAlternation !== undefined
-                  ? targetAlternation
-                  : lmnt.alternation,
-              ndxPos =
-                lmnt.locator[alternation] !== undefined
-                  ? lmnt.locator[alternation].toString().indexOf(alternateNdx)
-                  : -1;
-            if (
-              (indexPos === undefined || ndxPos < indexPos) &&
-              ndxPos !== -1
-            ) {
-              bestMatch = lmnt;
-              indexPos = ndxPos;
-            }
+
+            // check if an entry in mloc match the alternateNdx on targetAlternation
+            const mlocMatches = Object.values(lmnt.mloc).filter(
+              // eslint-disable-next-line eqeqeq
+              (m) => m[targetAlternation] == alternateNdx
+            );
+            // for each mlocMatch check the calculated distance
+            mlocMatches.every((mlocMatch) => {
+              let mlocMatchL = mlocMatch.join("").split(":")[0]; // strip off alternation marker
+              locator = locator || mlocMatchL;
+              while (mlocMatchL.length < locator.length) mlocMatchL += "0";
+
+              const mlocDistance = Number(mlocMatchL);
+              // console.log("mlocDistance", mlocDistance);
+              if (bestMatch === undefined || mlocDistance < distance) {
+                distance = mlocDistance;
+                bestMatch = lmnt;
+
+                // key from mlocMatch
+                newAlternateMloc = Object.entries(lmnt.mloc).find(
+                  (entry) => entry[1].toString() === mlocMatch.toString()
+                )[0];
+              }
+
+              return true; // continue
+            });
 
             return true;
           });
         }
         if (bestMatch) {
-          const bestMatchAltIndex = bestMatch.locator[bestMatch.alternation],
-            locator =
-              bestMatch.mloc[alternateNdx] ||
+          if (targetAlternation === undefined) {
+            alternateMloc = `${alternateNdx}:${bestMatch.alternation}`;
+          }
+          const bestMatchAltIndex = `${
+              bestMatch.locator[bestMatch.alternation]
+            }:${bestMatch.alternation}`,
+            slocator =
+              bestMatch.mloc[newAlternateMloc || alternateMloc] ||
               bestMatch.mloc[bestMatchAltIndex] ||
               bestMatch.locator;
-          if (locator[locator.length - 1].toString().indexOf(":") !== -1) {
+          if (slocator[slocator.length - 1].toString().indexOf(":") !== -1) {
             // eslint-disable-next-line no-unused-vars
-            const alternation = locator.pop();
+            const alternation = slocator.pop();
             // targetAlternation = parseInt(alternation.substring(1));
           }
-          return locator.slice(
-            (targetAlternation !== undefined
-              ? targetAlternation
-              : bestMatch.alternation) + 1
-          );
+
+          const sliceStart =
+            parseInt(
+              // newAlternateMloc
+              //   ? newAlternateMloc.split(":")[1]
+              //   : targetAlternation ||
+              bestMatch.alternation
+            ) + 1;
+
+          // console.log(
+          //   "resolveNdxInitializer",
+          //   pos,
+          //   alternateNdx,
+          //   targetAlternation,
+          //   slocator,
+          //   sliceStart,
+          //   bestMatch
+          // );
+
+          return slocator.slice(sliceStart);
         } else {
           return targetAlternation !== undefined
             ? resolveNdxInitializer(pos, alternateNdx)
@@ -472,25 +534,33 @@ function getTests(pos, ndxIntlzr, tstPs) {
           if (locNdx === undefined) {
             targetMatch.alternation = undefined;
           } else {
-            if (typeof locNdx === "string") locNdx = locNdx.split(",")[0];
-            if (targetMatch.mloc[locNdx] === undefined) {
-              targetMatch.mloc[locNdx] = targetMatch.locator.slice();
-              targetMatch.mloc[locNdx].push(`:${targetMatch.alternation}`); // add alternation index
-            }
-            if (altMatch !== undefined) {
-              const offset = 0;
-              for (let ndx in altMatch.mloc) {
-                if (typeof ndx === "string") ndx = parseInt(ndx.split(",")[0]);
-                // do {
-                // 	if (targetMatch.mloc[ndx + offset] === undefined) {
-                targetMatch.mloc[ndx + offset] = altMatch.mloc[ndx];
-                // 		break;
-                // 	}
-                // } while (targetMatch.mloc[ndx + offset++] !== undefined);
+            if (altMatch === undefined) {
+              if (typeof locNdx === "string") locNdx = locNdx.split(",")[0];
+              locNdx = `${locNdx}:${altNdx}`;
+              if (targetMatch.mloc[locNdx] === undefined) {
+                targetMatch.mloc[locNdx] = targetMatch.locator.slice();
+                targetMatch.mloc[locNdx].push(`:${altNdx}`); // add alternation index
               }
-              targetMatch.locator[altNdx] = Object.keys(targetMatch.mloc).join(
-                ","
-              );
+            } else {
+              let offset = 0;
+              for (const ndx in altMatch.mloc) {
+                // if (typeof ndx === "string") ndx = parseInt(ndx.split(",")[0]);
+                if (targetMatch.mloc[ndx] === undefined) {
+                  targetMatch.mloc[ndx] = altMatch.mloc[ndx];
+                } else {
+                  do {
+                    if (targetMatch.mloc[ndx + offset] === undefined) {
+                      targetMatch.mloc[ndx + offset] = altMatch.mloc[ndx];
+                      break;
+                    }
+                  } while (targetMatch.mloc[ndx + offset++] !== undefined);
+                }
+              }
+
+              targetMatch.locator = mergeLocators(testPos, [
+                targetMatch,
+                altMatch
+              ]);
             }
             if (targetMatch.alternation > altNdx) {
               // if the alternation index is higher than the current one resolve it to the alternation
@@ -522,22 +592,6 @@ function getTests(pos, ndxIntlzr, tstPs) {
           return mergeLoc(alternationNdx);
         }
         return false;
-      }
-
-      function isSameLevel(targetMatch, altMatch) {
-        if (targetMatch.locator.length !== altMatch.locator.length) {
-          return false;
-        }
-        for (
-          let locNdx = targetMatch.alternation + 1;
-          locNdx < targetMatch.locator.length;
-          locNdx++
-        ) {
-          if (targetMatch.locator[locNdx] !== altMatch.locator[locNdx]) {
-            return false;
-          }
-        }
-        return true;
       }
 
       function handleGroup() {
@@ -584,14 +638,26 @@ function getTests(pos, ndxIntlzr, tstPs) {
       }
 
       function handleAlternator() {
+        function calculateMatchesLength(matches) {
+          let matchesLength = 0;
+          for (let ndx = 0; ndx < matches.length; ndx++) {
+            const match = matches[ndx];
+            if (match.isQuantifier && !isNaN(match.quantifier.max)) {
+              matchesLength += match.quantifier.max;
+            } else {
+              matchesLength++;
+            }
+          }
+          return matchesLength;
+        }
         function isUnmatchedAlternation(alternateToken) {
-          let matchesLength = alternateToken.matches[0].matches
-              ? alternateToken.matches[0].matches.length
-              : 1,
-            matchesNewLength;
+          const matchesLength = alternateToken.matches[0].matches
+            ? calculateMatchesLength(alternateToken.matches[0].matches)
+            : 1;
+          let matchesNewLength;
           for (let alndx = 0; alndx < alternateToken.matches.length; alndx++) {
             matchesNewLength = alternateToken.matches[alndx].matches
-              ? alternateToken.matches[alndx].matches.length
+              ? calculateMatchesLength(alternateToken.matches[alndx].matches)
               : 1;
             if (matchesLength !== matchesNewLength) {
               break;
@@ -602,16 +668,16 @@ function getTests(pos, ndxIntlzr, tstPs) {
         }
 
         inputmask.hasAlternator = true;
-        let alternateToken = match,
+        const alternateToken = match,
           malternateMatches = [],
-          maltMatches,
           currentMatches = matches.slice(),
           loopNdxCnt = loopNdx.length,
           altIndex = ndxInitializer.length > 0 ? ndxInitializer.shift() : -1;
+        let maltMatches;
         if (altIndex === -1 || typeof altIndex === "string") {
-          let currentPos = testPos,
-            ndxInitializerClone = ndxInitializer.slice(),
-            altIndexArr = [],
+          const currentPos = testPos,
+            ndxInitializerClone = ndxInitializer.slice();
+          let altIndexArr = [],
             amndx;
           if (typeof altIndex === "string") {
             altIndexArr = altIndex.split(",");
@@ -662,9 +728,10 @@ function getTests(pos, ndxIntlzr, tstPs) {
             ) {
               match = true;
             } else {
-              if (ndx === 0) {
-                unMatchedAlternation = isUnmatchedAlternation(alternateToken);
-              }
+              // if (currentPos !== 0) {
+              // only check with the first alternate
+              unMatchedAlternation = isUnmatchedAlternation(alternateToken);
+              // }
               if (
                 tokenMatch &&
                 tokenMatch.matches &&
@@ -690,9 +757,9 @@ function getTests(pos, ndxIntlzr, tstPs) {
                 if (
                   typeof altIndex !== "string" ||
                   (altMatch.alternation !== undefined &&
-                    altIndexArr.includes(
+                    altIndex.indexOf(
                       altMatch.locator[altMatch.alternation].toString()
-                    ))
+                    ) !== -1)
                 ) {
                   if (altMatch.match.nativeDef === altMatch2.match.nativeDef) {
                     dropMatch = true;
@@ -712,12 +779,7 @@ function getTests(pos, ndxIntlzr, tstPs) {
                     setMergeLocators(altMatch2, altMatch);
                     break;
                   } else if (staticCanMatchDefinition(altMatch, altMatch2)) {
-                    if (
-                      !isSameLevel(altMatch, altMatch2) &&
-                      el.inputmask.userOptions.keepStatic === undefined
-                    ) {
-                      opts.keepStatic = true;
-                    } else if (setMergeLocators(altMatch, altMatch2)) {
+                    if (setMergeLocators(altMatch, altMatch2)) {
                       // insert match above general match
                       dropMatch = true;
                       malternateMatches.splice(
@@ -729,6 +791,14 @@ function getTests(pos, ndxIntlzr, tstPs) {
                     break;
                   } else if (staticCanMatchDefinition(altMatch2, altMatch)) {
                     setMergeLocators(altMatch2, altMatch);
+                    // hackery to solve a mask like ([0]9)|(2a) ~ note the static 0 is optional ~ see unittest ivaninDarpatov
+                    // this needs a better solution, but his will do for now
+                    if (
+                      altMatch2.match.optionality &&
+                      el.inputmask.userOptions.keepStatic === undefined
+                    ) {
+                      opts.keepStatic = currentPos;
+                    }
                     break;
                   }
                 }
@@ -740,8 +810,12 @@ function getTests(pos, ndxIntlzr, tstPs) {
           }
 
           matches = currentMatches.concat(malternateMatches);
+
           testPos = pos;
-          insertStop = matches.length > 0 && unMatchedAlternation; // insert a stopelemnt when there is an alternate - needed for non-greedy option
+          insertStop =
+            insertStop || (matches.length > 0 && unMatchedAlternation); // insert a stopelemnt when there is an alternate - needed for non-greedy option
+          if (!unMatchedAlternation && insertStop)
+            insertStopFromAlternation = true; // track insertStop set inside a symmetric alternation
           match = malternateMatches.length > 0 && !unMatchedAlternation; // set correct match state
 
           if (unMatchedAlternation && insertStop && !match) {
@@ -760,19 +834,22 @@ function getTests(pos, ndxIntlzr, tstPs) {
             quantifierRecurse
           );
         }
-        if (match) return true;
+        if (match) {
+          return true;
+        }
       }
 
       function handleQuantifier() {
-        let qt = match,
-          breakloop = false;
+        const qt = match;
+        let breakloop = false;
         for (
-          var qndx = ndxInitializer.length > 0 ? ndxInitializer.shift() : 0;
+          let qndx = ndxInitializer.length > 0 ? ndxInitializer.shift() : 0;
           qndx < (isNaN(qt.quantifier.max) ? qndx + 1 : qt.quantifier.max) &&
           testPos <= pos;
           qndx++
         ) {
-          var tokenGroup = maskToken.matches[maskToken.matches.indexOf(qt) - 1];
+          const tokenGroup =
+            maskToken.matches[maskToken.matches.indexOf(qt) - 1];
           match = handleMatch(tokenGroup, [qndx].concat(loopNdx), tokenGroup); // set the tokenGroup as quantifierRecurse marker
           if (match) {
             matches.forEach(function (mtch, ndx) {
@@ -788,7 +865,7 @@ function getTests(pos, ndxIntlzr, tstPs) {
                 (qndx + 1) * (tokenGroup.matches.indexOf(latestMatch) + 1) >
                 qt.quantifier.jit;
               if (
-                latestMatch.optionalQuantifier &&
+                (latestMatch.optionalQuantifier || latestMatch.optionality) &&
                 isFirstMatch(latestMatch, tokenGroup)
               ) {
                 insertStop = true;
@@ -910,36 +987,42 @@ function getTests(pos, ndxIntlzr, tstPs) {
   }
 
   function mergeLocators(pos, tests) {
-    let locator = [],
-      alternation;
+    let locator = [];
     if (!Array.isArray(tests)) tests = [tests];
 
     if (tests.length > 0) {
-      if (tests[0].alternation === undefined || opts.keepStatic === true) {
+      if (
+        tests[0].alternation === undefined ||
+        opts.keepStatic === true ||
+        (isFinite(parseInt(opts.keepStatic)) && pos >= opts.keepStatic)
+      ) {
         locator = determineTestTemplate
           .call(inputmask, pos, tests.slice())
           .locator.slice();
         if (locator.length === 0) locator = tests[0].locator.slice();
       } else {
-        tests.forEach(function (tst) {
-          if (tst.def !== "") {
-            if (locator.length === 0) {
-              alternation = tst.alternation;
-              locator = tst.locator.slice();
-            } else {
+        // alternation = tests[0].locator.length - 1;
+        tests.forEach((mtch) => {
+          Object.values(mtch.mloc).forEach((mloc) => {
+            mloc.forEach((loc, locNdx) => {
+              // if (locNdx > alternation) return;
+              const mergedPos = locator[locNdx];
               if (
-                tst.locator[alternation] &&
-                locator[alternation]
-                  .toString()
-                  .indexOf(tst.locator[alternation]) === -1
-              ) {
-                locator[alternation] += "," + tst.locator[alternation];
+                loc.toString().includes(":") ||
+                (mergedPos && mergedPos.toString().includes(":"))
+              )
+                return;
+              if (mergedPos === undefined) {
+                locator[locNdx] = loc;
+              } else if (!mergedPos.toString().includes(loc)) {
+                locator[locNdx] = locator[locNdx] + "," + loc;
               }
-            }
-          }
+            });
+          });
         });
       }
     }
+    // console.log("mergeLocators", pos, tests, locator);
     return locator;
   }
 
@@ -996,7 +1079,13 @@ function getTests(pos, ndxIntlzr, tstPs) {
         matches.filter((tst) => tst.unMatchedAlternationStopped !== true)
           .length === 0
           ? [0]
-          : [],
+          : insertStopFromAlternation &&
+              matches.length > 0 &&
+              matches
+                .filter((tst) => !tst.match.static)
+                .every((tst) => tst.match.optionalQuantifier)
+            ? [0]
+            : [],
       mloc: {},
       cd: cacheDependency
     });
@@ -1011,7 +1100,7 @@ function getTests(pos, ndxIntlzr, tstPs) {
     result = maskset.tests[pos];
   }
 
-  // console.log(pos + " - " + JSON.stringify(matches));
+  // console.log(pos, JSON.stringify(matches));
   // cleanup optionality marking
   matches.forEach((t) => {
     t.match.optionality = t.match.defOptionality || false;

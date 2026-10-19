@@ -95,7 +95,16 @@ class AuthController extends Controller
             ->sortBy('fecha')
             ->take(5);
 
+        // Bloques informativos del tablero: solo datos existentes y dentro del ámbito del usuario.
+        $alcance = app(\App\Services\AlcanceService::class);
+        $personasNuevas = $alcance->personasVisibles($actor)->orderByDesc('created_at')->orderByDesc('id')->limit(5)->get();
+        $puedeVerSinLider = \App\Support\Permisos::puede('verSinLider');
+        $sinLider = $puedeVerSinLider ? $alcance->personasVisibles($actor)->sinLider() : null;
+
         return view('dashboard', [
+            'personasNuevas' => $personasNuevas,
+            'personasSinLider' => $sinLider ? (clone $sinLider)->orderByDesc('created_at')->limit(5)->get() : null,
+            'sinLiderTotal' => $sinLider ? (clone $sinLider)->count() : 0,
             'userName' => Session::get('user_name', 'Usuario'),
             'userCount' => $userCount,
             'activeSessions' => $activeSessions,

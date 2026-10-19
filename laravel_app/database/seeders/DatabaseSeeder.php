@@ -12,7 +12,6 @@ use App\Models\Persona;
 use App\Models\Red;
 use App\Models\Sede;
 use App\Models\User;
-use App\Models\Zona;
 use App\Services\SedeContext;
 use App\Services\SedeService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -40,9 +39,9 @@ class DatabaseSeeder extends Seeder
         );
 
         $sedes = [
-            ['clave' => 'centro', 'nombre' => 'Torreón Fuerte Centro', 'ciudad' => 'Torreón', 'red' => 'Jóvenes', 'zona' => 'Centro'],
-            ['clave' => 'norte', 'nombre' => 'Torreón Fuerte Norte', 'ciudad' => 'Gómez Palacio', 'red' => 'Matrimonios', 'zona' => 'Norte'],
-            ['clave' => 'sur', 'nombre' => 'Torreón Fuerte Sur', 'ciudad' => 'Lerdo', 'red' => 'Mujeres', 'zona' => 'Sur'],
+            ['clave' => 'centro', 'nombre' => 'Torreón Fuerte Centro', 'ciudad' => 'Torreón', 'red' => 'Jóvenes', 'lugar' => 'Centro'],
+            ['clave' => 'norte', 'nombre' => 'Torreón Fuerte Norte', 'ciudad' => 'Gómez Palacio', 'red' => 'Matrimonios', 'lugar' => 'Norte'],
+            ['clave' => 'sur', 'nombre' => 'Torreón Fuerte Sur', 'ciudad' => 'Lerdo', 'red' => 'Mujeres', 'lugar' => 'Sur'],
         ];
 
         foreach ($sedes as $i => $d) {
@@ -63,11 +62,10 @@ class DatabaseSeeder extends Seeder
     private function datosDeLaSede(Sede $sede, array $d, int $indice): void
     {
         $red = Red::firstOrCreate(['sede_id' => $sede->id, 'clave' => strtolower($d['red'])], ['nombre' => $d['red']]);
-        $zona = Zona::firstOrCreate(['sede_id' => $sede->id, 'clave' => strtolower($d['zona'])], ['nombre' => $d['zona']]);
 
         $lider = Persona::firstOrCreate(
             ['sede_id' => $sede->id, 'nombres' => 'Lider', 'apellidos' => ucfirst($d['clave'])],
-            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true, 'red_id' => $red->id, 'zona_id' => $zona->id]
+            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true, 'red_id' => $red->id]
         );
         User::updateOrCreate(
             ['email' => "lider.{$d['clave']}@example.com"],
@@ -84,19 +82,19 @@ class DatabaseSeeder extends Seeder
         );
 
         $celula = Celula::firstOrCreate(
-            ['sede_id' => $sede->id, 'nombre' => "Célula {$d['zona']}"],
+            ['sede_id' => $sede->id, 'nombre' => "Célula {$d['lugar']}"],
             ['lider_id' => $lider->id, 'estado' => 'activa']
         );
         $celula->miembros()->syncWithoutDetaching([$miembro->id => ['fecha_ingreso' => now()->toDateString()]]);
 
         $evento = Evento::firstOrCreate(
-            ['sede_id' => $sede->id, 'nombre' => "Cena {$d['zona']}"],
+            ['sede_id' => $sede->id, 'nombre' => "Cena {$d['lugar']}"],
             ['tipo' => Evento::TIPOS[0], 'fecha' => now()->addWeeks(2)->toDateString(), 'costo' => 50000, 'estado' => 'planificado']
         );
         $inscripcion = EventoPersona::firstOrCreate(['sede_id' => $sede->id, 'evento_id' => $evento->id, 'persona_id' => $miembro->id]);
         EventoPago::firstOrCreate(['sede_id' => $sede->id, 'evento_persona_id' => $inscripcion->id], ['monto' => 20000, 'fecha_pago' => now()->toDateString()]);
 
-        Encuentro::firstOrCreate(['sede_id' => $sede->id, 'nombre' => "Encuentro {$d['zona']}"], ['fecha_realizacion' => now()->addMonth()->toDateString(), 'estado' => 'planificado']);
+        Encuentro::firstOrCreate(['sede_id' => $sede->id, 'nombre' => "Encuentro {$d['lugar']}"], ['fecha_realizacion' => now()->addMonth()->toDateString(), 'estado' => 'planificado']);
         Ministerio::firstOrCreate(['sede_id' => $sede->id, 'nombre' => 'Alabanza'], ['estado' => 'activo', 'encargado_id' => $lider->id]);
     }
 }

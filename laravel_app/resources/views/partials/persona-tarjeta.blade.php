@@ -3,16 +3,16 @@
         <div class="d-flex justify-content-between align-items-start">
             <div>
                 <a href="{{ route('personas.show', $persona) }}"><strong>{{ $persona->nombre_completo }}</strong></a>
-                @if($persona->es_lider)<span class="badge badge-primary">Líder</span>@endif
+                @if($persona->es_lider)<x-ui.estado valor="lider" />@endif
                 <div class="small text-muted">
-                    <span class="badge badge-{{ $persona->estado === 'inactivo' ? 'secondary' : ($persona->estado === 'visitante' ? 'warning' : 'success') }}">{{ $persona->estado_etiqueta }}</span>
+                    <x-ui.estado :valor="$persona->estado" :etiqueta="$persona->estado_etiqueta" />
                     @if($persona->lider) · Líder: {{ $persona->lider->nombre_completo }} @endif
                 </div>
             </div>
         </div>
         <div class="mt-2">
             @include('partials.acciones-contacto', ['persona' => $persona])
-            <a href="{{ route('personas.show', $persona) }}" class="btn btn-sm btn-info">Ver</a>
+            <a href="{{ route('personas.show', $persona) }}" class="btn btn-sm btn-outline-secondary">Ver</a>
         </div>
     </div>
 </div>

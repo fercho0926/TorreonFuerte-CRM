@@ -5,56 +5,25 @@
 @section('page-title', 'Cambiar pastor o pastora')
 
 @section('content')
-@if($errors->any())
-    <div class="alert alert-danger">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>
-@endif
-
 <div class="callout callout-info">
     <strong>{{ $sede->nombre }}</strong><br>
     Pastor actual: {{ $sede->pastor?->nombre_completo ?? '—' }} · Pastora actual: {{ $sede->pastora?->nombre_completo ?? '—' }}<br>
     <small>La cuenta anterior pasa a líder y conserva su registro como persona.</small>
 </div>
 
-<form method="POST" action="{{ route('sedes.pastores.update', $sede) }}">
-    @csrf
-    @method('PUT')
-    <div class="card card-primary">
-        <div class="card-header"><h3 class="card-title">Nueva cuenta pastoral</h3></div>
-        <div class="card-body">
-            <div class="form-group">
-                <label>¿Quién cambia?</label>
-                <select name="rol" class="form-control" required>
-                    <option value="pastor" {{ old('rol') === 'pastor' ? 'selected' : '' }}>Pastor</option>
-                    <option value="pastora" {{ old('rol') === 'pastora' ? 'selected' : '' }}>Pastora</option>
-                </select>
-            </div>
+<x-form.layout :action="route('sedes.pastores.update', $sede)" method="PUT" guardar="Guardar cambio" icono="fa-save" :cancelar="route('sedes.show', $sede)">
+    <x-form.section titulo="¿Quién cambia?" descripcion="Elige el cargo y, si ya tiene cuenta en esta sede, designa esa cuenta." icono="fa-exchange-alt" id="seccion-cargo">
+        <x-form.select name="rol" label="Cargo" icono="fa-user-tie" :required="true" :opciones="[['id' => 'pastor', 'texto' => 'Pastor'], ['id' => 'pastora', 'texto' => 'Pastora']]" :vacio="null" />
+        <x-form.select name="user_id" label="Cuenta existente de esta sede" icono="fa-user-check" vacio="— No, crear una cuenta nueva —" buscar
+            :opciones="$cuentas->map(fn ($c) => ['id' => $c->id, 'texto' => $c->name, 'apoyo' => $c->email])->all()" />
+    </x-form.section>
 
-            <div class="form-group">
-                <label>Designar una cuenta existente de esta sede</label>
-                <select name="user_id" class="form-control">
-                    <option value="">— No, crear una cuenta nueva —</option>
-                    @foreach($cuentas as $cuenta)
-                        <option value="{{ $cuenta->id }}" {{ (string) old('user_id') === (string) $cuenta->id ? 'selected' : '' }}>{{ $cuenta->name }} ({{ $cuenta->email }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <hr>
-            <p class="text-muted small">O completa los datos de la cuenta nueva:</p>
-            <div class="row">
-                <div class="col-md-6"><div class="form-group"><label>Nombres</label><input type="text" name="nombres" class="form-control" value="{{ old('nombres') }}"></div></div>
-                <div class="col-md-6"><div class="form-group"><label>Apellidos</label><input type="text" name="apellidos" class="form-control" value="{{ old('apellidos') }}"></div></div>
-            </div>
-            <div class="row">
-                <div class="col-md-5"><div class="form-group"><label>Correo</label><input type="email" name="email" class="form-control" value="{{ old('email') }}"></div></div>
-                <div class="col-md-4"><div class="form-group"><label>Contraseña inicial</label><input type="password" name="password" class="form-control" autocomplete="new-password"></div></div>
-                <div class="col-md-3"><div class="form-group"><label>Celular</label><input type="tel" name="celular" class="form-control" value="{{ old('celular') }}"></div></div>
-            </div>
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Guardar cambio</button>
-            <a href="{{ route('sedes.show', $sede) }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </div>
-</form>
+    <x-form.section titulo="Cuenta nueva" descripcion="Completa estos datos solo si no designas una cuenta existente." icono="fa-user-plus" id="seccion-cuenta-nueva">
+        <x-form.input name="nombres" label="Nombres" icono="fa-user" />
+        <x-form.input name="apellidos" label="Apellidos" icono="fa-user" />
+        <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" col="col-md-5" />
+        <x-form.input name="password" label="Contraseña inicial" type="password" icono="fa-lock" minlength="8" col="col-md-4" />
+        <x-form.input name="celular" label="Celular" type="tel" icono="fa-phone" mascara="celular" col="col-md-3" />
+    </x-form.section>
+</x-form.layout>
 @endsection

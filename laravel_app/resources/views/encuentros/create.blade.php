@@ -5,19 +5,7 @@
 @section('page-title', 'Crear nuevo encuentro')
 
 @section('content')
-<div class="card card-primary">
-    <div class="card-header">
-        <h3 class="card-title">Nuevo encuentro</h3>
-    </div>
-    <form method="POST" action="{{ route('encuentros.store') }}">
-        @csrf
-        <div class="card-body">
-            @include('encuentros._form')
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary">Guardar encuentro</button>
-            <a href="{{ route('encuentros.index') }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+<x-form.layout :action="route('encuentros.store')" guardar="Guardar encuentro" icono="fa-save" :cancelar="route('encuentros.index')">
+    @include('encuentros._form')
+</x-form.layout>
 @endsection

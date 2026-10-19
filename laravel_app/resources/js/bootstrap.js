@@ -1,4 +1,4 @@
-import 'bootstrap';
+// Bootstrap 5 (con Popper) para menús desplegables, colapsables y demás componentes interactivos.
+import * as bootstrap from 'bootstrap';
 
-// This file is intentionally minimal for AdminLTE/Vite integration.
-// If you need axios or other global JS helpers, add them here.
+window.bootstrap = bootstrap;

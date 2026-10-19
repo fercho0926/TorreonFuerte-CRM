@@ -48,7 +48,6 @@ class MatrizRutasTest extends TestCase
             'ministerio' => $this->B['ministerio']->id,
             'encuentro' => $this->B['encuentro']->id,
             'red' => $this->B['red']->id,
-            'zona' => $this->B['zona']->id,
             'user' => $this->B['liderUser']->id,
             'reunion' => $reunion->id,
             'sede' => $this->B['sede']->id,

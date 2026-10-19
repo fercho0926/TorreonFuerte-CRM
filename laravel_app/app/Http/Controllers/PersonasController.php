@@ -28,7 +28,7 @@ class PersonasController extends Controller
         $incluirInactivos = $request->boolean('inactivos') || $estado === 'inactivo';
 
         $personas = $this->alcance()->personasVisibles($user)
-            ->with(['lider', 'redLider', 'zona'])
+            ->with(['lider', 'redLider'])
             ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
             ->when($estado, fn ($query) => $query->where('estado', $estado))
             ->when(!$incluirInactivos, fn ($query) => $query->activas())
@@ -36,10 +36,6 @@ class PersonasController extends Controller
             ->when($request->filled('red_id'), function ($query) use ($request) {
                 $query->where(fn ($q) => $q->where('red_id', $request->red_id)
                     ->orWhereHas('lider', fn ($lider) => $lider->where('red_id', $request->red_id)));
-            })
-            ->when($request->filled('zona_id'), function ($query) use ($request) {
-                $query->where(fn ($q) => $q->where('zona_id', $request->zona_id)
-                    ->orWhereHas('lider', fn ($lider) => $lider->where('zona_id', $request->zona_id)));
             })
             ->orderBy('apellidos')
             ->orderBy('nombres')
@@ -50,12 +46,10 @@ class PersonasController extends Controller
             'personas' => $personas,
             'lideres' => $this->alcance()->lideresVisibles($user)->orderBy('apellidos')->orderBy('nombres')->get(),
             'redes' => $this->alcance()->redesVisibles($user)->orderBy('nombre')->get(),
-            'zonas' => $this->alcance()->zonasVisibles($user)->orderBy('nombre')->get(),
             'filtros' => [
                 'q' => $request->input('q'),
                 'estado' => $estado,
                 'red_id' => $request->input('red_id'),
-                'zona_id' => $request->input('zona_id'),
                 'lider_id' => $request->input('lider_id'),
                 'inactivos' => $incluirInactivos,
             ],
@@ -74,7 +68,6 @@ class PersonasController extends Controller
         $persona->load([
             'lider',
             'redLider',
-            'zona',
             'miembros' => fn ($query) => $query->orderBy('apellidos')->orderBy('nombres'),
             'celulas.lider',
             'celulasLideradas.miembros',
@@ -204,7 +197,7 @@ class PersonasController extends Controller
                 $this->liderazgo->registrarCambio($persona, 'estado', ['estado' => $estadoAnterior], ['estado' => $persona->estado], $user);
             }
             if (!$eraLider && $persona->es_lider) {
-                $this->liderazgo->registrarCambio($persona, 'rol_lider', ['es_lider' => false], ['es_lider' => true, 'red_id' => $persona->red_id, 'zona_id' => $persona->zona_id], $user);
+                $this->liderazgo->registrarCambio($persona, 'rol_lider', ['es_lider' => false], ['es_lider' => true, 'red_id' => $persona->red_id], $user);
             }
 
             return $cambiaLider ? $this->liderazgo->cambiarLider($persona, $nuevoLider, $user) : [];
@@ -298,7 +291,7 @@ class PersonasController extends Controller
 
     /**
      * Ajusta los datos validados según los permisos de quien guarda: solo quien puede designar
-     * líderes controla el rol, la red y la zona.
+     * líderes controla el rol y la red.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -308,7 +301,7 @@ class PersonasController extends Controller
         unset($data['confirmar_duplicado']);
 
         if (!$this->puede('designarLider')) {
-            unset($data['es_lider'], $data['red_id'], $data['zona_id']);
+            unset($data['es_lider'], $data['red_id']);
 
             return $data;
         }
@@ -320,7 +313,6 @@ class PersonasController extends Controller
         }
 
         $data['red_id'] = null;
-        $data['zona_id'] = null;
 
         return $data;
     }
@@ -371,7 +363,6 @@ class PersonasController extends Controller
             'lideres' => $lideres,
             'puedeDesignarLider' => $puedeDesignar,
             'redes' => $puedeDesignar ? Red::activas()->orderBy('nombre')->get() : collect(),
-            'zonas' => $puedeDesignar ? $this->alcance()->zonasVisibles($user)->orderBy('nombre')->get() : collect(),
         ];
     }
 }

@@ -16,7 +16,6 @@ class MigracionSedes
     public const TABLAS = [
         'personas',
         'redes',
-        'zonas',
         'celulas',
         'celula_reuniones',
         'encuentros',

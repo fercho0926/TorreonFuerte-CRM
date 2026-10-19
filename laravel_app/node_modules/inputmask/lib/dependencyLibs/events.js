@@ -1,5 +1,6 @@
 import window from "../global/window";
 
+import data from "./data";
 import extend from "./extend";
 import DependencyLib from "./inputmask.dependencyLib";
 
@@ -8,7 +9,7 @@ export { on, off, trigger, Evnt as Event };
 const document = window.document;
 
 function isValidElement(elem) {
-  return elem instanceof Element;
+  return elem instanceof Element && data(elem, "events");
 }
 
 let Evnt;
@@ -38,29 +39,31 @@ if (typeof window.CustomEvent === "function") {
 }
 
 function on(events, handler) {
-  function addEvent(ev, namespace) {
-    // register domevent
-    if (elem.addEventListener) {
-      // all browsers except IE before version 9
-      elem.addEventListener(ev, handler, false);
-    } else if (elem.attachEvent) {
-      // IE before version 9
-      elem.attachEvent(`on${ev}`, handler);
-    }
-    eventRegistry[ev] = eventRegistry[ev] || {};
-    eventRegistry[ev][namespace] = eventRegistry[ev][namespace] || [];
-    eventRegistry[ev][namespace].push(handler);
+  if (!this[0] || !isValidElement(this[0])) {
+    return this; // Early return if no valid element
   }
 
-  if (isValidElement(this[0])) {
-    var eventRegistry = this[0].eventRegistry,
-      elem = this[0];
+  const elem = this[0],
+    eventRegistry = data(elem, "events"),
+    addEvent = (ev, namespace) => {
+      // register domevent
+      if (elem.addEventListener) {
+        // all browsers except IE before version 9
+        elem.addEventListener(ev, handler, false);
+      } else if (elem.attachEvent) {
+        // IE before version 9
+        elem.attachEvent(`on${ev}`, handler);
+      }
+      eventRegistry[ev] = eventRegistry[ev] || {};
+      eventRegistry[ev][namespace] = eventRegistry[ev][namespace] || [];
+      eventRegistry[ev][namespace].push(handler);
+    };
 
-    events.split(" ").forEach((event) => {
-      const [ev, namespace = "global"] = event.split(".");
-      addEvent(ev, namespace);
-    });
-  }
+  events.split(" ").forEach((event) => {
+    const [ev, namespace = "global"] = event.split(".");
+    addEvent(ev, namespace);
+  });
+
   return this;
 }
 
@@ -77,6 +80,7 @@ function off(events, handler) {
         // IE before version 9
         elem.detachEvent(`on${ev}`, handler);
       }
+      // when the namespace is not defined (global namespace), we need to clean up all events in all namespaces
       if (namespace === "global") {
         for (const nmsp in eventRegistry[ev]) {
           eventRegistry[ev][nmsp].splice(
@@ -94,52 +98,55 @@ function off(events, handler) {
   }
 
   function resolveNamespace(ev, namespace) {
-    let evts = [],
-      hndx,
-      hndL;
+    const evts = [];
+    let hndx, hndL;
     if (ev.length > 0) {
-      if (handler === undefined) {
-        for (
-          hndx = 0, hndL = eventRegistry[ev][namespace].length;
-          hndx < hndL;
-          hndx++
-        ) {
+      const namespaces = namespace
+        ? [namespace]
+        : Object.keys(eventRegistry[ev]);
+      for (let nsi = 0; nsi < namespaces.length; nsi++) {
+        namespace = namespaces[nsi];
+        if (handler === undefined) {
+          for (
+            hndx = 0, hndL = eventRegistry[ev][namespace]?.length || 0;
+            hndx < hndL;
+            hndx++
+          ) {
+            evts.push({
+              ev,
+              namespace,
+              handler: eventRegistry[ev][namespace][hndx]
+            });
+          }
+        } else {
           evts.push({
             ev,
-            namespace: namespace && namespace.length > 0 ? namespace : "global",
-            handler: eventRegistry[ev][namespace][hndx]
+            namespace,
+            handler
           });
         }
-      } else {
-        evts.push({
-          ev,
-          namespace: namespace && namespace.length > 0 ? namespace : "global",
-          handler
-        });
       }
     } else if (namespace.length > 0) {
       for (const evNdx in eventRegistry) {
-        for (const nmsp in eventRegistry[evNdx]) {
-          if (nmsp === namespace) {
-            if (handler === undefined) {
-              for (
-                hndx = 0, hndL = eventRegistry[evNdx][nmsp].length;
-                hndx < hndL;
-                hndx++
-              ) {
-                evts.push({
-                  ev: evNdx,
-                  namespace: nmsp,
-                  handler: eventRegistry[evNdx][nmsp][hndx]
-                });
-              }
-            } else {
+        if (eventRegistry[evNdx][namespace]) {
+          if (handler === undefined) {
+            for (
+              hndx = 0, hndL = eventRegistry[evNdx][namespace].length;
+              hndx < hndL;
+              hndx++
+            ) {
               evts.push({
                 ev: evNdx,
-                namespace: nmsp,
-                handler
+                namespace,
+                handler: eventRegistry[evNdx][namespace][hndx]
               });
             }
+          } else {
+            evts.push({
+              ev: evNdx,
+              namespace,
+              handler
+            });
           }
         }
       }
@@ -148,40 +155,44 @@ function off(events, handler) {
     return evts;
   }
 
-  if (isValidElement(this[0]) && events) {
-    eventRegistry = this[0].eventRegistry;
+  if (isValidElement(this[0])) {
+    eventRegistry = data(this[0], "events");
     elem = this[0];
+    // if no events defined, remove all events
+    events = events || Object.keys(eventRegistry).join(" ");
 
-    events.split(" ").forEach((event) => {
-      const [ev, namespace] = event.split(".");
-      resolveNamespace(ev, namespace).forEach(
-        ({ ev: ev1, handler: handler1, namespace: namespace1 }) => {
-          removeEvent(ev1, namespace1, handler1);
-        }
-      );
-    });
+    if (events !== "") {
+      events.split(" ").forEach((event) => {
+        const [ev, namespace] = event.split(".");
+        resolveNamespace(ev, namespace).forEach(
+          ({ ev: ev1, handler: handler1, namespace: namespace1 }) => {
+            removeEvent(ev1, namespace1, handler1);
+          }
+        );
+      });
+    }
   }
   return this;
 }
 
 function trigger(events /* , args... */) {
   if (isValidElement(this[0])) {
-    const eventRegistry = this[0].eventRegistry,
+    const eventRegistry = data(this[0], "events"),
       elem = this[0],
       _events = typeof events === "string" ? events.split(" ") : [events.type];
     for (let endx = 0; endx < _events.length; endx++) {
       const nsEvent = _events[endx].split("."),
         ev = nsEvent[0],
         namespace = nsEvent[1] || "global";
-      if (document !== undefined && namespace === "global") {
+      if (document !== undefined) {
         // trigger domevent
-        var evnt,
-          params = {
-            bubbles: true,
-            cancelable: true,
-            composed: true,
-            detail: arguments[1]
-          };
+        let evnt;
+        const params = {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          detail: arguments[1]
+        };
         // The custom event that will be created
         if (document.createEvent) {
           try {

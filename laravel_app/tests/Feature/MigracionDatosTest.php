@@ -6,7 +6,6 @@ use App\Models\Celula;
 use App\Models\Persona;
 use App\Models\Red;
 use App\Models\User;
-use App\Models\Zona;
 use App\Support\MigracionRedesZonas;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +70,6 @@ class MigracionDatosTest extends TestCase
 
         $this->assertSame(1, $resultado['usuarios_convertidos']);
         $this->assertSame('lider_celula', $usuario->fresh()->role);
-        $this->assertSame(0, Zona::count());
     }
 
     public function test_no_se_pierde_ninguna_persona_y_quedan_como_miembros_activos(): void

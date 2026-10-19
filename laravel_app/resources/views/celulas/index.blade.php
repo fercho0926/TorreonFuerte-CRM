@@ -4,28 +4,21 @@
 
 @section('page-title', 'Células / Grupos pequeños')
 
-@section('content')
 @if($puedeGestionarEstructura)
-    <div class="row mb-3">
-        <div class="col-12 text-right">
+    @section('page-actions')
             <a href="{{ route('celulas.create') }}" class="btn btn-primary">Crear célula</a>
-        </div>
-    </div>
+    @endsection
 @endif
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
+@section('content')
 
-<div class="card">
+
+<div class="card mb-4">
     <div class="card-header">
-        <h3 class="card-title">Listado de células</h3>
+        <h3 class="card-title">Listado de células <small class="text-muted ms-2">{{ $celulas->count() }} resultados</small></h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -49,26 +42,16 @@
                         <td>{{ $celula->sede ?? '—' }}</td>
                         <td>{{ $celula->dia_reunion ?? '—' }} {{ $celula->hora_reunion ? substr($celula->hora_reunion, 0, 5) : '' }}</td>
                         <td>
-                            <span class="badge badge-{{ $celula->estado === 'activa' ? 'success' : 'secondary' }}">{{ ucfirst($celula->estado) }}</span>
+                            <x-ui.estado :valor="$celula->estado" />
                         </td>
-                        <td><span class="badge badge-info">{{ $celula->miembros_count }}</span></td>
+                        <td><x-ui.insignia color="info">{{ $celula->miembros_count }}</x-ui.insignia></td>
                         @todasLasSedes<td>{{ $celula->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
-                        <td>
-                            <a href="{{ route('celulas.show', $celula) }}" class="btn btn-sm btn-info">Ver</a>
-                            @if($puedeGestionarEstructura)
-                                <a href="{{ route('celulas.edit', $celula) }}" class="btn btn-sm btn-warning">Editar</a>
-                                <form action="{{ route('celulas.destroy', $celula) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar esta célula?')">Eliminar</button>
-                                </form>
-                            @endif
+                        <td class="text-end text-nowrap">
+                            <x-ui.acciones-fila :ver="route('celulas.show', $celula)" :editar="route('celulas.edit', $celula)" :eliminar="route('celulas.destroy', $celula)" :puede-editar="$puedeGestionarEstructura" :puede-eliminar="$puedeGestionarEstructura" eliminar-titulo="¿Eliminar esta célula?" :nombre="$celula->nombre" />
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="9" class="text-center">No hay células registradas.</td>
-                    </tr>
+                    <tr><td colspan="9"><x-ui.vacio mensaje="No hay células registradas." /></td></tr>
                 @endforelse
             </tbody>
         </table>

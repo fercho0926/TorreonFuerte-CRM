@@ -5,10 +5,6 @@
 @section('page-title', 'Trasladar persona a otra sede')
 
 @section('content')
-@if($errors->any())
-    <div class="alert alert-danger">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>
-@endif
-
 <div class="callout callout-info">
     <strong>{{ $persona->nombre_completo }}</strong> — sede actual: {{ $persona->sede?->nombre }}<br>
     <small>
@@ -28,25 +24,10 @@
     </div>
 @endif
 
-<form method="POST" action="{{ route('traslados.store', $persona) }}">
-    @csrf
-    <div class="card card-primary">
-        <div class="card-body">
-            <div class="form-group">
-                <label>Sede destino</label>
-                <select name="sede_destino_id" class="form-control @error('sede_destino_id') is-invalid @enderror" required>
-                    <option value="">Seleccione...</option>
-                    @foreach($sedes as $sede)
-                        <option value="{{ $sede->id }}" {{ (string) old('sede_destino_id') === (string) $sede->id ? 'selected' : '' }}>{{ $sede->nombre }} — {{ $sede->ciudad }}</option>
-                    @endforeach
-                </select>
-                @error('sede_destino_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-            </div>
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-primary" {{ array_sum($pendientes) > 0 ? 'disabled' : '' }}>Trasladar</button>
-            <a href="{{ route('personas.show', $persona) }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </div>
-</form>
+<x-form.layout :action="route('traslados.store', $persona)" guardar="Trasladar" icono="fa-exchange-alt" :cancelar="route('personas.show', $persona)" :deshabilitar="array_sum($pendientes) > 0" :leyenda="false">
+    <x-form.section titulo="Sede destino" descripcion="A qué iglesia se traslada la persona." icono="fa-church" id="seccion-destino">
+        <x-form.select name="sede_destino_id" label="Sede destino" icono="fa-church" :required="true" col="col-md-8"
+            :opciones="$sedes->map(fn ($s) => ['id' => $s->id, 'texto' => $s->nombre, 'apoyo' => $s->ciudad])->all()" />
+    </x-form.section>
+</x-form.layout>
 @endsection

@@ -18,10 +18,10 @@ class MarcaDeSedeTest extends TestCase
         $sede = $this->crearSede(['nombre' => 'Cocorná']);
         $this->comoPastorDe($sede);
 
-        foreach (['dashboard', 'personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'ministerios.index', 'encuentros.index', 'redes.index', 'zonas.index', 'sin-lider.index', 'users.index'] as $ruta) {
+        foreach (['dashboard', 'personas.index', 'lideres.index', 'celulas.index', 'eventos.index', 'ministerios.index', 'encuentros.index', 'redes.index', 'sin-lider.index', 'users.index'] as $ruta) {
             $this->get(route($ruta))
                 ->assertOk()
-                ->assertSee('CRM Admin - <strong>Cocorná</strong>', false)
+                ->assertSee('CRM Admin - <strong class="nombre-sede">Cocorná</strong>', false)
                 ->assertSee(self::MARCA, false);
         }
     }
@@ -39,10 +39,10 @@ class MarcaDeSedeTest extends TestCase
         $sede = $this->crearSede(['nombre' => 'Cocorná']);
 
         $this->comoAdminEnSede($sede);
-        $this->get(route('personas.index'))->assertSee('CRM Admin - <strong>Cocorná</strong>', false)->assertSee(self::MARCA, false);
+        $this->get(route('personas.index'))->assertSee('CRM Admin - <strong class="nombre-sede">Cocorná</strong>', false)->assertSee(self::MARCA, false);
 
         $this->flushSession();
         $this->comoAdminEnTodas();
-        $this->get(route('personas.index'))->assertDontSee('marca-agua-sede', false)->assertDontSee('CRM Admin - <strong>', false);
+        $this->get(route('personas.index'))->assertDontSee('marca-agua-sede', false)->assertDontSee('CRM Admin - <strong class="nombre-sede">', false);
     }
 }

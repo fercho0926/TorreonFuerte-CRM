@@ -27,7 +27,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'es_lider',
     'estado',
     'red_id',
-    'zona_id',
     'inactivado_en',
     'trasladada_a_sede_id',
     'trasladada_en',
@@ -79,11 +78,6 @@ class Persona extends Model
     public function redLider(): BelongsTo
     {
         return $this->belongsTo(Red::class, 'red_id');
-    }
-
-    public function zona(): BelongsTo
-    {
-        return $this->belongsTo(Zona::class, 'zona_id');
     }
 
     public function cambios(): HasMany

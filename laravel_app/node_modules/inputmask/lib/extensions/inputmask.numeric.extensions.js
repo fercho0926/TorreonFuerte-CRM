@@ -4,7 +4,7 @@
  Copyright (c) Robin Herbots
  Licensed under the MIT license
  */
-import escapeRegex from "../escapeRegex";
+import { escapeRegex } from "../escapeRegex";
 import Inputmask from "../inputmask";
 import { keys } from "../keycode";
 import { seekNext } from "../positioning";
@@ -164,7 +164,9 @@ function genMask(opts) {
         ? "lvp"
         : opts.positionCaretOnClick;
     opts.digitsOptional = false;
-    if (isNaN(opts.digits)) opts.digits = 2;
+    if (isNaN(opts.digits))
+      opts.digits =
+        opts.digits.indexOf(",") !== -1 ? opts.digits.split(",")[0] : 2;
     opts._radixDance = false;
     radixPointDef = opts.radixPoint === "," ? "?" : "!";
     if (
@@ -232,7 +234,7 @@ function genMask(opts) {
   return mask;
 }
 
-function hanndleRadixDance(pos, c, radixPos, maskset, opts) {
+function handleRadixDance(pos, c, radixPos, maskset, opts) {
   if (opts._radixDance && opts.numericInput && c !== opts.negationSymbol.back) {
     if (
       pos <= radixPos &&
@@ -382,7 +384,7 @@ Inputmask.extendAliases({
       if (opts.__financeInput !== false && c === opts.radixPoint) return false;
       const radixPos = buffer.indexOf(opts.radixPoint),
         initPos = pos;
-      pos = hanndleRadixDance(pos, c, radixPos, maskset, opts);
+      pos = handleRadixDance(pos, c, radixPos, maskset, opts);
       if (c === "-" || c === opts.negationSymbol.front) {
         if (opts.allowMinus !== true) return false;
         let isNegative = false,
@@ -461,16 +463,36 @@ Inputmask.extendAliases({
               return { rewritePosition: caretPos.begin - 1 };
             }
           }
-        } else if (
-          !opts.showMaskOnHover &&
-          !opts.showMaskOnFocus &&
-          !opts.digitsOptional &&
-          opts.digits > 0 &&
-          this.__valueGet.call(this.el) === ""
-        ) {
-          return { rewritePosition: radixPos };
+        } else {
+          if (
+            !opts.showMaskOnHover &&
+            !opts.showMaskOnFocus &&
+            !opts.digitsOptional &&
+            opts.digits > 0 &&
+            this.__valueGet.call(this.el) === ""
+          ) {
+            return { rewritePosition: radixPos };
+          }
+
+          // Cursor placed at or before the prefix on a field with no digits
+          // would otherwise fall through to alternation switching and land
+          // in the decimal part (#2615)
+          if (
+            pos >= buffer.length - opts.prefix.length &&
+            opts.radixPoint !== ""
+          ) {
+            const digitTest = new RegExp(opts.definitions["9"].validator);
+            if (
+              !maskset.validPositions.some(
+                (vp) => vp && !vp.generatedInput && digitTest.test(vp.input)
+              )
+            ) {
+              return { rewritePosition: radixPos !== -1 ? radixPos : 0 };
+            }
+          }
         }
       }
+
       return { rewritePosition: pos };
     },
     postValidation: function (
@@ -480,7 +502,9 @@ Inputmask.extendAliases({
       currentResult,
       opts,
       maskset,
-      strict
+      strict,
+      fromCheckval,
+      fromAlternate
     ) {
       if (currentResult === false) return currentResult;
       if (strict) return true;
@@ -495,7 +519,9 @@ Inputmask.extendAliases({
         if (
           opts.min !== null &&
           unmasked < opts.min &&
-          (unmasked.toString().length > opts.min.toString().length ||
+          fromAlternate !== true &&
+          (unmasked.toString().length > opts.min.toString().length || // > instead of >= because we want to allow to type a bigger number
+            buffer[0] === opts.radixPoint || // disallow radixpoint when value is smaller than min
             unmasked < 0)
         ) {
           return false;
@@ -505,7 +531,7 @@ Inputmask.extendAliases({
           // };
         }
 
-        if (opts.max !== null && unmasked > opts.max) {
+        if (opts.max !== null && opts.max >= 0 && unmasked > opts.max) {
           return opts.SetMaxOnOverflow
             ? {
                 refreshFromBuffer: true,
@@ -609,8 +635,8 @@ Inputmask.extendAliases({
         digits = !opts.digitsOptional
           ? opts.digits
           : opts.digits < decimalPart.length
-          ? opts.digits
-          : decimalPart.length;
+            ? opts.digits
+            : decimalPart.length;
         if (decimalPart !== "" || !opts.digitsOptional) {
           const digitsFactor = Math.pow(10, digits || 1);
 
@@ -633,7 +659,7 @@ Inputmask.extendAliases({
         );
       }
 
-      if (opts.min !== null || opts.max !== null) {
+      if (initialValue !== "" && (opts.min !== null || opts.max !== null)) {
         const numberValue = initialValue.toString().replace(radixPoint, ".");
         if (opts.min !== null && numberValue < opts.min) {
           initialValue = opts.min.toString().replace(".", radixPoint);
@@ -690,7 +716,7 @@ Inputmask.extendAliases({
         switch (e.type) {
           case "blur":
           case "checkval":
-            if (opts.min !== null) {
+            if (opts.min !== null || opts.max !== null) {
               const unmasked = opts.onUnMask(
                 buffer.slice().reverse().join(""),
                 undefined,
@@ -698,11 +724,24 @@ Inputmask.extendAliases({
                   unmaskAsNumber: true
                 })
               );
-              if (opts.min !== null && unmasked < opts.min) {
+              if (
+                opts.min !== null &&
+                unmasked < opts.min &&
+                buffer.join() !== ""
+              ) {
                 return {
                   refreshFromBuffer: true,
                   buffer: alignDigits(
                     opts.min.toString().replace(".", opts.radixPoint).split(""),
+                    opts.digits,
+                    opts
+                  ).reverse()
+                };
+              } else if (opts.max !== null && unmasked > opts.max) {
+                return {
+                  refreshFromBuffer: true,
+                  buffer: alignDigits(
+                    opts.max.toString().replace(".", opts.radixPoint).split(""),
                     opts.digits,
                     opts
                   ).reverse()
@@ -746,8 +785,9 @@ Inputmask.extendAliases({
 
             if (opts.enforceDigitsOnBlur) {
               result = result || {};
-              const bffr =
-                (result && result.buffer) || buffer.slice().reverse();
+              const bffr = ((result && result.buffer) || buffer)
+                .slice()
+                .reverse();
               result.refreshFromBuffer = true;
               result.buffer = alignDigits(
                 bffr,
@@ -840,8 +880,10 @@ Inputmask.extendAliases({
               bffr = buffer.slice().reverse();
               bffr.splice(
                 bffr.length - caretPos.begin,
-                caretPos.begin - caretPos.end + 1
+                caretPos.begin - caretPos.end || 1
               );
+              if (e.key === keys.Backspace || e.key === keys.BACKSPACE_SAFARI)
+                bffr.splice(bffr.length - caretPos.end + 1, 0, "0");
               // console.log(caretPos);
               bffr = alignDigits(bffr, opts.digits, opts).join("");
               if (restoreCaretPos) {

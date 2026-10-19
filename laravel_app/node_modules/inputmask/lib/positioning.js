@@ -63,10 +63,7 @@ function caret(input, begin, end, notranslate, isDelete) {
           end++; // set visualization for insert/overwrite mode
         }
       }
-      if (
-        input ===
-        (input.inputmask.shadowRoot || input.ownerDocument).activeElement
-      ) {
+      if (input === input.getRootNode().activeElement) {
         if ("setSelectionRange" in input) {
           input.setSelectionRange(begin, end);
         } else if (window.getSelection) {
@@ -129,12 +126,10 @@ function caret(input, begin, end, notranslate, isDelete) {
 
     // if (opts.insertModeVisual && opts.insertMode === false && begin === (end - 1)) end--; //correct caret for insert/overwrite mode
 
-    /* eslint-disable consistent-return */
     return {
       begin: notranslate ? begin : translatePosition.call(inputmask, begin),
       end: notranslate ? end : translatePosition.call(inputmask, end)
     };
-    /* eslint-enable consistent-return */
   }
 }
 
@@ -185,10 +180,33 @@ function determineLastRequiredPosition(returnDefinition) {
       buffer[pos] === getPlaceholder.call(inputmask, pos, testPos.match)
     ) {
       bl--;
+      if (testPos.match.optionality) {
+        // find the last position that is not optional ~ isoptional and newblockmarker == "master"
+        let prevPos = pos;
+        while (prevPos > 0) {
+          const test = getTest.call(inputmask, prevPos);
+          if (
+            test.match.newBlockMarker === "master" ||
+            test.match.newBlockMarker === true
+          ) {
+            break;
+          }
+          prevPos--;
+        }
+        if (maskset.validPositions[prevPos] !== undefined) {
+          break;
+        }
+      }
     } else {
       break;
     }
   }
+
+  // no extra required positions
+  if (pos === lvp) {
+    bl = pos;
+  }
+
   return returnDefinition
     ? {
         l: bl,
@@ -214,11 +232,11 @@ function determineNewCaretPosition(
         if (clickPos < seekNext.call(inputmask, -1)) return true;
         const radixPos = getBuffer.call(inputmask).indexOf(opts.radixPoint);
         if (radixPos !== -1) {
-          for (let vp = 0, vpl = vps.length; vp < vpl; vp++) {
+          for (const vp in vps) {
+            const pos = Number(vp);
             if (
-              vps[vp] &&
-              radixPos < vp &&
-              vps[vp].input !== getPlaceholder.call(inputmask, vp)
+              radixPos < pos &&
+              vps[vp].input !== getPlaceholder.call(inputmask, pos)
             ) {
               return false;
             }
@@ -368,10 +386,10 @@ function getLastValidPosition(closestTo, strict, validPositions) {
   return before === -1 || before === closestTo
     ? after
     : after === -1
-    ? before
-    : closestTo - before < after - closestTo
-    ? before
-    : after;
+      ? before
+      : closestTo - before < after - closestTo
+        ? before
+        : after;
 }
 
 // tobe put on prototype?

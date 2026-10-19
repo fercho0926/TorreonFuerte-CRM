@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Persona;
 use App\Models\Red;
-use App\Models\Zona;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
@@ -25,16 +24,14 @@ class CatalogosTest extends TestCase
         $this->assertStringContainsString('Jóvenes', session('errors')->first('nombre'));
     }
 
-    public function test_no_se_elimina_una_red_o_zona_con_lideres(): void
+    public function test_no_se_elimina_una_red_con_lideres(): void
     {
         $this->comoAdmin();
         $lider = Persona::factory()->lider()->create();
 
         $this->delete(route('redes.destroy', $lider->red_id))->assertStatus(422);
-        $this->delete(route('zonas.destroy', $lider->zona_id))->assertStatus(422);
 
         $this->assertNotNull(Red::find($lider->red_id));
-        $this->assertNotNull(Zona::find($lider->zona_id));
     }
 
     public function test_fusionar_redes_mueve_a_los_lideres(): void
@@ -55,6 +52,5 @@ class CatalogosTest extends TestCase
         $this->comoLider();
 
         $this->get(route('redes.index'))->assertForbidden();
-        $this->get(route('zonas.index'))->assertForbidden();
     }
 }

@@ -20,6 +20,6 @@ const escapeRegexRegex = new RegExp(
     ")",
   "gim"
 );
-export default function (str) {
+export function escapeRegex(str) {
   return str.replace(escapeRegexRegex, "\\$1");
 }

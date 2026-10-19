@@ -1,12 +1,9 @@
-@extends('layouts.admin')
+@extends(\Illuminate\Support\Facades\Session::get('is_logged_in') ? 'layouts.admin' : 'layouts.auth')
 
 @section('title', 'No se puede completar')
 
-@section('page-title', 'No se puede completar la acción')
+@section('page-title', 'No se puede completar')
 
 @section('content')
-<div class="alert alert-warning">
-    {{ $exception->getMessage() }}
-</div>
-<a href="javascript:history.back()" class="btn btn-secondary">Volver</a>
+@include('errors._contenido', ['codigo' => 422, 'icono' => 'fa-exclamation-circle', 'tipo' => 'warning', 'mensaje' => $exception->getMessage() ?: 'No se puede completar la acción.'])
 @endsection

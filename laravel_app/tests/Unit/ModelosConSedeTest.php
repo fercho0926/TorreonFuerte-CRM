@@ -47,7 +47,7 @@ class ModelosConSedeTest extends TestCase
 
     public function test_las_tablas_de_datos_esperadas_tienen_sede_id(): void
     {
-        foreach (['personas', 'redes', 'zonas', 'celulas', 'celula_reuniones', 'encuentros', 'eventos', 'evento_persona', 'evento_pagos', 'ministerios', 'persona_cambios', 'users'] as $tabla) {
+        foreach (['personas', 'redes', 'celulas', 'celula_reuniones', 'encuentros', 'eventos', 'evento_persona', 'evento_pagos', 'ministerios', 'persona_cambios', 'users'] as $tabla) {
             $this->assertTrue(Schema::hasColumn($tabla, 'sede_id'), "La tabla {$tabla} no tiene sede_id");
         }
     }

@@ -6,7 +6,6 @@ use App\Services\SedeContext;
 use App\Models\Celula;
 use App\Models\Persona;
 use App\Models\Red;
-use App\Models\Zona;
 use App\Services\LiderazgoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ViewErrorBag;
@@ -28,11 +27,10 @@ class LideresController extends Controller
         $user = $this->usuarioActual();
 
         $lideres = $this->alcance()->lideresVisibles($user)
-            ->with(['redLider', 'zona'])
+            ->with('redLider')
             ->withCount(['miembros', 'celulasLideradas'])
             ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
             ->when($request->filled('red_id'), fn ($query) => $query->where('red_id', $request->red_id))
-            ->when($request->filled('zona_id'), fn ($query) => $query->where('zona_id', $request->zona_id))
             ->orderBy('apellidos')
             ->orderBy('nombres')
             ->paginate(25)
@@ -41,8 +39,7 @@ class LideresController extends Controller
         return view('lideres.index', [
             'lideres' => $lideres,
             'redes' => $this->alcance()->redesVisibles($user)->orderBy('nombre')->get(),
-            'zonas' => $this->alcance()->zonasVisibles($user)->orderBy('nombre')->get(),
-            'filtros' => $request->only(['q', 'red_id', 'zona_id']),
+            'filtros' => $request->only(['q', 'red_id']),
         ]);
     }
 
@@ -68,7 +65,7 @@ class LideresController extends Controller
             ->get();
 
         return view('lideres.show', [
-            'lider' => $lider->load(['redLider', 'zona']),
+            'lider' => $lider->load('redLider'),
             'miembros' => $miembros,
             'celulas' => $celulas,
             'ultimaReunion' => $celulas->max('reuniones_max_fecha'),
@@ -100,7 +97,6 @@ class LideresController extends Controller
             'q' => $request->input('q'),
             'candidatas' => $candidatas,
             'redes' => Red::activas()->orderBy('nombre')->get(),
-            'zonas' => Zona::activas()->orderBy('nombre')->get(),
         ]);
     }
 
@@ -115,14 +111,13 @@ class LideresController extends Controller
         $data = $request->validate([
             'persona_id' => ['required', app(SedeContext::class)->existe('personas')],
             'red_id' => ['required', app(SedeContext::class)->existe('redes')],
-            'zona_id' => ['nullable', app(SedeContext::class)->existe('zonas')],
         ]);
 
         $user = $this->usuarioActual();
         $persona = $this->alcance()->personasVisibles($user)->whereKey($data['persona_id'])->first();
         abort_unless($persona, 404);
 
-        $this->liderazgo->designarLider($persona, Red::findOrFail($data['red_id']), Zona::find($data['zona_id'] ?? null), $user);
+        $this->liderazgo->designarLider($persona, Red::findOrFail($data['red_id']), $user);
 
         return redirect()->route('lideres.show', $persona)->with('success', 'La persona ahora es líder.');
     }

@@ -4,22 +4,15 @@
 
 @section('page-title', 'Detalle del evento')
 
+@section('page-actions')
+    <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-primary">Editar</a>
+    <a href="{{ route('eventos.index') }}" class="btn btn-outline-secondary">Volver</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-warning">Editar</a>
-        <a href="{{ route('eventos.index') }}" class="btn btn-secondary">Volver</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
-<div class="card card-primary">
+<div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $evento->nombre }}</h3>
     </div>
@@ -39,10 +32,7 @@
 
             <dt class="col-sm-3">Estado</dt>
             <dd class="col-sm-9">
-                @php
-                    $badge = ['planificado' => 'info', 'realizado' => 'success', 'cancelado' => 'danger'][$evento->estado] ?? 'secondary';
-                @endphp
-                <span class="badge badge-{{ $badge }}">{{ ucfirst($evento->estado) }}</span>
+                <x-ui.estado :valor="$evento->estado" />
             </dd>
 
             <dt class="col-sm-3">Descripción</dt>
@@ -57,55 +47,32 @@
     </div>
 </div>
 
-<div class="card card-outline card-secondary mb-3">
-    <div class="card-header">
-        <h3 class="card-title">Inscribir persona</h3>
-    </div>
-    <div class="card-body">
-        <form method="POST" action="{{ route('eventos.personas.store', $evento) }}" class="form-inline">
-            @csrf
-            <div class="form-group mr-2">
-                <select name="persona_id" class="form-control" required>
-                    <option value="">Seleccione una persona...</option>
-                    @foreach($personasSinInscribir as $persona)
-                        <option value="{{ $persona->id }}">{{ $persona->nombre_completo }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group mr-2">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">$</span>
-                    </div>
-                    <input type="number" step="0.01" min="0" name="costo_individual" class="form-control" placeholder="Costo (opcional)">
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Inscribir</button>
-        </form>
-        <small class="form-text text-muted">Deja el costo en blanco para usar el costo general del evento (${{ number_format($evento->costo, 2) }}).</small>
-    </div>
-</div>
+<x-form.layout :action="route('eventos.personas.store', $evento)" modo="incrustado" guardar="Inscribir" icono="fa-user-plus" :leyenda="false">
+    <x-form.section titulo="Inscribir persona" descripcion="Deja el costo en blanco para usar el costo general del evento." icono="fa-user-plus" id="seccion-inscribir">
+        <x-form.select name="persona_id" label="Persona" icono="fa-user" :required="true" col="col-md-7" buscar vacio="Seleccione una persona..."
+            :opciones="\App\Support\Formulario::opciones($personasSinInscribir, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null))" />
+        <x-form.money name="costo_individual" label="Costo individual (opcional)" col="col-md-5" ejemplo="Costo general"
+            :ayuda="'Costo general del evento: $'.number_format($evento->costo, 2)" />
+    </x-form.section>
+</x-form.layout>
 
 <h3 class="mb-3">Personas inscritas ({{ $evento->inscripciones->count() }})</h3>
 
 @forelse($evento->inscripciones as $inscripcion)
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h3 class="card-title">
                 {{ $inscripcion->persona->nombre_completo }}
                 @if($inscripcion->estaPagado())
-                    <span class="badge badge-success">Pagado</span>
+                    <x-ui.estado valor="pagado" />
                 @else
-                    <span class="badge badge-warning">Pendiente</span>
+                    <x-ui.estado valor="pendiente" />
                 @endif
             </h3>
             <div class="card-tools">
                 @if($inscripcion->pagos->isEmpty())
-                    <form action="{{ route('eventos.personas.destroy', [$evento, $inscripcion]) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Quitar a esta persona del evento?')">Quitar</button>
-                    </form>
+                    <x-form.confirm :action="route('eventos.personas.destroy', [$evento, $inscripcion])" method="DELETE" titulo="¿Quitar a esta persona del evento?"
+                        :mensaje="$inscripcion->persona->nombre_completo.' dejará de estar inscrita en este evento.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
                 @endif
             </div>
         </div>
@@ -133,11 +100,8 @@
                                 <td>${{ number_format($pago->monto, 2) }}</td>
                                 <td>{{ $pago->notas ?? '—' }}</td>
                                 <td>
-                                    <form action="{{ route('eventos.pagos.destroy', [$evento, $inscripcion, $pago]) }}" method="POST" style="display:inline-block;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-outline-danger" onclick="return confirm('¿Eliminar este abono?')">Eliminar</button>
-                                    </form>
+                                    <x-form.confirm :action="route('eventos.pagos.destroy', [$evento, $inscripcion, $pago])" method="DELETE" titulo="¿Eliminar este abono?"
+                                        :mensaje="'Se borrará el abono de $'.number_format($pago->monto, 2).' registrado el '.$pago->fecha_pago->format('d/m/Y').'.'" boton="Eliminar" :peligro="true" variante="outline-danger">Eliminar</x-form.confirm>
                                 </td>
                             </tr>
                         @endforeach
@@ -146,24 +110,13 @@
             @endif
 
             @if(!$inscripcion->estaPagado())
-                <form method="POST" action="{{ route('eventos.pagos.store', [$evento, $inscripcion]) }}" class="form-inline">
-                    @csrf
-                    <div class="form-group mr-2">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
-                            </div>
-                            <input type="number" step="0.01" min="0.01" name="monto" class="form-control" placeholder="Monto del abono" required>
-                        </div>
-                    </div>
-                    <div class="form-group mr-2">
-                        <input type="date" name="fecha_pago" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
-                    </div>
-                    <div class="form-group mr-2">
-                        <input type="text" name="notas" class="form-control" placeholder="Notas (opcional)">
-                    </div>
-                    <button type="submit" class="btn btn-success">Registrar abono</button>
-                </form>
+                <x-form.layout :action="route('eventos.pagos.store', [$evento, $inscripcion])" modo="incrustado" guardar="Registrar abono" icono="fa-plus-circle" boton="success" :leyenda="false" :id="'abono-'.$inscripcion->id">
+                    <x-form.section titulo="Registrar abono" icono="fa-money-bill-wave" :id="'seccion-abono-'.$inscripcion->id">
+                        <x-form.money name="monto" :id="'fm-monto-'.$inscripcion->id" label="Monto del abono" :required="true" col="col-md-4" />
+                        <x-form.date name="fecha_pago" :id="'fm-fecha-pago-'.$inscripcion->id" label="Fecha" :required="true" :value="now()->format('Y-m-d')" max="hoy" col="col-md-3" />
+                        <x-form.input name="notas" :id="'fm-notas-'.$inscripcion->id" label="Notas (opcional)" icono="fa-sticky-note" col="col-md-5" maxlength="255" />
+                    </x-form.section>
+                </x-form.layout>
             @endif
         </div>
     </div>

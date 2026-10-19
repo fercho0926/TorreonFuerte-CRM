@@ -4,19 +4,15 @@
 
 @section('page-title', 'Detalle del ministerio')
 
+@section('page-actions')
+    <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-primary">Editar</a>
+    <a href="{{ route('ministerios.index') }}" class="btn btn-outline-secondary">Volver</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-warning">Editar</a>
-        <a href="{{ route('ministerios.index') }}" class="btn btn-secondary">Volver</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-<div class="card card-primary">
+<div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $ministerio->nombre }}</h3>
     </div>
@@ -33,7 +29,7 @@
 
             <dt class="col-sm-3">Estado</dt>
             <dd class="col-sm-9">
-                <span class="badge badge-{{ $ministerio->estado === 'activo' ? 'success' : 'secondary' }}">{{ ucfirst($ministerio->estado) }}</span>
+                <x-ui.estado :valor="$ministerio->estado" />
             </dd>
 
             <dt class="col-sm-3">Descripción</dt>
@@ -42,53 +38,21 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Integrantes ({{ $ministerio->integrantes->count() }})</h3>
-    </div>
-    <form method="POST" action="{{ route('ministerios.integrantes', $ministerio) }}">
-        @csrf
-        @method('PUT')
-        <div class="card-body table-responsive p-0">
-            <table class="table table-bordered table-hover text-nowrap">
-                <thead>
-                    <tr>
-                        <th>Nombre completo</th>
-                        <th>Red</th>
-                        <th>Rol en el ministerio</th>
-                        <th>Fecha de ingreso</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($ministerio->integrantes as $persona)
-                        <tr>
-                            <td>
-                                {{ $persona->nombre_completo }}
-                                @if($persona->es_lider)
-                                    <span class="badge badge-primary">Líder</span>
-                                @endif
-                            </td>
-                            <td>{{ $persona->redLider?->nombre ?? $persona->lider?->redLider?->nombre ?? '—' }}</td>
-                            <td>
-                                <input type="text" name="rol[{{ $persona->id }}]" class="form-control form-control-sm" value="{{ $persona->pivot->rol }}" placeholder="Ej. Coordinador, Integrante...">
-                            </td>
-                            <td>
-                                <input type="date" name="fecha_ingreso[{{ $persona->id }}]" class="form-control form-control-sm" value="{{ $persona->pivot->fecha_ingreso }}">
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-center">Este ministerio aún no tiene integrantes. Agrégalos desde "Editar".</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+<x-form.layout :action="route('ministerios.integrantes', $ministerio)" method="PUT" modo="incrustado" guardar="Guardar cambios de integrantes" icono="fa-save" :deshabilitar="$ministerio->integrantes->isEmpty()" :leyenda="false">
+    <x-form.section :titulo="'Integrantes ('.$ministerio->integrantes->count().')'" descripcion="Rol y fecha de ingreso de cada integrante." icono="fa-users" id="seccion-integrantes">
+        <div class="col-12">
+            <x-form.lista-asistencia name="integrantes[]" :interruptor="false" vacio="Este ministerio aún no tiene integrantes. Agrégalos desde &quot;Editar&quot;."
+                :columnas="['Red']"
+                :filas="$ministerio->integrantes->map(fn ($p) => [
+                    'id' => $p->id,
+                    'nombre' => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''),
+                    'extra' => ['Red' => $p->redLider?->nombre ?? $p->lider?->redLider?->nombre ?? '—'],
+                    'campos' => [
+                        ['etiqueta' => 'Rol en el ministerio', 'name' => 'rol['.$p->id.']', 'valor' => $p->pivot->rol, 'tipo' => 'texto', 'ejemplo' => 'Ej. Coordinador, Integrante...'],
+                        ['etiqueta' => 'Fecha de ingreso', 'name' => 'fecha_ingreso['.$p->id.']', 'valor' => $p->pivot->fecha_ingreso, 'tipo' => 'fecha'],
+                    ],
+                ])->all()" />
         </div>
-        @if($ministerio->integrantes->isNotEmpty())
-            <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Guardar cambios de integrantes</button>
-            </div>
-        @endif
-    </form>
-</div>
+    </x-form.section>
+</x-form.layout>
 @endsection

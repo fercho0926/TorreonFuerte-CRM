@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Persona;
 use App\Models\Red;
-use App\Models\Zona;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -39,19 +38,15 @@ class PersonaFactory extends Factory
     }
 
     /**
-     * Persona con rol de líder; la red y la zona se crean en su misma sede si no se indican.
+     * Persona con rol de líder; la red se crea en su misma sede si no se indican.
      */
-    public function lider(?int $redId = null, ?int $zonaId = null): static
+    public function lider(?int $redId = null): static
     {
         return $this->state(fn () => [
             'es_lider' => true,
             'red_id' => $redId ?? fn (array $atributos) => Red::create([
                 'sede_id' => $atributos['sede_id'],
                 'nombre' => 'Red '.fake()->unique()->word().fake()->numerify('##'),
-            ])->id,
-            'zona_id' => $zonaId ?? fn (array $atributos) => Zona::create([
-                'sede_id' => $atributos['sede_id'],
-                'nombre' => 'Zona '.fake()->unique()->word().fake()->numerify('##'),
             ])->id,
         ]);
     }

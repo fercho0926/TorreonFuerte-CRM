@@ -86,20 +86,20 @@ function mask() {
           return this.inputmask.opts.autoUnmask
             ? this.inputmask.unmaskedvalue()
             : getLastValidPosition.call(inputmask) !== -1 ||
-              opts.nullable !== true
-            ? (this.inputmask.shadowRoot || this.ownerDocument)
-                .activeElement === this && opts.clearMaskOnLostFocus
-              ? (inputmask.isRTL
-                  ? clearOptionalTail
-                      .call(inputmask, getBuffer.call(inputmask).slice())
-                      .reverse()
-                  : clearOptionalTail.call(
-                      inputmask,
-                      getBuffer.call(inputmask).slice()
-                    )
-                ).join("")
-              : valueGet.call(this)
-            : "";
+                opts.nullable !== true
+              ? this.getRootNode().activeElement === this &&
+                opts.clearMaskOnLostFocus
+                ? (inputmask.isRTL
+                    ? clearOptionalTail
+                        .call(inputmask, getBuffer.call(inputmask).slice())
+                        .reverse()
+                    : clearOptionalTail.call(
+                        inputmask,
+                        getBuffer.call(inputmask).slice()
+                      )
+                  ).join("")
+                : valueGet.call(this)
+              : "";
         } else {
           return valueGet.call(this);
         }
@@ -182,8 +182,8 @@ function mask() {
             value === null || value === undefined
               ? ""
               : overruleRTL !== true && inputmask.isRTL
-              ? value.split("").reverse().join("")
-              : value
+                ? value.split("").reverse().join("")
+                : value
           );
         };
 
@@ -201,16 +201,12 @@ function mask() {
       }
     }
 
-    // if (input.tagName.toLowerCase() !== "textarea") {
-    //     opts.ignorables.push(keys.Enter);
-    // }
-
-    let elementType = input.getAttribute("type"),
-      isSupported =
-        (input.tagName.toLowerCase() === "input" &&
-          opts.supportsInputType.includes(elementType)) ||
-        input.isContentEditable ||
-        input.tagName.toLowerCase() === "textarea";
+    const elementType = input.getAttribute("type");
+    let isSupported =
+      (input.tagName.toLowerCase() === "input" &&
+        opts.supportsInputType.includes(elementType)) ||
+      input.isContentEditable ||
+      input.tagName.toLowerCase() === "textarea";
     if (!isSupported) {
       if (input.tagName.toLowerCase() === "input") {
         let el = document.createElement("input");
@@ -284,14 +280,13 @@ function mask() {
 
     getBufferTemplate.call(inputmask).join(""); // initialize the buffer and getmasklength
     inputmask.undoValue = inputmask._valueGet(true);
-    const activeElement = (el.inputmask.shadowRoot || el.ownerDocument)
-      .activeElement;
+    const activeElement = el.getRootNode().activeElement;
     if (
       el.inputmask._valueGet(true) !== "" ||
       opts.clearMaskOnLostFocus === false ||
       activeElement === el
     ) {
-      applyInputValue(el, el.inputmask._valueGet(true), opts);
+      applyInputValue(el, el.inputmask._valueGet(true));
       let buffer = getBuffer.call(inputmask).slice();
       if (isComplete.call(inputmask, buffer) === false) {
         if (opts.clearIncomplete) {
@@ -319,6 +314,8 @@ function mask() {
           el,
           seekNext.call(inputmask, getLastValidPosition.call(inputmask))
         );
+      } else {
+        caret.call(inputmask, el, 0);
       }
     }
   }

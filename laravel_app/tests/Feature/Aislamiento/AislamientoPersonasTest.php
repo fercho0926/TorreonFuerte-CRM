@@ -4,7 +4,6 @@ namespace Tests\Feature\Aislamiento;
 
 use App\Models\Persona;
 use App\Models\Red;
-use App\Models\Zona;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\ConSedes;
 use Tests\Support\EscenarioDosSedes;
@@ -37,17 +36,15 @@ class AislamientoPersonasTest extends TestCase
 
     public function test_selectores_y_filtros_no_ofrecen_datos_de_otra_sede(): void
     {
-        $this->get(route('personas.index'))->assertDontSee('Red Beta')->assertDontSee('Zona Beta');
+        $this->get(route('personas.index'))->assertDontSee('Red Beta');
 
         $this->get(route('personas.create'))
             ->assertOk()
             ->assertSee('LiderAlfa')
             ->assertDontSee('LiderBeta')
-            ->assertDontSee('Red Beta')
-            ->assertDontSee('Zona Beta');
+            ->assertDontSee('Red Beta');
 
         $this->get(route('redes.index'))->assertSee('Red Alfa')->assertDontSee('Red Beta');
-        $this->get(route('zonas.index'))->assertSee('Zona Alfa')->assertDontSee('Zona Beta');
     }
 
     public function test_enlaces_directos_a_otra_sede_responden_404(): void
@@ -69,7 +66,7 @@ class AislamientoPersonasTest extends TestCase
         $this->assertSame('activo' !== $persona->fresh()->estado, true);
     }
 
-    public function test_no_se_puede_asignar_a_lider_red_o_zona_de_otra_sede(): void
+    public function test_no_se_puede_asignar_a_lider_o_red_de_otra_sede(): void
     {
         $base = ['apellidos' => 'Prueba', 'celular' => '3009998888', 'estado' => 'visitante'];
 
@@ -77,14 +74,10 @@ class AislamientoPersonasTest extends TestCase
             ->assertSessionHasErrors('lider_id');
 
         $this->post(route('personas.store'), $base + ['nombres' => 'ConRedAjena', 'estado' => 'miembro_activo', 'tipo_documento' => 'CC', 'numero_documento' => '12121212',
-            'es_lider' => 1, 'red_id' => $this->B['red']->id, 'zona_id' => $this->A['zona']->id])
+            'es_lider' => 1, 'red_id' => $this->B['red']->id])
             ->assertSessionHasErrors('red_id');
 
-        $this->post(route('personas.store'), $base + ['nombres' => 'ConZonaAjena', 'estado' => 'miembro_activo', 'tipo_documento' => 'CC', 'numero_documento' => '13131313',
-            'es_lider' => 1, 'red_id' => $this->A['red']->id, 'zona_id' => $this->B['zona']->id])
-            ->assertSessionHasErrors('zona_id');
-
-        $this->assertSame(0, Persona::withoutGlobalScopes()->whereIn('nombres', ['ConLiderAjeno', 'ConRedAjena', 'ConZonaAjena'])->count());
+        $this->assertSame(0, Persona::withoutGlobalScopes()->whereIn('nombres', ['ConLiderAjeno', 'ConRedAjena'])->count());
 
         $this->put(route('personas.update', $this->A['persona']), [
             'nombres' => 'PersonaAlfa', 'apellidos' => 'Miembro', 'estado' => 'miembro_activo', 'tipo_documento' => 'CC',
@@ -133,12 +126,10 @@ class AislamientoPersonasTest extends TestCase
 
     public function test_catalogos_independientes_por_sede(): void
     {
-        // El mismo nombre de red o zona es válido en dos sedes.
+        // El mismo nombre de red es válido en dos sedes.
         $this->post(route('redes.store'), ['nombre' => 'Red Beta'])->assertSessionHasNoErrors();
-        $this->post(route('zonas.store'), ['nombre' => 'Zona Beta'])->assertSessionHasNoErrors();
 
         $this->assertSame(2, Red::withoutGlobalScopes()->where('nombre', 'Red Beta')->count());
-        $this->assertSame(2, Zona::withoutGlobalScopes()->where('nombre', 'Zona Beta')->count());
 
         // Dentro de la misma sede sigue siendo duplicado.
         $this->post(route('redes.store'), ['nombre' => 'red alfa'])->assertSessionHasErrors('nombre');

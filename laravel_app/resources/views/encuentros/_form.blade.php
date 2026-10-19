@@ -1,81 +1,19 @@
 @php
     $encuentro = $encuentro ?? null;
     $seleccionadas = $personasSeleccionadas ?? [];
+    $opcionesEstado = collect(\App\Models\Encuentro::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
+    $opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''), fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
 @endphp
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Nombre del encuentro</label>
-            <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre', $encuentro?->nombre) }}" required>
-            @error('nombre')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Fecha de realización</label>
-            <input type="date" name="fecha_realizacion" class="form-control @error('fecha_realizacion') is-invalid @enderror" value="{{ old('fecha_realizacion', optional($encuentro?->fecha_realizacion)->format('Y-m-d')) }}" required>
-            @error('fecha_realizacion')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Estado</label>
-            <select name="estado" class="form-control @error('estado') is-invalid @enderror" required>
-                @foreach(\App\Models\Encuentro::ESTADOS as $estado)
-                    <option value="{{ $estado }}" {{ old('estado', $encuentro?->estado ?? 'planificado') == $estado ? 'selected' : '' }}>{{ ucfirst($estado) }}</option>
-                @endforeach
-            </select>
-            @error('estado')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-</div>
+<x-form.section titulo="Datos del encuentro" descripcion="Nombre, fecha, lugar y estado." icono="fa-calendar-check" id="seccion-encuentro">
+    <x-form.input name="nombre" label="Nombre del encuentro" icono="fa-heading" :required="true" :value="$encuentro?->nombre" maxlength="255" />
+    <x-form.date name="fecha_realizacion" label="Fecha de realización" :required="true" :value="$encuentro?->fecha_realizacion" col="col-md-3" />
+    <x-form.select name="estado" label="Estado" icono="fa-toggle-on" :required="true" :opciones="$opcionesEstado" :value="$encuentro?->estado ?? 'planificado'" :vacio="null" col="col-md-3" />
+    <x-form.input name="lugar" label="Lugar" icono="fa-map-marker-alt" :value="$encuentro?->lugar" maxlength="255" />
+    <x-form.money name="valor" label="Valor" :required="true" :value="$encuentro?->valor ?? 0" />
+    <x-form.textarea name="notas" label="Notas" :value="$encuentro?->notas" ayuda="Opcional: detalles que quieras recordar del encuentro." />
+</x-form.section>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Lugar</label>
-            <input type="text" name="lugar" class="form-control @error('lugar') is-invalid @enderror" value="{{ old('lugar', $encuentro?->lugar) }}">
-            @error('lugar')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Valor</label>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">$</span>
-                </div>
-                <input type="number" step="0.01" min="0" name="valor" class="form-control @error('valor') is-invalid @enderror" value="{{ old('valor', $encuentro?->valor) }}" required>
-            </div>
-            @error('valor')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-</div>
-
-<div class="form-group">
-    <label>Notas</label>
-    <textarea name="notas" class="form-control @error('notas') is-invalid @enderror" rows="3">{{ old('notas', $encuentro?->notas) }}</textarea>
-    @error('notas')<span class="invalid-feedback">{{ $message }}</span>@enderror
-</div>
-
-<div class="form-group">
-    <label>Personas participantes</label>
-    <div class="border rounded p-2" style="max-height: 280px; overflow-y: auto;">
-        @forelse($personas as $persona)
-            <div class="form-check">
-                <input type="checkbox" name="personas[]" value="{{ $persona->id }}" class="form-check-input" id="persona-{{ $persona->id }}"
-                    {{ in_array($persona->id, old('personas', $seleccionadas)) ? 'checked' : '' }}>
-                <label class="form-check-label" for="persona-{{ $persona->id }}">
-                    {{ $persona->nombre_completo }}
-                    @if($persona->es_lider)
-                        <span class="badge badge-primary">Líder</span>
-                    @endif
-                </label>
-            </div>
-        @empty
-            <p class="text-muted mb-0">No hay personas registradas todavía.</p>
-        @endforelse
-    </div>
-    @error('personas')<span class="text-danger">{{ $message }}</span>@enderror
-</div>
+<x-form.section titulo="Participantes" descripcion="Elige a las personas que participan; puedes cambiarlas después." icono="fa-users" id="seccion-participantes">
+    <x-form.multiselect name="personas[]" label="Personas participantes" :opciones="$opcionesPersona" :seleccionados="$seleccionadas" vacio="No hay personas registradas todavía." />
+</x-form.section>

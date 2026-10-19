@@ -25,7 +25,7 @@ import { getPlaceholder, getTest } from "./validation-tests";
 
 export { EventHandlers };
 
-var EventHandlers = {
+const EventHandlers = {
   keyEvent: function (e, checkval, writeOut, strict, ndx) {
     const inputmask = this.inputmask,
       opts = inputmask.opts,
@@ -81,6 +81,7 @@ var EventHandlers = {
       caret.call(inputmask, input, 0, e.shiftKey ? pos.begin : 0, true);
     } else if (
       ((opts.undoOnEscape && c === keys.Escape) ||
+        // eslint-disable-next-line no-constant-binary-expression -- TODO: revisit, ctrl+z undo branch is disabled via `false &&`, see #762
         (false && c === keys.z && e.ctrlKey)) &&
       e.altKey !== true
     ) {
@@ -156,12 +157,11 @@ var EventHandlers = {
       }
     }
 
-    inputmask.isComposing = c == keys.Process || c == keys.Unidentified;
-    inputmask.ignorable =
-      c.length > 1 &&
-      !(input.tagName.toLowerCase() === "textarea" && c == keys.Enter);
+    inputmask.isComposing = c === keys.Process || c === keys.Unidentified;
+
+    inputmask.ignorable = c === undefined || c.length > 1;
     return EventHandlers.keypressEvent.call(
-      this,
+      inputmask,
       e,
       checkval,
       writeOut,
@@ -173,11 +173,11 @@ var EventHandlers = {
     const inputmask = this.inputmask || this,
       opts = inputmask.opts,
       $ = inputmask.dependencyLib,
-      maskset = inputmask.maskset;
+      maskset = inputmask.maskset,
+      input = inputmask.el,
+      $input = $(input);
 
-    let input = inputmask.el,
-      $input = $(input),
-      c = e.key;
+    let c = e.key;
 
     if (
       checkval !== true &&
@@ -187,14 +187,11 @@ var EventHandlers = {
       if (c === keys.Enter) {
         if (inputmask.undoValue !== inputmask._valueGet(true)) {
           inputmask.undoValue = inputmask._valueGet(true);
-          // e.preventDefault();
-
           setTimeout(function () {
             $input.trigger("change");
           }, 0);
         }
       }
-      // inputmask.skipInputEvent = true; //skip the input as otherwise the skipped char could be picked up for validation by the inputfallback
     } else if (c) {
       // special treat the decimal separator
       // if ((k === 44 || k === 46) && e.location === 3 && opts.radixPoint !== "") k = opts.radixPoint.charCodeAt(0);
@@ -471,10 +468,7 @@ var EventHandlers = {
 
     if (buffer !== inputValue) {
       changes = analyseChanges(inputValue, buffer, caretPos);
-      if (
-        (input.inputmask.shadowRoot || input.ownerDocument).activeElement !==
-        input
-      ) {
+      if (input.getRootNode().activeElement !== input) {
         input.focus();
       }
       writeBuffer(input, getBuffer.call(inputmask));
@@ -520,7 +514,7 @@ var EventHandlers = {
           EventHandlers.keyEvent.call(input, keydown);
           break;
         default:
-          applyInputValue(input, inputValue);
+          applyInputValue(input, inputValue, e);
           caret.call(inputmask, input, caretPos.begin, caretPos.end, true);
           break;
       }
@@ -538,7 +532,12 @@ var EventHandlers = {
       value = input.inputmask._valueGet(true);
     }
 
-    applyInputValue(input, value, new $.Event("input"));
+    applyInputValue(
+      input,
+      value,
+      new $.Event("input"),
+      (e && e.detail ? e.detail[0] : arguments[1]) !== undefined
+    );
 
     if ((e.detail && e.detail[1] !== undefined) || arguments[2] !== undefined) {
       caret.call(inputmask, input, e.detail ? e.detail[1] : arguments[2]);
@@ -581,8 +580,7 @@ var EventHandlers = {
     inputmask.mouseEnter = false;
     if (
       opts.clearMaskOnLostFocus &&
-      (input.inputmask.shadowRoot || input.ownerDocument).activeElement !==
-        input
+      input.getRootNode().activeElement !== input
     ) {
       HandleNativePlaceholder(input, inputmask.originalPlaceholder);
     }
@@ -592,10 +590,7 @@ var EventHandlers = {
     inputmask.clicked++;
 
     const input = this;
-    if (
-      (input.inputmask.shadowRoot || input.ownerDocument).activeElement ===
-      input
-    ) {
+    if (input.getRootNode().activeElement === input) {
       const newCaretPosition = determineNewCaretPosition.call(
         inputmask,
         caret.call(inputmask, input),
@@ -677,10 +672,16 @@ var EventHandlers = {
 
       nptValue = inputmask._valueGet(true);
       if (inputmask.undoValue !== nptValue) {
+        const bufferTemplateStr = (
+          inputmask.isRTL
+            ? getBufferTemplate.call(inputmask).slice().reverse()
+            : getBufferTemplate.call(inputmask)
+        ).join("");
+
         if (
-          nptValue != "" ||
-          inputmask.undoValue != getBufferTemplate.call(inputmask).join("") ||
-          (inputmask.undoValue == getBufferTemplate.call(inputmask).join("") &&
+          nptValue !== "" ||
+          inputmask.undoValue !== bufferTemplateStr ||
+          (inputmask.undoValue === bufferTemplateStr &&
             inputmask.maskset.validPositions.length > 0)
         ) {
           inputmask.undoValue = nptValue;
@@ -694,10 +695,7 @@ var EventHandlers = {
       { showMaskOnHover } = inputmask.opts,
       input = this;
     inputmask.mouseEnter = true;
-    if (
-      (input.inputmask.shadowRoot || input.ownerDocument).activeElement !==
-      input
-    ) {
+    if (input.getRootNode().activeElement !== input) {
       const bufferTemplate = (
         inputmask.isRTL
           ? getBufferTemplate.call(inputmask).slice().reverse()

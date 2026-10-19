@@ -47,7 +47,7 @@ class SedeActivaAdminTest extends TestCase
             ->assertSee('Iglesia Beta')
             ->assertSee('solo consulta');
 
-        foreach (['lideres.index', 'celulas.index', 'encuentros.index', 'eventos.index', 'ministerios.index', 'redes.index', 'zonas.index'] as $ruta) {
+        foreach (['lideres.index', 'celulas.index', 'encuentros.index', 'eventos.index', 'ministerios.index', 'redes.index'] as $ruta) {
             $this->get(route($ruta))->assertOk()->assertSee('<th>Sede</th>', false);
         }
     }

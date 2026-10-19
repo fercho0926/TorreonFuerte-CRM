@@ -1,181 +1,153 @@
 <!DOCTYPE html>
-<html lang="es">
+{{-- Tema claro fijo: data-lte-color-mode="off" desactiva el selector de tema de AdminLTE. --}}
+<html lang="es" data-bs-theme="light" data-lte-color-mode="off">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'AdminLTE Panel')@if($sedeActual) · {{ $sedeActual->nombre }}@endif</title>
+    <title>@yield('title', 'Inicio') · {{ config('app.sistema') }}@if($sedeActual) · {{ $sedeActual->nombre }}@endif</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="hold-transition sidebar-mini">
-<div class="wrapper">
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-            </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('dashboard') }}" class="nav-link">Inicio</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav ml-auto align-items-center">
-            @if($esAdminSede)
-                <li class="nav-item mr-2">
-                    <form method="POST" action="{{ route('sede-activa.update') }}" class="form-inline">
-                        @csrf
-                        <label class="mr-1 mb-0 small text-muted" for="sede-activa">Sede activa</label>
-                        <select id="sede-activa" name="sede_id" class="form-control form-control-sm" onchange="this.form.submit()">
-                            <option value="" {{ $enTodasLasSedes ? 'selected' : '' }}>Todas las sedes</option>
-                            @foreach($sedesSelector as $opcion)
-                                <option value="{{ $opcion->id }}" {{ $sedeActual?->id === $opcion->id ? 'selected' : '' }}>{{ $opcion->nombre }}{{ $opcion->activa ? '' : ' (inactiva)' }}</option>
-                            @endforeach
-                        </select>
-                    </form>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+{{-- Aplica el plegado recordado antes del primer pintado para evitar parpadeo (ver layout/menu-recordado.js). --}}
+<script>try{if(localStorage.getItem('crm.menu.plegado')==='1'&&window.innerWidth>=992)document.body.classList.add('sidebar-collapse')}catch(e){}</script>
+<div class="app-wrapper">
+    <nav class="app-header navbar navbar-expand bg-body">
+        <div class="container-fluid">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Mostrar u ocultar el menú"><i class="fas fa-bars"></i></a>
                 </li>
-                @if($enTodasLasSedes)
-                    <li class="nav-item mr-2"><span class="badge badge-warning">Todas las sedes: solo consulta</span></li>
+                <li class="nav-item d-none d-md-block">
+                    <a href="{{ route('dashboard') }}" class="nav-link">Inicio</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto align-items-center">
+                @if($esAdminSede)
+                    <li class="nav-item me-2">
+                        <form method="POST" action="{{ route('sede-activa.update') }}" class="d-flex align-items-center gap-1">
+                            @csrf
+                            <label class="small text-muted d-none d-lg-inline mb-0" for="sede-activa">Sede activa</label>
+                            <select id="sede-activa" name="sede_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="" {{ $enTodasLasSedes ? 'selected' : '' }}>Todas las sedes</option>
+                                @foreach($sedesSelector as $opcion)
+                                    <option value="{{ $opcion->id }}" {{ $sedeActual?->id === $opcion->id ? 'selected' : '' }}>{{ $opcion->nombre }}{{ $opcion->activa ? '' : ' (inactiva)' }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </li>
+                    @if($enTodasLasSedes)
+                        <li class="nav-item me-2"><span class="badge text-bg-warning">Todas las sedes: solo consulta</span></li>
+                    @endif
+                @elseif($sedeActual)
+                    <li class="nav-item me-3 d-none d-sm-block"><span class="navbar-text fw-bold"><i class="fas fa-church"></i> <span class="nombre-sede">{{ $sedeActual->nombre }}</span></span></li>
                 @endif
-            @elseif($sedeActual)
-                <li class="nav-item mr-3"><span class="navbar-text font-weight-bold"><i class="fas fa-church"></i> {{ $sedeActual->nombre }}</span></li>
-            @endif
-            <li class="nav-item">
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-danger">Cerrar sesión</button>
-                </form>
-            </li>
-        </ul>
+                @if($usuarioActual)
+                    <li class="nav-item dropdown user-menu">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fa-lg"></i>
+                            <span class="d-none d-md-inline ms-1">{{ $usuarioActual->name }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                            <li class="user-header text-bg-primary">
+                                <i class="fas fa-user-circle fa-3x mb-2"></i>
+                                <p class="mb-0">{{ $usuarioActual->name }}</p>
+                                <small>{{ $rolEtiqueta }}</small>
+                                <small class="d-block">{{ $sedeActual?->nombre ?? 'Todas las sedes' }}</small>
+                            </li>
+                            <li class="user-footer">
+                                <form method="POST" action="{{ route('logout') }}" class="text-end">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-secondary "><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @endif
+            </ul>
+        </div>
     </nav>
 
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="{{ route('dashboard') }}" class="brand-link">
-            <span class="brand-text font-weight-light">CRM Admin{!! $sedeActual ? ' - <strong>'.e($sedeActual->nombre).'</strong>' : '' !!}</span>
-        </a>
-        <div class="sidebar">
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                    <li class="nav-item">
-                        <a href="{{ route('dashboard') }}" class="nav-link @if(request()->routeIs('dashboard')) active @endif">
-                            <i class="nav-icon fas fa-home"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('personas.index') }}" class="nav-link @if(request()->routeIs('personas.*')) active @endif">
-                            <i class="nav-icon fas fa-address-card"></i>
-                            <p>Personas</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('lideres.index') }}" class="nav-link @if(request()->routeIs('lideres.*')) active @endif">
-                            <i class="nav-icon fas fa-user-tie"></i>
-                            <p>Líderes</p>
-                        </a>
-                    </li>
-                    @puede('ver', \App\Models\Sede::class)
-                    <li class="nav-item">
-                        <a href="{{ route('sedes.index') }}" class="nav-link @if(request()->routeIs('sedes.*')) active @endif">
-                            <i class="nav-icon fas fa-church"></i>
-                            <p>Sedes</p>
-                        </a>
-                    </li>
-                    @endpuede
-                    @puede('verSinLider')
-                    <li class="nav-item">
-                        <a href="{{ route('sin-lider.index') }}" class="nav-link @if(request()->routeIs('sin-lider.*')) active @endif">
-                            <i class="nav-icon fas fa-user-clock"></i>
-                            <p>Sin líder asignado @if($sinLiderPendientes > 0)<span class="badge badge-warning right">{{ $sinLiderPendientes }}</span>@endif</p>
-                        </a>
-                    </li>
-                    @endpuede
-                    @puede('gestionarCatalogos')
-                    <li class="nav-item">
-                        <a href="{{ route('redes.index') }}" class="nav-link @if(request()->routeIs('redes.*')) active @endif">
-                            <i class="nav-icon fas fa-sitemap"></i>
-                            <p>Redes</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('zonas.index') }}" class="nav-link @if(request()->routeIs('zonas.*')) active @endif">
-                            <i class="nav-icon fas fa-map-marked-alt"></i>
-                            <p>Zonas</p>
-                        </a>
-                    </li>
-                    @endpuede
-                    <li class="nav-item">
-                        <a href="{{ route('celulas.index') }}" class="nav-link @if(request()->routeIs('celulas.*')) active @endif">
-                            <i class="nav-icon fas fa-people-arrows"></i>
-                            <p>Células</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('encuentros.index') }}" class="nav-link @if(request()->routeIs('encuentros.*')) active @endif">
-                            <i class="nav-icon fas fa-calendar-check"></i>
-                            <p>Encuentros</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('eventos.index') }}" class="nav-link @if(request()->routeIs('eventos.*')) active @endif">
-                            <i class="nav-icon fas fa-glass-cheers"></i>
-                            <p>Eventos</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('ministerios.index') }}" class="nav-link @if(request()->routeIs('ministerios.*')) active @endif">
-                            <i class="nav-icon fas fa-hands-helping"></i>
-                            <p>Ministerios</p>
-                        </a>
-                    </li>
-                    @puede('verUsuarios', \App\Models\User::class)
-                    <li class="nav-item">
-                        <a href="{{ route('users.index') }}" class="nav-link @if(request()->routeIs('users.*')) active @endif">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>Usuarios</p>
-                        </a>
-                    </li>
-                    @endpuede
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+        <div class="sidebar-brand">
+            <a href="{{ route('dashboard') }}" class="brand-link">
+                <span class="brand-text fw-light">CRM Admin{!! $sedeActual ? ' - <strong class="nombre-sede">'.e($sedeActual->nombre).'</strong>' : '' !!}</span>
+            </a>
+        </div>
+        <div class="sidebar-wrapper">
+            <nav class="mt-2" aria-label="Menú principal">
+                <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+                    @foreach($menu as $seccion)
+                        @if($seccion['titulo'])
+                            <li class="nav-header">{{ mb_strtoupper($seccion['titulo']) }}</li>
+                        @endif
+                        @foreach($seccion['opciones'] as $opcion)
+                            <li class="nav-item">
+                                <a href="{{ $opcion['url'] }}" class="nav-link{{ $opcion['activa'] ? ' active' : '' }}" @if($opcion['activa']) aria-current="page" @endif>
+                                    <i class="nav-icon fas {{ $opcion['icono'] }}"></i>
+                                    <p>{{ $opcion['etiqueta'] }}@if($opcion['insignia'] > 0)<span class="nav-badge badge text-bg-warning me-3">{{ $opcion['insignia'] }}</span>@endif</p>
+                                </a>
+                            </li>
+                        @endforeach
+                    @endforeach
                 </ul>
             </nav>
         </div>
     </aside>
 
-    @if($sedeActual)
-        {{-- Marca de agua con el nombre de la sede en la que se está trabajando (todas las páginas). --}}
-        <style>
-            .marca-agua-sede {
-                position: fixed; inset: 0; z-index: 0; pointer-events: none;
-                display: flex; align-items: flex-end; justify-content: center; overflow: hidden; padding-bottom: 7vh;
-            }
-            .marca-agua-sede span {
-                text-transform: uppercase; white-space: nowrap;
-                font-weight: 800; font-size: clamp(2rem, 8vw, 7rem); letter-spacing: .05em;
-                color: rgba(0, 0, 0, .05); user-select: none;
-            }
-            .content-wrapper .content-header, .content-wrapper .content { position: relative; z-index: 1; }
-        </style>
-        <div class="marca-agua-sede" aria-hidden="true"><span>{{ $sedeActual->nombre }}</span></div>
-    @endif
-
-    <div class="content-wrapper">
-        <section class="content-header">
+    <main class="app-main">
+        @if($sedeActual)
+            {{-- Marca de agua con el nombre de la sede en la que se está trabajando (todas las páginas). --}}
+            <div class="marca-agua-sede" aria-hidden="true"><span>{{ $sedeActual->nombre }}</span></div>
+        @endif
+        @php($migas = \App\Support\Menu::migas($menu, trim($__env->yieldContent('page-title'))))
+        <div class="app-content-header">
             <div class="container-fluid">
-                <div class="row mb-2">
+                <div class="row align-items-center">
                     <div class="col-sm-6">
-                        <h1>@yield('page-title', 'Dashboard')</h1>
+                        <h3 class="mb-0">@yield('page-title', 'Dashboard')</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end mb-0 mt-2 mt-sm-0">
+                            @hasSection('breadcrumbs')
+                                @yield('breadcrumbs')
+                            @else
+                                @foreach($migas as $miga)
+                                    @if($loop->last || !$miga['url'])
+                                        <li class="breadcrumb-item @if($loop->last) active @endif" @if($loop->last) aria-current="page" @endif>{{ $miga['texto'] }}</li>
+                                    @else
+                                        <li class="breadcrumb-item"><a href="{{ $miga['url'] }}">{{ $miga['texto'] }}</a></li>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </ol>
                     </div>
                 </div>
+                @hasSection('page-actions')
+                    <div class="row mt-2">
+                        <div class="col-12 d-flex flex-wrap gap-2">@yield('page-actions')</div>
+                    </div>
+                @endif
             </div>
-        </section>
-
-        <section class="content">
+        </div>
+        <div class="app-content">
             <div class="container-fluid">
+                {{-- Mensajes de la acción anterior: el éxito se vuelve un aviso que se cierra solo (con JavaScript). --}}
+                <div data-avisos aria-live="polite">
+                    @if(session('success'))
+                        <div class="alert alert-success" role="status" data-aviso="exito">{{ session('success') }}</div>
+                    @endif
+                    @if(session('error'))
+                        <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+                    @endif
+                </div>
                 @yield('content')
             </div>
-        </section>
-    </div>
+        </div>
+    </main>
 
-    <footer class="main-footer">
-        <div class="float-right d-none d-sm-inline">CRM Laravel</div>
-        <strong>Copyright &copy; 2026.</strong>
+    <footer class="app-footer">
+        <div class="float-end d-none d-sm-inline">{{ config('app.sistema') }}</div>
+        <strong>Copyright &copy; {{ date('Y') }}.</strong>
     </footer>
 </div>
 </body>

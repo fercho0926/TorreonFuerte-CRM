@@ -35,7 +35,7 @@ class ModulosRelacionadosTest extends TestCase
         $this->comoAdmin();
         $celula = Celula::factory()->create();
 
-        foreach ([route('celulas.index'), route('celulas.show', $celula), route('celulas.create'), route('lideres.designar'), route('zonas.index'), route('redes.index'), route('personas.create'), route('personas.create', ['es_lider' => 1])] as $url) {
+        foreach ([route('celulas.index'), route('celulas.show', $celula), route('celulas.create'), route('lideres.designar'), route('redes.index'), route('personas.create'), route('personas.create', ['es_lider' => 1])] as $url) {
             $this->get($url)->assertOk();
         }
     }

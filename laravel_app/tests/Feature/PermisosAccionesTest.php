@@ -32,7 +32,7 @@ class PermisosAccionesTest extends TestCase
         $this->comoPastor();
 
         $this->get(route('lideres.index'))->assertSee('Designar líder');
-        $this->get(route('personas.index'))->assertSee('Redes')->assertSee('Zonas')->assertSee('Sin líder asignado');
+        $this->get(route('personas.index'))->assertSee('Redes')->assertSee('Sin líder asignado');
     }
 
     public function test_acciones_no_permitidas_responden_403_con_mensaje_claro(): void

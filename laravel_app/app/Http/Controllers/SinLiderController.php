@@ -26,7 +26,6 @@ class SinLiderController extends Controller
 
         $personas = $this->alcance()->personasVisibles($user)
             ->sinLider()
-            ->with('zona')
             ->when($request->filled('q'), fn ($query) => $query->buscar($request->q))
             ->orderBy('apellidos')
             ->orderBy('nombres')

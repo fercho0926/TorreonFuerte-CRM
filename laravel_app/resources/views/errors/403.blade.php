@@ -1,12 +1,9 @@
-@extends('layouts.admin')
+@extends(\Illuminate\Support\Facades\Session::get('is_logged_in') ? 'layouts.admin' : 'layouts.auth')
 
 @section('title', 'Sin permiso')
 
 @section('page-title', 'Sin permiso')
 
 @section('content')
-<div class="alert alert-danger">
-    {{ $exception->getMessage() ?: 'No tienes permiso para esta acción' }}
-</div>
-<a href="{{ route('dashboard') }}" class="btn btn-secondary">Volver al inicio</a>
+@include('errors._contenido', ['codigo' => 403, 'icono' => 'fa-lock', 'tipo' => 'danger', 'mensaje' => $exception->getMessage() ?: 'No tienes permiso para esta acción.'])
 @endsection

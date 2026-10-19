@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Celula;
 use App\Models\Persona;
-use App\Models\Zona;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
@@ -21,15 +20,10 @@ class AlcancePorRolTest extends TestCase
 
     private Persona $personaB;
 
-    private Zona $zonaA;
-
     private function escenario(): void
     {
-        $this->zonaA = Zona::create(['sede_id' => \Database\Factories\SedeFactory::idPorDefecto(), 'nombre' => 'Zona A']);
-        $zonaB = Zona::create(['sede_id' => \Database\Factories\SedeFactory::idPorDefecto(), 'nombre' => 'Zona B']);
-
-        $this->liderA = Persona::factory()->lider(null, $this->zonaA->id)->create(['nombres' => 'LiderA', 'apellidos' => 'Alfa']);
-        $this->liderB = Persona::factory()->lider(null, $zonaB->id)->create(['nombres' => 'LiderB', 'apellidos' => 'Beta']);
+        $this->liderA = Persona::factory()->lider()->create(['nombres' => 'LiderA', 'apellidos' => 'Alfa']);
+        $this->liderB = Persona::factory()->lider()->create(['nombres' => 'LiderB', 'apellidos' => 'Beta']);
         $this->personaA = Persona::factory()->create(['nombres' => 'PersonaA', 'apellidos' => 'Alfa', 'lider_id' => $this->liderA->id]);
         $this->personaB = Persona::factory()->create(['nombres' => 'PersonaB', 'apellidos' => 'Beta', 'lider_id' => $this->liderB->id]);
     }
@@ -96,7 +90,7 @@ class AlcancePorRolTest extends TestCase
 
         $this->post(route('personas.store'), [
             'nombres' => 'Intento', 'apellidos' => 'Lider', 'celular' => '3001230000', 'estado' => 'visitante',
-            'es_lider' => 1, 'red_id' => $this->liderA->red_id, 'zona_id' => $this->liderA->zona_id,
+            'es_lider' => 1, 'red_id' => $this->liderA->red_id,
         ])->assertSessionHasNoErrors();
 
         $this->assertFalse(Persona::where('nombres', 'Intento')->firstOrFail()->es_lider);

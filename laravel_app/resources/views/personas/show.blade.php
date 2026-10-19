@@ -4,55 +4,38 @@
 
 @section('page-title', 'Detalle de persona')
 
+@section('page-actions')
+    @puede('editar', $persona)
+        <a href="{{ route('personas.edit', $persona) }}" class="btn btn-primary">Editar</a>
+    @endpuede
+    @puede('inactivar', $persona)
+        @if($persona->estado === 'inactivo')
+            <x-form.accion :action="route('personas.reactivar', $persona)" boton="Reactivar" variante="success" icono="fa-undo" />
+        @else
+            <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a esta persona?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="">Inactivar</x-form.confirm>
+        @endif
+    @endpuede
+    @puede('trasladar', \App\Models\Sede::class)
+        @if(!$persona->trasladada_a_sede_id)
+            <a href="{{ route('traslados.create', $persona) }}" class="btn btn-outline-primary">Trasladar a otra sede</a>
+        @endif
+    @endpuede
+    @puede('eliminar', $persona)
+        <x-form.confirm :action="route('personas.destroy', $persona)" method="DELETE" titulo="¿Eliminar definitivamente?" mensaje="Solo es posible si no tiene historial." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="">Eliminar</x-form.confirm>
+    @endpuede
+    <a href="{{ route('personas.index') }}" class="btn btn-outline-secondary">Volver</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        @puede('editar', $persona)
-            <a href="{{ route('personas.edit', $persona) }}" class="btn btn-warning">Editar</a>
-        @endpuede
-        @puede('inactivar', $persona)
-            @if($persona->estado === 'inactivo')
-                <form action="{{ route('personas.reactivar', $persona) }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-success">Reactivar</button>
-                </form>
-            @else
-                <form action="{{ route('personas.inactivar', $persona) }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-outline-secondary" onclick="return confirm('¿Inactivar a esta persona? Su historial se conserva.')">Inactivar</button>
-                </form>
-            @endif
-        @endpuede
-        @puede('trasladar', \App\Models\Sede::class)
-            @if(!$persona->trasladada_a_sede_id)
-                <a href="{{ route('traslados.create', $persona) }}" class="btn btn-outline-primary">Trasladar a otra sede</a>
-            @endif
-        @endpuede
-        @puede('eliminar', $persona)
-            <form action="{{ route('personas.destroy', $persona) }}" method="POST" class="d-inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar definitivamente? Solo es posible si no tiene historial.')">Eliminar</button>
-            </form>
-        @endpuede
-        <a href="{{ route('personas.index') }}" class="btn btn-secondary">Volver</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
-<div class="card card-primary">
+<div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">
             {{ $persona->nombre_completo }}
-            <span class="badge badge-light">{{ $persona->estado_etiqueta }}</span>
+            <x-ui.estado :valor="$persona->estado" :etiqueta="$persona->estado_etiqueta" />
             @if($persona->es_lider)
-                <span class="badge badge-warning">Líder</span>
+                <x-ui.estado valor="lider" />
             @endif
         </h3>
     </div>
@@ -87,10 +70,7 @@
 
             @if($persona->es_lider)
                 <dt class="col-sm-3">Red</dt>
-                <dd class="col-sm-9"><span class="badge badge-info">{{ $persona->redLider?->nombre ?? '—' }}</span></dd>
-
-                <dt class="col-sm-3">Zona</dt>
-                <dd class="col-sm-9"><span class="badge badge-info">{{ $persona->zona?->nombre ?? '—' }}</span></dd>
+                <dd class="col-sm-9"><x-ui.insignia color="info">{{ $persona->redLider?->nombre ?? '—' }}</x-ui.insignia></dd>
             @endif
 
             <dt class="col-sm-3">Líder</dt>
@@ -106,7 +86,7 @@
 </div>
 
 @if($persona->miembros->isNotEmpty())
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h3 class="card-title">Personas a su cargo ({{ $persona->miembros->count() }})</h3>
         </div>
@@ -131,19 +111,19 @@
     </div>
 @endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Células</h3>
     </div>
     <div class="card-body">
         @foreach($persona->celulasLideradas as $celula)
-            <p><span class="badge badge-primary">Líder</span> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — {{ $celula->miembros->count() }} miembros</p>
+            <p><x-ui.estado valor="lider" /> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — {{ $celula->miembros->count() }} miembros</p>
         @endforeach
         @foreach($persona->celulasCoLideradas as $celula)
-            <p><span class="badge badge-secondary">Co-líder</span> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — {{ $celula->miembros->count() }} miembros</p>
+            <p><x-ui.insignia color="secondary">Co-líder</x-ui.insignia> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — {{ $celula->miembros->count() }} miembros</p>
         @endforeach
         @foreach($persona->celulas as $celula)
-            <p><span class="badge badge-light border">Miembro</span> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — líder: {{ $celula->lider->nombre_completo }}</p>
+            <p><x-ui.insignia color="light" class="border">Miembro</x-ui.insignia> <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a> — líder: {{ $celula->lider->nombre_completo }}</p>
         @endforeach
         @if($persona->celulasLideradas->isEmpty() && $persona->celulasCoLideradas->isEmpty() && $persona->celulas->isEmpty())
             <p class="text-muted mb-0">No pertenece a ninguna célula todavía.</p>
@@ -151,7 +131,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Encuentros ({{ $persona->encuentros->count() }})</h3>
     </div>
@@ -172,9 +152,9 @@
                         <td>{{ $encuentro->fecha_realizacion->translatedFormat('j \d\e F \d\e Y') }}</td>
                         <td>
                             @if($encuentro->pivot->asistio)
-                                <span class="badge badge-success">Sí</span>
+                                <x-ui.estado valor="si" />
                             @else
-                                <span class="badge badge-secondary">No</span>
+                                <x-ui.estado valor="no" />
                             @endif
                         </td>
                         <td>{{ $encuentro->pivot->valor_pagado !== null ? '$'.number_format($encuentro->pivot->valor_pagado, 2) : '—' }}</td>
@@ -189,7 +169,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Eventos ({{ $persona->inscripcionesEventos->count() }})</h3>
     </div>
@@ -215,9 +195,9 @@
                         <td>${{ number_format($inscripcion->saldoPendiente(), 2) }}</td>
                         <td>
                             @if($inscripcion->estaPagado())
-                                <span class="badge badge-success">Pagado</span>
+                                <x-ui.estado valor="pagado" />
                             @else
-                                <span class="badge badge-warning">Pendiente</span>
+                                <x-ui.estado valor="pendiente" />
                             @endif
                         </td>
                     </tr>
@@ -231,17 +211,17 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Ministerios</h3>
     </div>
     <div class="card-body">
         @foreach($persona->ministeriosLiderados as $ministerio)
-            <p><span class="badge badge-primary">Encargado</span> <a href="{{ route('ministerios.show', $ministerio) }}">{{ $ministerio->nombre }}</a></p>
+            <p><x-ui.insignia color="primary">Encargado</x-ui.insignia> <a href="{{ route('ministerios.show', $ministerio) }}">{{ $ministerio->nombre }}</a></p>
         @endforeach
         @foreach($persona->ministerios as $ministerio)
             <p>
-                <span class="badge badge-light border">{{ $ministerio->pivot->rol ?? 'Integrante' }}</span>
+                <x-ui.insignia color="light" class="border">{{ $ministerio->pivot->rol ?? 'Integrante' }}</x-ui.insignia>
                 <a href="{{ route('ministerios.show', $ministerio) }}">{{ $ministerio->nombre }}</a>
                 @if($ministerio->pivot->fecha_ingreso)
                     — desde {{ \Illuminate\Support\Carbon::parse($ministerio->pivot->fecha_ingreso)->translatedFormat('j \d\e F \d\e Y') }}
@@ -255,7 +235,7 @@
 </div>
 
 @puede('verBitacora')
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h3 class="card-title">Historial de cambios</h3>
         </div>

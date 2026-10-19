@@ -4,7 +4,7 @@
  Copyright (c) Robin Herbots
  Licensed under the MIT license
  */
-import escapeRegex from "../escapeRegex";
+import { escapeRegex } from "../escapeRegex";
 import Inputmask from "../inputmask";
 import { keyCode, keys } from "../keycode.js";
 import { seekNext } from "../positioning";
@@ -32,53 +32,61 @@ class DateObject {
   }
 
   initDateObject(mask, opts, inputmask) {
-    let match;
+    let match,
+      lastNdx = -1;
     getTokenizer(opts).lastIndex = 0;
     while ((match = getTokenizer(opts).exec(this.format))) {
-      let dynMatches = /\d+$/.exec(match[0]),
-        fcode = dynMatches ? match[0][0] + "x" : match[0],
-        value;
-      if (mask !== undefined) {
-        // console.log("mask", mask);
-        if (dynMatches) {
-          const lastIndex = getTokenizer(opts).lastIndex,
-            tokenMatch = getTokenMatch.call(
-              inputmask,
-              match.index,
-              opts,
-              inputmask && inputmask.maskset
+      if (match.index >= lastNdx) {
+        let dynMatches = /\d+$/.exec(match[0]),
+          fcode = dynMatches ? match[0][0] + "x" : match[0],
+          value;
+        if (mask !== undefined) {
+          // console.log("mask", mask);
+          if (dynMatches) {
+            const lastIndex = getTokenizer(opts).lastIndex,
+              tokenMatch = getTokenMatch.call(
+                inputmask,
+                match.index,
+                opts,
+                inputmask && inputmask.maskset
+              );
+            getTokenizer(opts).lastIndex = lastIndex;
+            value = mask.slice(0, mask.indexOf(tokenMatch.nextMatch[0]));
+          } else {
+            let targetSymbol = match[0][0],
+              ndx = match.index;
+            while (
+              inputmask &&
+              (opts.placeholder[
+                `${match.index}'${
+                  getTest.call(inputmask, ndx).match.placeholder
+                }`
+              ] || getTest.call(inputmask, ndx).match.placeholder) ===
+                targetSymbol
+            ) {
+              ndx++;
+            }
+            lastNdx = ndx;
+            const targetMatchLength = ndx - match.index;
+            value = mask.slice(
+              0,
+              targetMatchLength ||
+                (formatcode(fcode) && formatcode(fcode)[4]) ||
+                fcode.length
             );
-          getTokenizer(opts).lastIndex = lastIndex;
-          value = mask.slice(0, mask.indexOf(tokenMatch.nextMatch[0]));
-        } else {
-          let targetSymbol = match[0][0],
-            ndx = match.index;
-          while (
-            inputmask &&
-            (opts.placeholder[getTest.call(inputmask, ndx).match.placeholder] ||
-              getTest.call(inputmask, ndx).match.placeholder) === targetSymbol
-          ) {
-            ndx++;
           }
-          const targetMatchLength = ndx - match.index;
-          value = mask.slice(
-            0,
-            targetMatchLength ||
-              (formatCode[fcode] && formatCode[fcode][4]) ||
-              fcode.length
+          mask = mask.slice(value.length);
+        }
+
+        if (Object.prototype.hasOwnProperty.call(formatCode, fcode)) {
+          this.setValue(
+            this,
+            value,
+            fcode,
+            formatcode(fcode)[2],
+            formatcode(fcode)[1]
           );
         }
-        mask = mask.slice(value.length);
-      }
-
-      if (Object.prototype.hasOwnProperty.call(formatCode, fcode)) {
-        this.setValue(
-          this,
-          value,
-          fcode,
-          formatCode[fcode][2],
-          formatCode[fcode][1]
-        );
       }
     }
   }
@@ -91,8 +99,8 @@ class DateObject {
           dateObj["raw" + targetProp] = value.replace(/\s/g, "_");
           break;
         case "month":
-          if (fcode === "mmm" || fcode === "mmmm") {
-            fcode === "mmm"
+          if (fcode === "MMM" || fcode === "MMMM") {
+            fcode === "MMM"
               ? (dateObj[targetProp] = pad(
                   i18n.monthNames
                     .slice(0, 12)
@@ -144,8 +152,8 @@ class DateObject {
       if (targetProp === "month") useDateObject = true;
       if (targetProp === "year") {
         useDateObject = true;
-        if (datavalue.length < formatCode[fcode][4])
-          datavalue = pad(datavalue, formatCode[fcode][4], true);
+        if (datavalue.length < formatcode(fcode)[4])
+          datavalue = pad(datavalue, formatcode(fcode)[4], true);
       }
       if ((datavalue !== "" && !isNaN(datavalue)) || targetProp === "ampm")
         dateOperation.call(dateObj._date, datavalue);
@@ -163,11 +171,13 @@ class DateObject {
   }
 }
 
-let currentYear = new Date().getFullYear(),
+let useDateObject = false;
+const currentYear = new Date().getFullYear(),
   i18n = Inputmask.prototype.i18n,
-  useDateObject = false, // supported codes for formatting
-  // http://blog.stevenlevithan.com/archives/date-time-format
+  // supported codes for formatting
+  // https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-date-time-string-format
   // https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings?view=netframework-4.7
+  // https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table
   formatCode = {
     // regex, valueSetter, type, displayformatter, #entries (optional)
     d: [
@@ -186,7 +196,7 @@ let currentYear = new Date().getFullYear(),
     ], // Day of the month as digits; leading zero for single-digit days.
     ddd: [""], // Day of the week as a three-letter abbreviation.
     dddd: [""], // Day of the week as its full name.
-    m: [
+    M: [
       "[1-9]|1[012]",
       function (val) {
         let mval = val ? parseInt(val) : 0;
@@ -198,7 +208,7 @@ let currentYear = new Date().getFullYear(),
         return Date.prototype.getMonth.call(this) + 1;
       }
     ], // Month as digits; no leading zero for single-digit months.
-    mm: [
+    MM: [
       "0[1-9]|1[012]",
       function (val) {
         let mval = val ? parseInt(val) : 0;
@@ -210,7 +220,7 @@ let currentYear = new Date().getFullYear(),
         return pad(Date.prototype.getMonth.call(this) + 1, 2);
       }
     ], // Month as digits; leading zero for single-digit months.
-    mmm: [
+    MMM: [
       i18n.monthNames.slice(0, 12).join("|"),
       function (val) {
         const mval = i18n.monthNames
@@ -223,7 +233,7 @@ let currentYear = new Date().getFullYear(),
         return i18n.monthNames.slice(0, 12)[Date.prototype.getMonth.call(this)];
       }
     ], // Month as a three-letter abbreviation.
-    mmmm: [
+    MMMM: [
       i18n.monthNames.slice(12, 24).join("|"),
       function (val) {
         const mval = i18n.monthNames
@@ -309,13 +319,13 @@ let currentYear = new Date().getFullYear(),
         };
       }
     ], // Hours; no limit; set maximum digits
-    M: [
+    m: [
       "[1-5]?[0-9]",
       Date.prototype.setMinutes,
       "minutes",
       Date.prototype.getMinutes
     ], // Minutes; no leading zero for single-digit minutes. Uppercase M unlike CF timeFormat's m to avoid conflict with months.
-    MM: [
+    mm: [
       "0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]",
       Date.prototype.setMinutes,
       "minutes",
@@ -363,11 +373,22 @@ let currentYear = new Date().getFullYear(),
     o: [""], // GMT/UTC timezone offset, e.g. -0500 or +0230.
     S: [""] // The date's ordinal suffix (st, nd, rd, or th).
   },
+  formatCodeAlias = {
+    D: "d",
+    DD: "dd",
+    DDD: "ddd",
+    DDDD: "dddd",
+    mmm: "MMM",
+    mmmm: "MMMM",
+    YY: "yy",
+    YYYY: "yyyy",
+    sss: "L"
+  },
   formatAlias = {
-    isoDate: "yyyy-mm-dd", // 2007-06-09
-    isoTime: "HH:MM:ss", // 17:46:21
-    isoDateTime: "yyyy-mm-dd'T'HH:MM:ss", // 2007-06-09T17:46:21
-    isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'" // 2007-06-09T22:46:21Z
+    isoDate: "yyyy-MM-dd", // 2007-06-09
+    isoTime: "HH:mm:ss", // 17:46:21
+    isoDateTime: "yyyy-MM-dd\\THH:mm:ss", // 2007-06-09T17:46:21
+    isoUtcDateTime: "UTC:yyyy-MM-dd\\THH:mm:ss\\Z" // 2007-06-09T22:46:21Z
   };
 
 function setAMPM(value) {
@@ -402,23 +423,30 @@ function getTimeZoneAbbreviated() {
 }
 
 function formatcode(match) {
-  const dynMatches = /\d+$/.exec(match[0]);
+  const fcMatch = formatCodeAlias[match] || match,
+    dynMatches = /\d+$/.exec(fcMatch);
   if (dynMatches && dynMatches[0] !== undefined) {
-    const fcode = formatCode[match[0][0] + "x"].slice("");
+    const fcode = formatCode[fcMatch[0] + "x"].slice("");
     fcode[0] = fcode[0](dynMatches[0]);
     fcode[3] = fcode[3](dynMatches[0]);
 
     return fcode;
-  } else if (formatCode[match[0]]) {
-    return formatCode[match[0]];
+  } else if (formatCode[fcMatch]) {
+    return formatCode[fcMatch];
   }
+
+  return undefined;
 }
 
 function getTokenizer(opts) {
   if (!opts.tokenizer) {
     const tokens = [],
-      dyntokens = [];
-    for (const ndx in formatCode) {
+      dyntokens = [],
+      formatCodeKeys = Object.keys(formatCode).concat(
+        Object.keys(formatCodeAlias)
+      );
+
+    for (const ndx of formatCodeKeys) {
       if (/\.*x$/.test(ndx)) {
         const dynToken = ndx[0] + "\\d+";
         if (dyntokens.indexOf(dynToken) === -1) {
@@ -432,7 +460,7 @@ function getTokenizer(opts) {
       "(" +
       (dyntokens.length > 0 ? dyntokens.join("|") + "|" : "") +
       tokens.join("+|") +
-      ")+?|.";
+      "+)+?|.";
     opts.tokenizer = new RegExp(opts.tokenizer, "g");
   }
 
@@ -513,7 +541,7 @@ function isValidDate(dateParts, currentResult, opts) {
       );
       if (
         tokenMatch.targetMatch &&
-        tokenMatch.targetMatch[0] === "yyyy" &&
+        ["yyyy", "YYYY"].includes(tokenMatch.targetMatch[0]) &&
         currentResult.pos - tokenMatch.targetMatchIndex === 2
       ) {
         currentResult.remove = currentResult.pos + 1;
@@ -551,7 +579,7 @@ function isDateInRange(dateParts, result, opts, maskset, fromCheckval) {
       getTokenizer(opts).lastIndex = 0;
       while ((match = getTokenizer(opts).exec(opts.inputFormat))) {
         var fcode;
-        if ((fcode = formatcode(match))) {
+        if ((fcode = formatcode(match[0]))) {
           if (fcode[3]) {
             let setFn = fcode[1],
               current = dateParts[fcode[2]],
@@ -609,57 +637,68 @@ function isDateInRange(dateParts, result, opts, maskset, fromCheckval) {
 
 // parse the given format and return a mask pattern
 // when a dateObjValue is passed a datestring in the requested format is returned
-function parse(format, dateObjValue, opts, raw) {
+function parse(format, dateObjValue, opts) {
   // parse format to regex string
   let mask = "",
     match,
     fcode,
     ndx = 0,
-    placeHolder = {};
+    escaped = false;
+  const placeHolder = {};
   getTokenizer(opts).lastIndex = 0;
   while ((match = getTokenizer(opts).exec(format))) {
-    if (dateObjValue === undefined) {
-      if ((fcode = formatcode(match))) {
-        mask += "(" + fcode[0] + ")";
-        // map placeholder to placeholder object and set placeholder mappings
-        if (opts.placeholder && opts.placeholder !== "") {
-          placeHolder[ndx] =
-            opts.placeholder[match.index % opts.placeholder.length];
-          placeHolder[opts.placeholder[match.index % opts.placeholder.length]] =
-            match[0].charAt(0);
+    if (match[0] === opts.escapeChar) {
+      escaped = true;
+    } else {
+      if (dateObjValue === undefined) {
+        if (!escaped && (fcode = formatcode(match[0]))) {
+          mask += "(" + fcode[0] + ")";
+          // map placeholder to placeholder object and set placeholder mappings
+          if (opts.placeholder && opts.placeholder !== "") {
+            placeHolder[ndx] =
+              opts.placeholder[match.index % opts.placeholder.length];
+            // internal use of datetime alias
+            placeHolder[
+              `${match.index}'${
+                opts.placeholder[match.index % opts.placeholder.length]
+              }`
+            ] = match[0].charAt(0);
+          } else {
+            placeHolder[ndx] = match[0].charAt(0);
+          }
         } else {
-          placeHolder[ndx] = match[0].charAt(0);
+          switch (match[0]) {
+            case "[":
+              mask += "(";
+              break;
+            case "]":
+              mask += ")?";
+              break;
+            default:
+              mask += escapeRegex(match[0]);
+              placeHolder[ndx] = match[0].charAt(0);
+          }
         }
       } else {
-        switch (match[0]) {
-          case "[":
-            mask += "(";
-            break;
-          case "]":
-            mask += ")?";
-            break;
-          default:
-            mask += escapeRegex(match[0]);
-            placeHolder[ndx] = match[0].charAt(0);
-        }
-      }
-    } else {
-      if ((fcode = formatcode(match))) {
-        if (raw !== true && fcode[3]) {
-          const getFn = fcode[3];
-          mask += getFn.call(dateObjValue.date);
-        } else if (fcode[2]) {
-          mask += dateObjValue["raw" + fcode[2]];
+        if (!escaped && (fcode = formatcode(match[0]))) {
+          if (fcode[3]) {
+            const getFn = fcode[3];
+            mask += getFn.call(dateObjValue.date);
+          } else if (fcode[2] && dateObjValue["raw" + fcode[2]] !== undefined) {
+            mask += dateObjValue["raw" + fcode[2]];
+          } else {
+            mask += match[0];
+          }
         } else {
           mask += match[0];
         }
-      } else {
-        mask += match[0];
       }
+      ndx++;
+      escaped = false;
     }
-    ndx++;
   }
   if (dateObjValue === undefined) {
+    // console.log(JSON.stringify(placeHolder));
     opts.placeholder = placeHolder;
   }
   return mask;
@@ -694,17 +733,14 @@ function importDate(dateObj, opts) {
 
 function getTokenMatch(pos, opts, maskset) {
   let inputmask = this,
-    masksetHint =
-      maskset && maskset.tests[pos]
-        ? opts.placeholder[maskset.tests[pos][0].match.placeholder] ||
-          maskset.tests[pos][0].match.placeholder
-        : "",
     calcPos = 0,
     targetMatch,
     match,
     matchLength = 0;
+
   getTokenizer(opts).lastIndex = 0;
   while ((match = getTokenizer(opts).exec(opts.inputFormat))) {
+    // console.log(`match.index ${match.index}`);
     const dynMatches = /\d+$/.exec(match[0]);
     if (dynMatches) {
       matchLength = parseInt(dynMatches[0]);
@@ -713,8 +749,9 @@ function getTokenMatch(pos, opts, maskset) {
         ndx = calcPos;
       while (
         inputmask &&
-        (opts.placeholder[getTest.call(inputmask, ndx).match.placeholder] ||
-          getTest.call(inputmask, ndx).match.placeholder) === targetSymbol
+        (opts.placeholder[
+          `${match.index}'${getTest.call(inputmask, ndx).match.placeholder}`
+        ] || getTest.call(inputmask, ndx).match.placeholder) === targetSymbol
       ) {
         ndx++;
       }
@@ -723,11 +760,36 @@ function getTokenMatch(pos, opts, maskset) {
     }
 
     calcPos += matchLength;
-    if (match[0].indexOf(masksetHint) != -1 || calcPos >= pos + 1) {
-      // console.log("gettokenmatch " + match[0] + " ~ " + (maskset ? maskset.tests[pos][0].match.placeholder : ""));
-      targetMatch = match;
-      match = getTokenizer(opts).exec(opts.inputFormat);
-      break;
+    // console.log(`calcPos ${calcPos}`);
+
+    if (calcPos >= pos + 1) {
+      let masksetHint = "";
+      if (maskset && maskset.tests[pos]) {
+        const filteredPlaceholders = Object.keys(opts.placeholder).filter(
+          (value) => {
+            for (let i = match.index - 1; i < calcPos; i++) {
+              if (value === `${i}'${maskset.tests[pos][0].match.placeholder}`) {
+                return true;
+              }
+            }
+            return false;
+          }
+        );
+
+        masksetHint =
+          filteredPlaceholders.length > 0
+            ? opts.placeholder[filteredPlaceholders[0]]
+            : maskset.tests[pos][0].match.placeholder;
+      }
+      // console.log(masksetHint);
+      if (match[0].indexOf(masksetHint) !== -1) {
+        // console.log(`match ${masksetHint} ${calcPos} >= ${pos + 1}`);
+        targetMatch = match;
+        match = getTokenizer(opts).exec(opts.inputFormat);
+        break;
+      } else {
+        // console.log(`no match ${masksetHint} ${calcPos} >= ${pos + 1}`);
+      }
     }
   }
   return {
@@ -747,6 +809,17 @@ Inputmask.extendAliases({
       formatCode.S = i18n.ordinalSuffix.join("|");
 
       opts.inputFormat = formatAlias[opts.inputFormat] || opts.inputFormat; // resolve possible formatAlias
+      if (opts.repeat) {
+        opts.repeat = parseInt(opts.repeat.toString());
+        if (opts.repeat > 0) {
+          let inputFormat = "";
+          for (let i = 0; i < opts.repeat; i++) {
+            inputFormat = inputFormat + opts.inputFormat;
+          }
+          opts.inputFormat = inputFormat;
+          opts.repeat = 0;
+        }
+      }
       opts.displayFormat =
         formatAlias[opts.displayFormat] ||
         opts.displayFormat ||
@@ -755,6 +828,7 @@ Inputmask.extendAliases({
         formatAlias[opts.outputFormat] || opts.outputFormat || opts.inputFormat; // resolve possible formatAlias
       // opts.placeholder = opts.placeholder !== "" ? opts.placeholder : opts.inputFormat.replace(/[[\]]/, "");
       opts.regex = parse(opts.inputFormat, undefined, opts);
+      // console.log("inputFormat", opts.regex);
       opts.min = analyseMask(opts.min, opts.inputFormat, opts);
       opts.max = analyseMask(opts.max, opts.inputFormat, opts);
       return null; // migrate to regex mask
@@ -785,7 +859,7 @@ Inputmask.extendAliases({
           tokenMatch.nextMatch[0] === c &&
           tokenMatch.targetMatch[0].length > 1
         ) {
-          const validator = formatcode(tokenMatch.targetMatch)[0];
+          const validator = formatcode(tokenMatch.targetMatch[0])[0];
           if (new RegExp(validator).test("0" + buffer[pos - 1])) {
             buffer[pos] = buffer[pos - 1];
             buffer[pos - 1] = "0";
@@ -821,21 +895,23 @@ Inputmask.extendAliases({
           tokenMatch.targetMatch &&
           tokenMatch.targetMatchIndex === pos &&
           tokenMatch.targetMatch[0].length > 1 &&
-          formatCode[tokenMatch.targetMatch[0]] !== undefined
+          formatcode(tokenMatch.targetMatch[0]) !== undefined
         ) {
-          validator = formatcode(tokenMatch.targetMatch)[0];
+          validator = formatcode(tokenMatch.targetMatch[0])[0];
         } else {
           tokenMatch = getTokenMatch.call(inputmask, pos + 2, opts, maskset);
           if (
             tokenMatch.targetMatch &&
             tokenMatch.targetMatchIndex === pos + 1 &&
             tokenMatch.targetMatch[0].length > 1 &&
-            formatCode[tokenMatch.targetMatch[0]] !== undefined
+            formatcode(tokenMatch.targetMatch[0]) !== undefined
           ) {
-            validator = formatcode(tokenMatch.targetMatch)[0];
+            validator = formatcode(tokenMatch.targetMatch[0]);
           }
         }
         if (validator !== undefined) {
+          // correct position ~ pos in front of shifted targetMatch
+          pos = tokenMatch.targetMatchIndex;
           if (
             maskset.validPositions[pos + 1] !== undefined &&
             new RegExp(validator).test(c + "0")
@@ -845,7 +921,7 @@ Inputmask.extendAliases({
             currentResult = {
               // insert: [{pos: pos, c: "0"}, {pos: pos + 1, c: c}],
               pos: pos + 2, // this will triggeer a refreshfrombuffer
-              caret: pos
+              caret: pos + 1
             };
           } else if (new RegExp(validator).test("0" + c)) {
             buffer[pos] = "0";
@@ -870,9 +946,9 @@ Inputmask.extendAliases({
       if (
         tokenMatch.targetMatch &&
         tokenMatch.targetMatch[0] &&
-        formatCode[tokenMatch.targetMatch[0]] !== undefined
+        formatcode(tokenMatch.targetMatch[0]) !== undefined
       ) {
-        const fcode = formatcode(tokenMatch.targetMatch);
+        const fcode = formatcode(tokenMatch.targetMatch[0]);
         validator = fcode[0];
         const part = buffer.slice(
           tokenMatch.targetMatchIndex,
@@ -919,7 +995,10 @@ Inputmask.extendAliases({
         return {
           buffer: parse(opts.inputFormat, dateParts, opts).split(""),
           refreshFromBuffer: { start: pos, end: currentResult.pos },
-          pos: currentResult.caret || currentResult.pos // correct caret position
+          pos:
+            currentResult.caret !== undefined
+              ? currentResult.caret
+              : currentResult.pos // correct caret position
         };
       }
 
@@ -938,28 +1017,11 @@ Inputmask.extendAliases({
         ? parse(
             opts.outputFormat,
             analyseMask.call(inputmask, maskedValue, opts.inputFormat, opts),
-            opts,
-            true
+            opts
           )
         : unmaskedValue;
     },
-    casing: function (elem, test, pos, validPositions) {
-      if (test.nativeDef.indexOf("[ap]") == 0) return elem.toLowerCase();
-      if (test.nativeDef.indexOf("[AP]") == 0) return elem.toUpperCase();
-
-      const posBefore = getTest.call(this, [pos - 1]);
-      if (posBefore.match.def.indexOf("[AP]") == 0) return elem.toUpperCase();
-
-      if (
-        pos === 0 ||
-        (posBefore && posBefore.input === String.fromCharCode(keyCode.Space)) ||
-        (posBefore &&
-          posBefore.match.def === String.fromCharCode(keyCode.Space))
-      ) {
-        return elem.toUpperCase();
-      }
-      return elem.toLowerCase();
-    },
+    casing: "follow",
     onBeforeMask: function (initialValue, opts) {
       if (Object.prototype.toString.call(initialValue) === "[object Date]") {
         initialValue = importDate(initialValue, opts);

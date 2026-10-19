@@ -16,6 +16,12 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
+    | Nombre del sistema que se muestra en pestañas, menú y pie de página.
+    */
+
+    'sistema' => env('APP_SISTEMA', 'CRM Torreón Fuerte'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------

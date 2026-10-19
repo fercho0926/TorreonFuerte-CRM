@@ -12,7 +12,6 @@ use App\Http\Controllers\SedeActivaController;
 use App\Http\Controllers\SedesController;
 use App\Http\Controllers\SinLiderController;
 use App\Http\Controllers\TrasladosController;
-use App\Http\Controllers\ZonasController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -70,10 +69,6 @@ Route::put('/redes/{red}', [RedesController::class, 'update'])->name('redes.upda
 Route::post('/redes/{red}/fusionar', [RedesController::class, 'fusionar'])->name('redes.fusionar');
 Route::delete('/redes/{red}', [RedesController::class, 'destroy'])->name('redes.destroy');
 
-Route::get('/zonas', [ZonasController::class, 'index'])->name('zonas.index');
-Route::post('/zonas', [ZonasController::class, 'store'])->name('zonas.store');
-Route::put('/zonas/{zona}', [ZonasController::class, 'update'])->name('zonas.update');
-Route::delete('/zonas/{zona}', [ZonasController::class, 'destroy'])->name('zonas.destroy');
 
 Route::get('/encuentros', [EncuentrosController::class, 'index'])->name('encuentros.index');
 Route::get('/encuentros/create', [EncuentrosController::class, 'create'])->name('encuentros.create');

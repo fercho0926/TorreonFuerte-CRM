@@ -1,5 +1,5 @@
 import $ from "./dependencyLibs/inputmask.dependencyLib";
-import escapeRegex from "./escapeRegex";
+import { escapeRegex } from "./escapeRegex";
 import Inputmask from "./inputmask";
 import MaskToken from "./masktoken";
 
@@ -14,7 +14,7 @@ function generateMaskSet(opts, nocache) {
   ) {
     if (repeat > 0 || repeat === "*" || repeat === "+") {
       const repeatStart = repeat === "*" ? 0 : repeat === "+" ? 1 : repeat;
-      if (repeatStart != repeat) {
+      if (repeatStart !== repeat) {
         mask =
           groupmarker[0] +
           mask +
@@ -74,8 +74,8 @@ function generateMaskSet(opts, nocache) {
     maskdefKey = regexMask
       ? "regex_" + opts.regex
       : opts.numericInput
-      ? mask.split("").reverse().join("")
-      : mask;
+        ? mask.split("").reverse().join("")
+        : mask;
     if (opts.keepStatic !== null) {
       // keepstatic modifies the output from the testdefinitions ~ so differentiate in the maskcache
       maskdefKey = "ks_" + opts.keepStatic + maskdefKey;
@@ -157,7 +157,9 @@ function generateMaskSet(opts, nocache) {
   } else {
     ms = generateMask(opts.mask, opts.mask, opts);
   }
-  if (opts.keepStatic === null) opts.keepStatic = false;
+  if (opts.keepStatic === null) {
+    opts.keepStatic = false;
+  }
   return ms;
 }
 
@@ -166,13 +168,13 @@ function analyseMask(mask, regexMask, opts) {
       /(?:[?*+]|\{[0-9+*]+(?:,[0-9+*]*)?(?:\|[0-9+*]*)?\})|[^.?*+^${[]()|\\]+|./g,
     // Thx to https://github.com/slevithan/regex-colorizer for the regexTokenizer regex
     regexTokenizer =
-      /\[\^?]?(?:[^\\\]]+|\\[\S\s]?)*]?|\\(?:0(?:[0-3][0-7]{0,2}|[4-7][0-7]?)?|[1-9][0-9]*|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|c[A-Za-z]|[\S\s]?)|\((?:\?[:=!]?)?|(?:[?*+]|\{[0-9]+(?:,[0-9]*)?\})\??|[^.?*+^${[()|\\]+|./g;
-  let escaped = false,
+      /\[\^?]?(?:[^\\\]]+|\\[\S\s]?)*]?|\\(?:0(?:[0-3][0-7]{0,2}|[4-7][0-7]?)?|[1-9][0-9]*|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|c[A-Za-z]|[\S\s]?)|\((?:\?[:=!]?)?|(?:[?*+]|\{[0-9]+(?:,[0-9]*)?\})\??|[^.?*+^${[()|\\]+|./g,
     currentToken = new MaskToken(),
+    openenings = [],
+    maskTokens = [];
+  let escaped = false,
     match,
     m,
-    openenings = [],
-    maskTokens = [],
     openingToken,
     currentOpeningToken,
     alternator,
@@ -185,14 +187,14 @@ function analyseMask(mask, regexMask, opts) {
     // console.log(element, position, currentToken.matches.length);
     // if (typeof opts.placeholder === "string")
     // 	console.log(opts.placeholder.charAt(currentToken.matches.length % opts.placeholder.length));
-    let prevMatch = mtoken.matches[position - 1];
+    let prevMatch = mtoken.matches[position - 1],
+      flag = opts.casing ? "i" : "";
     if (regexMask) {
       if (
         element.indexOf("[") === 0 ||
         (escaped && /\\d|\\s|\\w|\\p/i.test(element)) ||
         element === "."
       ) {
-        let flag = opts.casing ? "i" : "";
         if (/\\p\{.*}/i.test(element)) flag += "u";
         mtoken.matches.splice(position++, 0, {
           fn: new RegExp(element, flag),
@@ -216,7 +218,7 @@ function analyseMask(mask, regexMask, opts) {
             fn: /[a-z]/i.test(opts.staticDefinitionSymbol || lmnt)
               ? new RegExp(
                   "[" + (opts.staticDefinitionSymbol || lmnt) + "]",
-                  opts.casing ? "i" : ""
+                  flag
                 )
               : null,
             static: true,
@@ -231,8 +233,8 @@ function analyseMask(mask, regexMask, opts) {
               opts.staticDefinitionSymbol !== undefined
                 ? lmnt
                 : typeof opts.placeholder === "object"
-                ? opts.placeholder[currentToken.matches.length]
-                : undefined,
+                  ? opts.placeholder[currentToken.matches.length]
+                  : undefined,
             nativeDef: (escaped ? "'" : "") + lmnt
           });
         });
@@ -244,10 +246,15 @@ function analyseMask(mask, regexMask, opts) {
         (opts.usePrototypeDefinitions &&
           Inputmask.prototype.definitions[element]);
       if (maskdef && !escaped) {
+        if (
+          typeof maskdef.validator === "string" &&
+          /\\p\{.*}/i.test(maskdef.validator)
+        )
+          flag += "u";
         mtoken.matches.splice(position++, 0, {
           fn: maskdef.validator
             ? typeof maskdef.validator === "string"
-              ? new RegExp(maskdef.validator, opts.casing ? "i" : "")
+              ? new RegExp(maskdef.validator, flag)
               : new (function () {
                   this.test = maskdef.validator;
                 })()
@@ -270,7 +277,7 @@ function analyseMask(mask, regexMask, opts) {
           fn: /[a-z]/i.test(opts.staticDefinitionSymbol || element)
             ? new RegExp(
                 "[" + (opts.staticDefinitionSymbol || element) + "]",
-                opts.casing ? "i" : ""
+                flag
               )
             : null,
           static: true,
@@ -502,43 +509,45 @@ function analyseMask(mask, regexMask, opts) {
         openenings.push(new MaskToken(true));
         break;
       case opts.quantifiermarker[0]:
-        // Quantifier
-        var quantifier = new MaskToken(false, false, true);
+        {
+          // Quantifier
+          const quantifier = new MaskToken(false, false, true);
 
-        m = m.replace(/[{}?]/g, ""); // ? matches lazy quantifiers
-        var mqj = m.split("|"),
-          mq = mqj[0].split(","),
-          mq0 = isNaN(mq[0]) ? mq[0] : parseInt(mq[0]),
-          mq1 = mq.length === 1 ? mq0 : isNaN(mq[1]) ? mq[1] : parseInt(mq[1]),
-          mqJit = isNaN(mqj[1]) ? mqj[1] : parseInt(mqj[1]);
-        if (mq0 === "*" || mq0 === "+") {
-          mq0 = mq1 === "*" ? 0 : 1;
+          m = m.replace(/[{}?]/g, ""); // ? matches lazy quantifiers
+          const mqj = m.split("|"),
+            mq = mqj[0].split(",");
+          let mq0 = isNaN(mq[0]) ? mq[0] : parseInt(mq[0]);
+          const mq1 =
+              mq.length === 1 ? mq0 : isNaN(mq[1]) ? mq[1] : parseInt(mq[1]),
+            mqJit = isNaN(mqj[1]) ? mqj[1] : parseInt(mqj[1]);
+          if (mq0 === "*" || mq0 === "+") {
+            mq0 = mq1 === "*" ? 0 : 1;
+          }
+          quantifier.quantifier = {
+            min: mq0,
+            max: mq1,
+            jit: mqJit
+          };
+          const matches =
+            openenings.length > 0
+              ? openenings[openenings.length - 1].matches
+              : currentToken.matches;
+          match = matches.pop();
+          // if (match.isAlternator) { //handle quantifier in an alternation [0-9]{2}|[0-9]{3}
+          //     matches.push(match); //push back alternator
+          //     matches = match.matches; //remap target matches
+          //     var groupToken = new MaskToken(true);
+          //     var tmpMatch = matches.pop();
+          //     matches.push(groupToken); //push the group
+          //     matches = groupToken.matches;
+          //     match = tmpMatch;
+          // }
+          if (!match.isGroup) {
+            match = groupify([match]);
+          }
+          matches.push(match);
+          matches.push(quantifier);
         }
-        quantifier.quantifier = {
-          min: mq0,
-          max: mq1,
-          jit: mqJit
-        };
-        var matches =
-          openenings.length > 0
-            ? openenings[openenings.length - 1].matches
-            : currentToken.matches;
-        match = matches.pop();
-        // if (match.isAlternator) { //handle quantifier in an alternation [0-9]{2}|[0-9]{3}
-        //     matches.push(match); //push back alternator
-        //     matches = match.matches; //remap target matches
-        //     var groupToken = new MaskToken(true);
-        //     var tmpMatch = matches.pop();
-        //     matches.push(groupToken); //push the group
-        //     matches = groupToken.matches;
-        //     match = tmpMatch;
-        // }
-        if (!match.isGroup) {
-          match = groupify([match]);
-        }
-        matches.push(match);
-        matches.push(quantifier);
-
         break;
       case opts.alternatormarker:
         if (openenings.length > 0) {

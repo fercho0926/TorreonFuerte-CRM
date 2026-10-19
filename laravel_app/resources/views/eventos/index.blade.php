@@ -4,23 +4,19 @@
 
 @section('page-title', 'Eventos')
 
+@section('page-actions')
+    <a href="{{ route('eventos.create') }}" class="btn btn-primary">Crear evento</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('eventos.create') }}" class="btn btn-primary">Crear evento</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
-        <h3 class="card-title">Listado de eventos</h3>
+        <h3 class="card-title">Listado de eventos <small class="text-muted ms-2">{{ $eventos->count() }} resultados</small></h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -44,27 +40,16 @@
                         <td>{{ $evento->lugar ?? '—' }}</td>
                         <td>${{ number_format($evento->costo, 2) }}</td>
                         <td>
-                            @php
-                                $badge = ['planificado' => 'info', 'realizado' => 'success', 'cancelado' => 'danger'][$evento->estado] ?? 'secondary';
-                            @endphp
-                            <span class="badge badge-{{ $badge }}">{{ ucfirst($evento->estado) }}</span>
+                            <x-ui.estado :valor="$evento->estado" />
                         </td>
-                        <td><span class="badge badge-secondary">{{ $evento->inscripciones_count }}</span></td>
+                        <td><x-ui.insignia color="secondary">{{ $evento->inscripciones_count }}</x-ui.insignia></td>
                         @todasLasSedes<td>{{ $evento->sede?->nombre ?? '—' }}</td>@endtodasLasSedes
-                        <td>
-                            <a href="{{ route('eventos.show', $evento) }}" class="btn btn-sm btn-info">Ver</a>
-                            <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-sm btn-warning">Editar</a>
-                            <form action="{{ route('eventos.destroy', $evento) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este evento? Se perderá el historial de inscritos y abonos.')">Eliminar</button>
-                            </form>
+                        <td class="text-end text-nowrap">
+                            <x-ui.acciones-fila :ver="route('eventos.show', $evento)" :editar="route('eventos.edit', $evento)" :eliminar="route('eventos.destroy', $evento)" eliminar-titulo="¿Eliminar este evento?" eliminar-mensaje="Se perderá el historial de inscritos y abonos." :nombre="$evento->nombre" />
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="9" class="text-center">No hay eventos registrados.</td>
-                    </tr>
+                    <tr><td colspan="9"><x-ui.vacio mensaje="No hay eventos registrados." /></td></tr>
                 @endforelse
             </tbody>
         </table>

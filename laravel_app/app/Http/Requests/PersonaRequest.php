@@ -25,7 +25,7 @@ class PersonaRequest extends FormRequest
             'confirmar_duplicado' => $this->boolean('confirmar_duplicado'),
         ]);
 
-        foreach (['numero_documento', 'tipo_documento', 'celular', 'email', 'lider_id', 'red_id', 'zona_id'] as $campo) {
+        foreach (['numero_documento', 'tipo_documento', 'celular', 'email', 'lider_id', 'red_id'] as $campo) {
             if ($this->has($campo) && trim((string) $this->input($campo)) === '') {
                 $this->merge([$campo => null]);
             }
@@ -60,7 +60,6 @@ class PersonaRequest extends FormRequest
             'lider_id' => ['nullable', app(SedeContext::class)->existe('personas')->where('es_lider', true)->whereNull('deleted_at')],
             'es_lider' => ['boolean'],
             'red_id' => ['nullable', 'required_if:es_lider,1', app(SedeContext::class)->existe('redes')],
-            'zona_id' => ['nullable', app(SedeContext::class)->existe('zonas')],
             'confirmar_duplicado' => ['boolean'],
         ];
     }

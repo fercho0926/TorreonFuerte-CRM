@@ -10,15 +10,10 @@ import definitions from "./definitions";
 import $ from "./dependencyLibs/inputmask.dependencyLib";
 import { EventRuler } from "./eventruler";
 import window from "./global/window";
-import { checkVal, unmaskedvalue } from "./inputHandling";
+import { checkVal, clearOptionalTail, unmaskedvalue } from "./inputHandling";
 import { mask } from "./mask";
 import { generateMaskSet, analyseMask } from "./mask-lexer";
-import {
-  determineLastRequiredPosition,
-  getBuffer,
-  getBufferTemplate,
-  isMask
-} from "./positioning";
+import { getBuffer, getBufferTemplate } from "./positioning";
 import { isComplete } from "./validation";
 import { getMaskTemplate } from "./validation-tests";
 
@@ -63,6 +58,7 @@ function Inputmask(alias, options, internal) {
   this.clicked = 0;
   this.originalPlaceholder = undefined; // needed for FF
   this.isComposing = false; // keydowncode == 229  compositionevent fallback
+  this.lastInputEvent = null; // track last input event to prevent duplicates #2855
   this.hasAlternator = false;
 }
 
@@ -86,8 +82,8 @@ Inputmask.prototype = {
     elems = elems.nodeName
       ? [elems]
       : Array.isArray(elems)
-      ? elems
-      : [].slice.call(elems); // [].slice as alternate for Array.from (Yandex browser)
+        ? elems
+        : [].slice.call(elems); // [].slice as alternate for Array.from (Yandex browser)
     elems.forEach(function (el, ndx) {
       const scopedOpts = $.extend(true, {}, that.opts);
       if (
@@ -245,26 +241,14 @@ Inputmask.prototype = {
           : value
       ).split("");
       checkVal.call(this, undefined, true, false, valueBuffer);
-    } else {
-      value = this.isRTL
-        ? getBuffer.call(this).slice().reverse().join("")
-        : getBuffer.call(this).join("");
     }
-    let buffer = getBuffer.call(this),
-      rl = determineLastRequiredPosition.call(this),
-      lmib = buffer.length - 1;
-    for (; lmib > rl; lmib--) {
-      if (isMask.call(this, lmib)) break;
-    }
-    buffer.splice(rl, lmib + 1 - rl);
 
-    return (
-      isComplete.call(this, buffer) &&
-      value ===
-        (this.isRTL
-          ? getBuffer.call(this).slice().reverse().join("")
-          : getBuffer.call(this).join(""))
-    );
+    const buffer = clearOptionalTail.call(this, []),
+      isC = isComplete.call(this, buffer),
+      isc2 =
+        value === (this.isRTL ? buffer.reverse().join("") : buffer.join(""));
+
+    return isC && (value === undefined || isc2);
   },
   format: function (value, metadata) {
     this.maskset =
@@ -317,12 +301,13 @@ function importAttributeOptions(npt, opts, userOptions, dataAttribute) {
       optionData !== undefined ? optionData : npt.getAttribute(attrOption);
     if (optionData !== null) {
       if (typeof optionData === "string") {
-        if (option.indexOf("on") === 0) {
+        if (option.startsWith("on")) {
+          // get function definition
           optionData = window[optionData];
-        } // get function definition
-        else if (optionData === "false") {
-          optionData = false;
-        } else if (optionData === "true") optionData = true;
+        } else if (optionData === "false") optionData = false;
+        else if (optionData === "true") optionData = true;
+        else if (option === "mask")
+          optionData = optionData.replace(/\\\\/g, "\\");
       }
       userOptions[option] = optionData;
     }
@@ -410,9 +395,9 @@ Inputmask.remove = function (elems) {
     elems = document.getElementById(elems) || document.querySelectorAll(elems);
   }
   elems = elems.nodeName ? [elems] : elems;
-  elems.forEach(function (el) {
-    if (el.inputmask) el.inputmask.remove();
-  });
+  for (let i = 0; i < elems.length; i++) {
+    if (elems[i].inputmask) elems[i].inputmask.remove();
+  }
 };
 Inputmask.setValue = function (elems, value) {
   if (typeof elems === "string") {

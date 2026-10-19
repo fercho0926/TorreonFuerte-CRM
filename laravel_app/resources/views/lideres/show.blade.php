@@ -4,40 +4,36 @@
 
 @section('page-title', 'Detalle del líder')
 
-@section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        @puede('editar', $lider)
-            <a href="{{ route('personas.edit', $lider) }}" class="btn btn-warning">Editar</a>
-        @endpuede
-        @puede('designarLider')
-            <a href="{{ route('lideres.quitar', $lider) }}" class="btn btn-outline-danger">Quitar rol</a>
-        @endpuede
-        <a href="{{ route('lideres.index') }}" class="btn btn-secondary">Volver</a>
-    </div>
-</div>
+@section('page-actions')
+    @puede('editar', $lider)
+        <a href="{{ route('personas.edit', $lider) }}" class="btn btn-primary">Editar</a>
+    @endpuede
+    @puede('designarLider')
+        <a href="{{ route('lideres.quitar', $lider) }}" class="btn btn-outline-danger">Quitar rol</a>
+    @endpuede
+    <a href="{{ route('lideres.index') }}" class="btn btn-outline-secondary">Volver</a>
+@endsection
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+@section('content')
+
 
 <div class="row">
     <div class="col-sm-4">
-        <div class="info-box"><span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+        <div class="info-box"><span class="info-box-icon text-bg-info"><i class="fas fa-users"></i></span>
             <div class="info-box-content"><span class="info-box-text">Personas</span><span class="info-box-number">{{ $miembros->count() }}</span></div></div>
     </div>
     <div class="col-sm-4">
-        <div class="info-box"><span class="info-box-icon bg-secondary"><i class="fas fa-people-arrows"></i></span>
+        <div class="info-box"><span class="info-box-icon text-bg-secondary"><i class="fas fa-people-arrows"></i></span>
             <div class="info-box-content"><span class="info-box-text">Células</span><span class="info-box-number">{{ $celulas->count() }}</span></div></div>
     </div>
     <div class="col-sm-4">
-        <div class="info-box"><span class="info-box-icon bg-success"><i class="fas fa-calendar-check"></i></span>
+        <div class="info-box"><span class="info-box-icon text-bg-success"><i class="fas fa-calendar-check"></i></span>
             <div class="info-box-content"><span class="info-box-text">Última reunión</span>
                 <span class="info-box-number">{{ $ultimaReunion ? \Illuminate\Support\Carbon::parse($ultimaReunion)->translatedFormat('j \d\e F \d\e Y') : '—' }}</span></div></div>
     </div>
 </div>
 
-<div class="card card-primary">
+<div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $lider->nombre_completo }}</h3>
     </div>
@@ -47,10 +43,7 @@
         </div>
         <dl class="row">
             <dt class="col-sm-3">Red</dt>
-            <dd class="col-sm-9"><span class="badge badge-primary">{{ $lider->redLider?->nombre ?? '—' }}</span></dd>
-
-            <dt class="col-sm-3">Zona</dt>
-            <dd class="col-sm-9"><span class="badge badge-info">{{ $lider->zona?->nombre ?? '—' }}</span></dd>
+            <dd class="col-sm-9"><x-ui.insignia color="primary">{{ $lider->redLider?->nombre ?? '—' }}</x-ui.insignia></dd>
 
             <dt class="col-sm-3">Documento</dt>
             <dd class="col-sm-9">{{ $lider->numero_documento ? $lider->tipo_documento.' '.$lider->numero_documento : '—' }}</dd>
@@ -73,7 +66,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Células ({{ $celulas->count() }})</h3>
     </div>
@@ -82,7 +75,7 @@
             <p>
                 <a href="{{ route('celulas.show', $celula) }}">{{ $celula->nombre }}</a>
                 — {{ $celula->miembros_count }} miembros
-                @if($celula->co_lider_id === $lider->id)<span class="badge badge-secondary">Co-líder</span>@endif
+                @if($celula->co_lider_id === $lider->id)<x-ui.insignia color="secondary">Co-líder</x-ui.insignia>@endif
             </p>
         @empty
             <p class="text-muted mb-0">Este líder aún no dirige ninguna célula.</p>
@@ -90,7 +83,7 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Personas a su cargo ({{ $miembros->count() }})</h3>
     </div>
@@ -122,7 +115,7 @@
                             <td>{{ $miembro->ciudad ?? '—' }}</td>
                             <td>
                                 @puede('editar', $miembro)
-                                    <a href="{{ route('personas.edit', $miembro) }}" class="btn btn-sm btn-warning">Editar</a>
+                                    <a href="{{ route('personas.edit', $miembro) }}" class="btn btn-sm btn-primary">Editar</a>
                                 @endpuede
                             </td>
                         </tr>

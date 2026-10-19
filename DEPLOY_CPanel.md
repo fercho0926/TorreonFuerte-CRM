@@ -173,3 +173,5 @@ Ingresa con:
 - Si el sitio arroja `Error 500`, revisa `laravel_app/storage/logs/laravel.log`.
 - Si hay problemas de permiso, asegúrate de que `storage` y `bootstrap/cache` sean escribibles.
 - Si estás en producción, mantén `APP_DEBUG=false`.
+- La interfaz (AdminLTE 4 + Bootstrap 5) se compila con `npm install && npm run build` dentro de `laravel_app/`; sube la carpeta `laravel_app/public/build` junto con el resto. Define `APP_SISTEMA` en `.env` si quieres otro nombre en pestañas y pie.
+- Después de subir cambios en vistas, ejecuta `php artisan view:clear && php artisan view:cache` para que las pantallas respondan más rápido.

@@ -9,25 +9,16 @@
     <div class="alert alert-warning">{{ session('error') }}</div>
 @endif
 @if(!empty($mensajeError))
-    <div class="alert alert-danger">{{ $mensajeError }}</div>
+    <div class="alert alert-danger" role="alert">{{ $mensajeError }}</div>
 @endif
 
-<div class="card card-warning">
-    <div class="card-header">
-        <h3 class="card-title">{{ $lider->nombre_completo }}</h3>
-    </div>
-    <form method="POST" action="{{ route('lideres.destroy', $lider) }}">
-        @csrf
-        @method('DELETE')
-        <div class="card-body">
-            <p>
-                Al quitar el rol, <strong>no se elimina a la persona</strong>. Esto es lo que quedaría sin líder:
-            </p>
+<x-form.layout :action="route('lideres.destroy', $lider)" method="DELETE" guardar="Quitar rol de líder" boton="danger" icono="fa-user-minus" :cancelar="route('lideres.show', $lider)" :leyenda="false">
+    <x-form.section :titulo="$lider->nombre_completo" descripcion="Al quitar el rol no se elimina a la persona. Esto es lo que quedaría sin líder." icono="fa-user-tie" id="seccion-impacto">
+        <div class="col-12">
             <ul>
                 <li><strong>{{ $impacto['personas'] }}</strong> persona(s) a su cargo</li>
                 <li><strong>{{ $impacto['celulas'] }}</strong> célula(s)</li>
             </ul>
-
             @if($personas->isNotEmpty())
                 <details class="mb-2"><summary>Ver personas</summary>
                     <ul>@foreach($personas as $p)<li>{{ $p->nombre_completo }}</li>@endforeach</ul>
@@ -38,32 +29,18 @@
                     <ul>@foreach($celulas as $c)<li>{{ $c->nombre }}</li>@endforeach</ul>
                 </details>
             @endif
+        </div>
 
-            @if($impacto['personas'] > 0 || $impacto['celulas'] > 0)
-                <div class="form-group">
-                    <label>Reasignar a otro líder</label>
-                    <select name="reasignar_a" class="form-control @error('reasignar_a') is-invalid @enderror">
-                        <option value="">No reasignar</option>
-                        @foreach($otrosLideres as $otro)
-                            <option value="{{ $otro->id }}">{{ $otro->nombre_completo }}</option>
-                        @endforeach
-                    </select>
-                    @error('reasignar_a')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    <small class="form-text text-muted">Las células solo pueden quedar a cargo de otro líder.</small>
-                </div>
+        @if($impacto['personas'] > 0 || $impacto['celulas'] > 0)
+            <x-form.select name="reasignar_a" label="Reasignar a otro líder" icono="fa-user-friends" vacio="No reasignar" col="col-12" buscar
+                :opciones="$otrosLideres->map(fn ($o) => ['id' => $o->id, 'texto' => $o->nombre_completo, 'apoyo' => $o->numero_documento ? 'Doc. '.$o->numero_documento : null])->all()"
+                ayuda="Las células solo pueden quedar a cargo de otro líder." />
 
-                @if($impacto['celulas'] === 0)
-                    <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="confirmar_sin_lider" name="confirmar_sin_lider" value="1">
-                        <label class="custom-control-label" for="confirmar_sin_lider">Confirmo que sus personas queden sin líder (aparecerán en "Sin líder asignado")</label>
-                    </div>
-                @endif
+            @if($impacto['celulas'] === 0)
+                <x-form.switch name="confirmar_sin_lider" label="Confirmo que sus personas queden sin líder" icono="fa-exclamation-triangle"
+                    ayuda="Aparecerán en &quot;Sin líder asignado&quot; para que las asignes a otro líder." />
             @endif
-        </div>
-        <div class="card-footer">
-            <button type="submit" class="btn btn-danger">Quitar rol de líder</button>
-            <a href="{{ route('lideres.show', $lider) }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
+        @endif
+    </x-form.section>
+</x-form.layout>
 @endsection

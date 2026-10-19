@@ -4,9 +4,13 @@ namespace App\Providers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Persona;
+use App\Models\User;
 use App\Services\AlcanceService;
 use App\Services\SedeContext;
+use App\Support\Menu;
+use App\Support\Permisos;
 use Carbon\Carbon;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
@@ -30,13 +34,10 @@ class AppServiceProvider extends ServiceProvider
     {
         app()->setLocale('es');
         Carbon::setLocale('es');
+        Paginator::useBootstrapFive();
 
         // @puede('editar', $persona) ... @endpuede — la app usa sesión propia, no Auth de Laravel.
-        Blade::if('puede', function (string $habilidad, mixed $argumento = Persona::class) {
-            $user = Controller::usuarioDeLaPeticion();
-
-            return $user && Gate::forUser($user)->allows($habilidad, $argumento);
-        });
+        Blade::if('puede', fn (string $habilidad, mixed $argumento = Persona::class) => Permisos::puede($habilidad, $argumento));
 
         // @todasLasSedes ... @endtodasLasSedes — solo para el admin en "Todas las sedes" (columna Sede).
         Blade::if('todasLasSedes', function () {
@@ -59,9 +60,15 @@ class AppServiceProvider extends ServiceProvider
                 'sedesSelector' => $esAdmin ? \App\Models\Sede::orderBy('nombre')->get(['id', 'nombre', 'activa']) : collect(),
             ]);
 
-            $view->with('sinLiderPendientes', $user && Gate::forUser($user)->allows('verSinLider', Persona::class)
+            $sinLider = $user && Gate::forUser($user)->allows('verSinLider', Persona::class)
                 ? $alcance->personasVisibles($user)->sinLider()->count()
-                : 0);
+                : 0;
+
+            $view->with([
+                'usuarioActual' => $user,
+                'rolEtiqueta' => $user ? (User::ROLE_LABELS[$user->role] ?? $user->role) : null,
+                'menu' => Menu::secciones($user, ['sinLider' => $sinLider]),
+            ]);
         });
     }
 }

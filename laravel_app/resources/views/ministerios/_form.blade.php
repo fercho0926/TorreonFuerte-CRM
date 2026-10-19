@@ -1,64 +1,17 @@
 @php
     $ministerio = $ministerio ?? null;
     $seleccionadas = $personasSeleccionadas ?? [];
+    $opcionesEstado = collect(\App\Models\Ministerio::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
+    $opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''), fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
 @endphp
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Nombre del ministerio</label>
-            <input type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre', $ministerio?->nombre) }}" placeholder="Ej. Alabanza, Niños, Jóvenes..." required>
-            @error('nombre')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Encargado</label>
-            <select name="encargado_id" class="form-control @error('encargado_id') is-invalid @enderror">
-                <option value="">Sin encargado asignado</option>
-                @foreach($personas as $persona)
-                    <option value="{{ $persona->id }}" {{ (string) old('encargado_id', $ministerio?->encargado_id) === (string) $persona->id ? 'selected' : '' }}>{{ $persona->nombre_completo }}</option>
-                @endforeach
-            </select>
-            @error('encargado_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label>Estado</label>
-            <select name="estado" class="form-control @error('estado') is-invalid @enderror" required>
-                @foreach(\App\Models\Ministerio::ESTADOS as $estado)
-                    <option value="{{ $estado }}" {{ old('estado', $ministerio?->estado ?? 'activo') == $estado ? 'selected' : '' }}>{{ ucfirst($estado) }}</option>
-                @endforeach
-            </select>
-            @error('estado')<span class="invalid-feedback">{{ $message }}</span>@enderror
-        </div>
-    </div>
-</div>
+<x-form.section titulo="Datos del ministerio" descripcion="Nombre, encargado y estado." icono="fa-hands-helping" id="seccion-ministerio">
+    <x-form.input name="nombre" label="Nombre del ministerio" icono="fa-heading" :required="true" ejemplo="Ej. Alabanza, Niños, Jóvenes..." :value="$ministerio?->nombre" maxlength="255" />
+    <x-form.select name="encargado_id" label="Encargado" icono="fa-user-tie" :opciones="$opcionesPersona" :value="$ministerio?->encargado_id" vacio="Sin encargado asignado" col="col-md-3" buscar />
+    <x-form.select name="estado" label="Estado" icono="fa-toggle-on" :required="true" :opciones="$opcionesEstado" :value="$ministerio?->estado ?? 'activo'" :vacio="null" col="col-md-3" />
+    <x-form.textarea name="descripcion" label="Descripción" :value="$ministerio?->descripcion" ayuda="Opcional: a qué se dedica el ministerio." />
+</x-form.section>
 
-<div class="form-group">
-    <label>Descripción</label>
-    <textarea name="descripcion" class="form-control @error('descripcion') is-invalid @enderror" rows="3">{{ old('descripcion', $ministerio?->descripcion) }}</textarea>
-    @error('descripcion')<span class="invalid-feedback">{{ $message }}</span>@enderror
-</div>
-
-<div class="form-group">
-    <label>Integrantes</label>
-    <div class="border rounded p-2" style="max-height: 280px; overflow-y: auto;">
-        @forelse($personas as $persona)
-            <div class="form-check">
-                <input type="checkbox" name="personas[]" value="{{ $persona->id }}" class="form-check-input" id="integrante-{{ $persona->id }}"
-                    {{ in_array($persona->id, old('personas', $seleccionadas)) ? 'checked' : '' }}>
-                <label class="form-check-label" for="integrante-{{ $persona->id }}">
-                    {{ $persona->nombre_completo }}
-                    @if($persona->es_lider)
-                        <span class="badge badge-primary">Líder</span>
-                    @endif
-                </label>
-            </div>
-        @empty
-            <p class="text-muted mb-0">No hay personas registradas todavía.</p>
-        @endforelse
-    </div>
-    <small class="form-text text-muted">El rol y la fecha de ingreso de cada integrante se editan desde el detalle del ministerio.</small>
-</div>
+<x-form.section titulo="Integrantes" descripcion="El rol y la fecha de ingreso de cada integrante se editan desde el detalle del ministerio." icono="fa-users" id="seccion-integrantes">
+    <x-form.multiselect name="personas[]" label="Integrantes" :opciones="$opcionesPersona" :seleccionados="$seleccionadas" vacio="No hay personas registradas todavía." />
+</x-form.section>

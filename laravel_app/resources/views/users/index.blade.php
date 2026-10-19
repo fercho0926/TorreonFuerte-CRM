@@ -4,35 +4,25 @@
 
 @section('page-title', 'Usuarios registrados')
 
-@section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('users.create') }}" class="btn btn-primary">Crear usuario</a>
-    </div>
-</div>
+@section('page-actions')
+    <a href="{{ route('users.create') }}" class="btn btn-primary">Crear usuario</a>
+@endsection
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+@section('content')
+
 
 @if($sedes->isNotEmpty())
-    <form method="GET" action="{{ route('users.index') }}" class="form-inline mb-3">
-        <label class="mr-2">Sede</label>
-        <select name="sede_id" class="form-control mr-2" onchange="this.form.submit()">
-            <option value="">Todas</option>
-            @foreach($sedes as $sede)
-                <option value="{{ $sede->id }}" {{ (string) $filtroSede === (string) $sede->id ? 'selected' : '' }}>{{ $sede->nombre }}</option>
-            @endforeach
-        </select>
-    </form>
+    <x-form.layout :action="route('users.index')" method="GET" modo="filtro" guardar="Filtrar" icono="fa-filter" :leyenda="false">
+        <x-form.select name="sede_id" label="Sede" icono="fa-church" :opciones="$sedes->map(fn ($x) => ['id' => $x->id, 'texto' => $x->nombre])->all()" :value="$filtroSede" vacio="Todas" col="col-md-4" />
+    </x-form.layout>
 @endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Lista de usuarios</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-bordered table-hover text-nowrap">
+        <table class="table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -49,25 +39,16 @@
                     <tr>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td><span class="badge badge-secondary">{{ \App\Models\User::ROLE_LABELS[$user->role] ?? $user->role }}</span></td>
+                        <td><x-ui.insignia color="secondary">{{ \App\Models\User::ROLE_LABELS[$user->role] ?? $user->role }}</x-ui.insignia></td>
                         @if($sedes->isNotEmpty())<td>{{ $user->sede?->nombre ?? 'Todas (administrador)' }}</td>@endif
                         <td>{{ $user->persona?->nombre_completo ?? '—' }}</td>
                         <td>{{ $user->created_at->format('Y-m-d H:i') }}</td>
-                        <td>
-                            @puede('gestionar', $user)
-                                <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning">Editar</a>
-                                <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar usuario?')">Eliminar</button>
-                                </form>
-                            @endpuede
+                        <td class="text-end text-nowrap">
+                            <x-ui.acciones-fila :editar="route('users.edit', $user)" :eliminar="route('users.destroy', $user)" :puede-editar="\App\Support\Permisos::puede('gestionar', $user)" :puede-eliminar="\App\Support\Permisos::puede('gestionar', $user)" eliminar-titulo="¿Eliminar usuario?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$user->name" />
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="7" class="text-center">No hay usuarios registrados.</td>
-                    </tr>
+                    <tr><td colspan="7"><x-ui.vacio mensaje="No hay usuarios registrados." /></td></tr>
                 @endforelse
             </tbody>
         </table>

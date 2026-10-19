@@ -5,31 +5,17 @@
 @section('page-title', 'Nueva sede')
 
 @section('content')
-<form method="POST" action="{{ route('sedes.store') }}">
-    @csrf
-    <div class="card card-primary">
-        <div class="card-header"><h3 class="card-title">Datos de la iglesia</h3></div>
-        <div class="card-body">
-            @include('sedes._datos')
-        </div>
-    </div>
+<x-form.layout :action="route('sedes.store')" guardar="Crear sede" icono="fa-save" :cancelar="route('sedes.index')">
+    <x-form.section titulo="Datos de la iglesia" descripcion="Nombre y datos de contacto de la sede." icono="fa-church" id="seccion-iglesia">
+        @include('sedes._datos')
+    </x-form.section>
 
-    <div class="card card-info">
-        <div class="card-header"><h3 class="card-title">Pastor</h3></div>
-        <div class="card-body">
-            @include('sedes._cuenta', ['prefijo' => 'pastor', 'obligatoria' => true])
-        </div>
-    </div>
+    <x-form.section titulo="Pastor" descripcion="Tendrá acceso para administrar esta sede." icono="fa-user-tie" id="seccion-pastor">
+        @include('sedes._cuenta', ['prefijo' => 'pastor', 'obligatoria' => true])
+    </x-form.section>
 
-    <div class="card card-outline card-info">
-        <div class="card-header"><h3 class="card-title">Pastora <small class="text-muted">(opcional)</small></h3></div>
-        <div class="card-body">
-            <p class="text-muted small">Si la iglesia solo tiene pastor, deja estos campos vacíos; la pastora puede añadirse después. Tendrá los mismos permisos que el pastor sobre su sede.</p>
-            @include('sedes._cuenta', ['prefijo' => 'pastora', 'obligatoria' => false])
-        </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Crear sede</button>
-    <a href="{{ route('sedes.index') }}" class="btn btn-secondary">Cancelar</a>
-</form>
+    <x-form.section titulo="Pastora (opcional)" descripcion="Si la iglesia solo tiene pastor, deja estos campos vacíos; podrás añadirla después. Tendrá los mismos permisos que el pastor." icono="fa-user-friends" id="seccion-pastora">
+        @include('sedes._cuenta', ['prefijo' => 'pastora', 'obligatoria' => false])
+    </x-form.section>
+</x-form.layout>
 @endsection

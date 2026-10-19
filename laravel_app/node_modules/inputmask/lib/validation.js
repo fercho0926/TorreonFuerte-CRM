@@ -16,7 +16,8 @@ import {
   getPlaceholder,
   getTest,
   getTests,
-  getTestTemplate
+  getTestTemplate,
+  getMaskTemplate
 } from "./validation-tests";
 
 export {
@@ -27,7 +28,8 @@ export {
   isValid,
   refreshFromBuffer,
   revalidateMask,
-  handleRemove
+  handleRemove,
+  casing
 };
 
 // tobe put on prototype?
@@ -40,9 +42,9 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
 
   if (!inputmask.hasAlternator) return false;
 
-  let validPsClone = $.extend(true, [], maskset.validPositions),
-    tstClone = $.extend(true, {}, maskset.tests),
-    lastAlt,
+  const validPsClone = $.extend(true, [], maskset.validPositions),
+    tstClone = $.extend(true, {}, maskset.tests);
+  let lastAlt,
     alternation,
     isValidRslt = false,
     returnRslt = false,
@@ -66,15 +68,19 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
       end = selection.begin;
     }
   }
+
   if (lAltPos === -1 && rAltPos === undefined) {
-    // do not recurse when already paste the beginning
+    // do not recurse when already passed the beginning
     lastAlt = 0;
     prevAltPos = getTest.call(inputmask, lastAlt);
     alternation = prevAltPos.alternation;
   } else {
     // find last modified alternation
     for (; lAltPos >= 0; lAltPos--) {
-      altPos = maskset.validPositions[lAltPos];
+      altPos =
+        lAltPos === 0
+          ? getTest.call(inputmask, 0)
+          : maskset.validPositions[lAltPos];
       if (altPos && altPos.alternation !== undefined) {
         if (
           lAltPos <= (maskPos || 0) &&
@@ -85,7 +91,7 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
           break;
         }
         lastAlt = lAltPos;
-        alternation = maskset.validPositions[lastAlt].alternation;
+        alternation = altPos.alternation;
         prevAltPos = altPos;
       }
     }
@@ -94,15 +100,15 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
   if (alternation !== undefined) {
     decisionPos = parseInt(lastAlt);
     maskset.excludes[decisionPos] = maskset.excludes[decisionPos] || [];
+    // generalize
     if (maskPos !== true) {
-      // generalize
       maskset.excludes[decisionPos].push(
         getDecisionTaker(prevAltPos) + ":" + prevAltPos.alternation
       );
     }
 
-    let validInputs = [],
-      resultPos = -1;
+    const validInputs = [];
+    let resultPos = -1;
     for (
       i = decisionPos;
       decisionPos < getLastValidPosition.call(inputmask, undefined, true) + 1;
@@ -116,6 +122,8 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
       if (
         validPos &&
         validPos.generatedInput !== true &&
+        (decisionPos !== 0 ||
+          validPos.input !== opts.skipOptionalPartCharacter) &&
         (selection === undefined || i < begin || i >= end)
       ) {
         validInputs.push(validPos.input);
@@ -136,13 +144,26 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
       maskset.tests = {}; // clear all
       resetMaskSet.call(inputmask, true); // clear getbuffer
       isValidRslt = true;
+      nextPos = decisionPos - 1;
+      const targetTemplate = getMaskTemplate.call(inputmask, true, 0);
+
       for (i = 0; i < validInputs.length; i++) {
-        nextPos =
-          isValidRslt.caret ||
-          (opts.insertMode == false && nextPos != undefined)
-            ? seekNext.call(inputmask, nextPos)
-            : getLastValidPosition.call(inputmask, undefined, true) + 1;
         input = validInputs[i];
+        if (
+          targetTemplate[nextPos + 1] === input &&
+          opts.numericInput !== true
+        ) {
+          nextPos++;
+        } else if (
+          i === 0 ||
+          returnRslt.caretPos !== undefined ||
+          opts.insertMode === false
+        ) {
+          nextPos = seekNext.call(inputmask, nextPos);
+        } else {
+          nextPos = getLastValidPosition.call(inputmask, nextPos, true) + 1;
+        }
+
         // nextPos = translatePosition.call(inputmask, nextPos);
         if (
           !(isValidRslt = isValid.call(
@@ -154,22 +175,27 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
             true
           ))
         ) {
+          // if (isComplete.call(inputmask, getBuffer.call(inputmask))) {
+          // isValidRslt = returnRslt; // keep previous result if any
+          // }
           break;
         }
         if (i === resultPos) {
           returnRslt = isValidRslt;
         }
-        if (maskPos == true && isValidRslt) {
+        if (maskPos === true && isValidRslt) {
           // return validposition on generalise
           returnRslt = { caretPos: i };
         }
       }
+
       if (!isValidRslt) {
         resetMaskSet.call(inputmask);
         prevAltPos = getTest.call(inputmask, decisionPos); // get the current decisionPos to exclude ~ needs to be before restoring the initial validation
         // reset & revert
         maskset.validPositions = $.extend(true, [], validPsClone);
         maskset.tests = $.extend(true, {}, tstClone); // refresh tests after possible alternating
+        returnRslt = false;
         if (maskset.excludes[decisionPos]) {
           if (prevAltPos.alternation != undefined) {
             const decisionTaker = getDecisionTaker(prevAltPos);
@@ -222,6 +248,10 @@ function alternate(maskPos, c, strict, fromIsValid, rAltPos, selection) {
   if (!returnRslt || opts.keepStatic !== false) {
     delete maskset.excludes[decisionPos];
   }
+  if (!returnRslt) {
+    maskset.validPositions = $.extend(true, [], validPsClone);
+    maskset.tests = $.extend(true, {}, tstClone); // refresh tests after possible alternating
+  }
   return returnRslt;
 }
 
@@ -231,10 +261,10 @@ function casing(elem, test, pos) {
 
   switch (opts.casing || test.casing) {
     case "upper":
-      elem = elem.toUpperCase();
+      elem = elem.toLocaleUpperCase();
       break;
     case "lower":
-      elem = elem.toLowerCase();
+      elem = elem.toLocaleLowerCase();
       break;
     case "title":
       var posBefore = maskset.validPositions[pos - 1];
@@ -242,9 +272,16 @@ function casing(elem, test, pos) {
         pos === 0 ||
         (posBefore && posBefore.input === String.fromCharCode(keyCode.Space))
       ) {
-        elem = elem.toUpperCase();
+        elem = elem.toLocaleUpperCase();
       } else {
-        elem = elem.toLowerCase();
+        elem = elem.toLocaleLowerCase();
+      }
+      break;
+    case "follow":
+      if (test.def && test.def !== test.def.toLocaleLowerCase()) {
+        elem = elem.toLocaleUpperCase();
+      } else if (test.def && test.def !== test.def.toLocaleUpperCase()) {
+        elem = elem.toLocaleLowerCase();
       }
       break;
     default:
@@ -506,14 +543,14 @@ function isValid(
                 isSelection.call(inputmask, pos)
               )
             : (c === test.def || c === opts.skipOptionalPartCharacter) &&
-              test.def !== "" // non mask
-            ? {
-                c:
-                  getPlaceholder.call(inputmask, position, test, true) ||
-                  test.def,
-                pos: position
-              }
-            : false;
+                test.def !== "" // non mask
+              ? {
+                  c:
+                    getPlaceholder.call(inputmask, position, test, true) ||
+                    test.def,
+                  pos: position
+                }
+              : false;
       }
       if (rslt !== false) {
         let elem = rslt.c !== undefined ? rslt.c : c,
@@ -669,38 +706,45 @@ function isValid(
 
     if (inputmask.hasAlternator && fromAlternate !== true && !strict) {
       fromAlternate = true; // stop possible loop
-      if (
-        result === false &&
-        opts.keepStatic &&
-        (isComplete.call(inputmask, getBuffer.call(inputmask)) || maskPos === 0)
-      ) {
-        // try fuzzy alternator logic
-        result = alternate.call(
-          inputmask,
-          maskPos,
-          c,
-          strict,
-          fromIsValid,
-          undefined,
-          pos
-        );
-      } else if (
-        isSelection.call(inputmask, pos) &&
-        maskset.tests[maskPos] &&
-        maskset.tests[maskPos].length > 1 &&
-        opts.keepStatic
-      ) {
+      if (result === false) {
+        // try alternating when the validation fails
+        if (
+          opts.keepStatic === true ||
+          (isFinite(parseInt(opts.keepStatic)) && maskPos >= opts.keepStatic)
+        ) {
+          // console.log("alternate 0");
+          result = alternate.call(
+            inputmask,
+            maskPos,
+            c,
+            strict,
+            fromIsValid,
+            undefined,
+            pos
+          );
+        }
+      } else if (result === true) {
+        // try alternating when the validation succeeds
         // selection clears an alternated keepstatic mask ~ #2189
-        result = alternate.call(inputmask, true);
-      } else if (
-        result == true &&
-        opts.numericInput !== true &&
-        maskset.tests[maskPos] &&
-        maskset.tests[maskPos].length > 1 &&
-        getLastValidPosition.call(inputmask, undefined, true) > maskPos
-      ) {
-        // console.log("Alternating");
-        result = alternate.call(inputmask, true);
+        if (
+          isSelection.call(inputmask, pos) &&
+          maskset.tests[maskPos] &&
+          maskset.tests[maskPos].length > 1 &&
+          opts.keepStatic
+        ) {
+          // console.log("alternate 1");
+          result = alternate.call(inputmask, true) || result;
+        }
+        // alternate by adding extra input in between
+        else if (
+          opts.numericInput !== true &&
+          maskset.tests[maskPos] &&
+          maskset.tests[maskPos].length > 1 &&
+          getLastValidPosition.call(inputmask, undefined, true) > maskPos
+        ) {
+          // console.log("alternate 2");
+          result = alternate.call(inputmask, true) || result;
+        }
       }
     }
 
@@ -709,25 +753,27 @@ function isValid(
         pos: maskPos
       };
     }
-  }
-  if (
-    typeof opts.postValidation === "function" &&
-    fromIsValid !== true &&
-    validateOnly !== true
-  ) {
-    const postResult = opts.postValidation.call(
-      inputmask,
-      getBuffer.call(inputmask, true),
-      pos.begin !== undefined ? (inputmask.isRTL ? pos.end : pos.begin) : pos,
-      c,
-      result,
-      opts,
-      maskset,
-      strict,
-      fromCheckval
-    );
-    if (postResult !== undefined) {
-      result = postResult === true ? result : postResult;
+
+    if (
+      typeof opts.postValidation === "function" &&
+      fromIsValid !== true &&
+      validateOnly !== true
+    ) {
+      const postResult = opts.postValidation.call(
+        inputmask,
+        getBuffer.call(inputmask, true),
+        pos.begin !== undefined ? (inputmask.isRTL ? pos.end : pos.begin) : pos,
+        c,
+        result,
+        opts,
+        maskset,
+        strict,
+        fromCheckval,
+        fromAlternate
+      );
+      if (postResult !== undefined) {
+        result = postResult === true ? result : postResult;
+      }
     }
   }
 
@@ -825,7 +871,7 @@ function refreshFromBuffer(start, end, buffer) {
     ).begin;
   } else {
     for (i = start; i < end; i++) {
-      maskset.validPositions.splice(start, 0);
+      delete maskset.validPositions[i];
     }
     p = start;
   }
@@ -979,12 +1025,12 @@ function revalidateMask(pos, validTest, fromIsValid, validatedPos) {
     }
 
     if (positionsClone[end] == undefined && maskset.jitOffset[end]) {
-      end += maskset.jitOffset[end] + 1;
+      end += maskset.jitOffset[end] + (validTest ? 1 : 0);
     }
     for (i = validTest ? end : end - 1; i <= lvp; i++) {
       if (
         (t = positionsClone[i]) !== undefined &&
-        t.generatedInput !== true &&
+        (opts.shiftPositions !== true || t.generatedInput !== true) &&
         (i >= end ||
           (i >= begin &&
             IsEnclosedStatic(i, positionsClone, {

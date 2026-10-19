@@ -4,21 +4,14 @@
 
 @section('page-title', 'Sedes')
 
+@section('page-actions')
+    <a href="{{ route('sedes.create') }}" class="btn btn-primary">Nueva sede</a>
+@endsection
+
 @section('content')
-<div class="row mb-3">
-    <div class="col-12 text-right">
-        <a href="{{ route('sedes.create') }}" class="btn btn-primary">Nueva sede</a>
-    </div>
-</div>
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-header">
         <h3 class="card-title">Iglesias ({{ $resumen->count() }})</h3>
     </div>
@@ -45,23 +38,22 @@
                         <td>{{ $sede->ciudad }}</td>
                         <td>{{ $sede->pastor?->nombre_completo ?? '—' }}</td>
                         <td>{{ $sede->pastora?->nombre_completo ?? '—' }}</td>
-                        <td><span class="badge badge-info">{{ $fila['personas'] }}</span></td>
-                        <td><span class="badge badge-primary">{{ $fila['lideres'] }}</span></td>
-                        <td><span class="badge badge-secondary">{{ $fila['celulas'] }}</span></td>
+                        <td><x-ui.insignia color="info">{{ $fila['personas'] }}</x-ui.insignia></td>
+                        <td><x-ui.insignia color="primary">{{ $fila['lideres'] }}</x-ui.insignia></td>
+                        <td><x-ui.insignia color="secondary">{{ $fila['celulas'] }}</x-ui.insignia></td>
                         <td>
                             @if($sede->activa)
-                                <span class="badge badge-success">Activa</span>
+                                <x-ui.estado valor="activa" />
                             @else
-                                <span class="badge badge-secondary">Inactiva</span>
+                                <x-ui.estado valor="inactiva" />
                             @endif
                         </td>
-                        <td class="text-nowrap">
-                            <a href="{{ route('sedes.show', $sede) }}" class="btn btn-sm btn-info">Ver</a>
-                            <a href="{{ route('sedes.edit', $sede) }}" class="btn btn-sm btn-warning">Editar</a>
+                        <td class="text-end text-nowrap">
+                            <x-ui.acciones-fila :ver="route('sedes.show', $sede)" :editar="route('sedes.edit', $sede)" :nombre="$sede->nombre" />
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="text-center">Aún no hay sedes. Crea la primera.</td></tr>
+                    <tr><td colspan="9"><x-ui.vacio mensaje="Aún no hay sedes. Crea la primera." /></td></tr>
                 @endforelse
             </tbody>
         </table>
