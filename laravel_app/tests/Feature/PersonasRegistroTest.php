@@ -36,15 +36,6 @@ class PersonasRegistroTest extends TestCase
             ->assertSessionHasErrors(['celular', 'email']);
     }
 
-    public function test_exige_documento_al_pasar_a_miembro_activo(): void
-    {
-        $this->comoAdmin();
-
-        $this->post(route('personas.store'), [
-            'nombres' => 'Mario', 'apellidos' => 'Miembro', 'celular' => '3001112222', 'estado' => 'miembro_activo',
-        ])->assertSessionHasErrors(['numero_documento', 'tipo_documento']);
-    }
-
     public function test_avisa_de_posible_duplicado_y_permite_confirmar(): void
     {
         $this->comoAdmin();
@@ -58,17 +49,6 @@ class PersonasRegistroTest extends TestCase
 
         $this->post(route('personas.store'), $datos + ['confirmar_duplicado' => 1])->assertSessionHasNoErrors();
         $this->assertSame(2, Persona::count());
-    }
-
-    public function test_rechaza_un_documento_duplicado(): void
-    {
-        $this->comoAdmin();
-        Persona::factory()->create(['numero_documento' => '999']);
-
-        $this->post(route('personas.store'), [
-            'nombres' => 'Otra', 'apellidos' => 'Persona', 'celular' => '3000000001', 'estado' => 'miembro_activo',
-            'tipo_documento' => 'CC', 'numero_documento' => '999',
-        ])->assertSessionHasErrors('numero_documento');
     }
 
     public function test_varios_visitantes_sin_documento_pueden_coexistir(): void

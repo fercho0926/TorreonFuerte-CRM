@@ -14,7 +14,7 @@ class TarjetaUnicaTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
 
-    private const CAMPOS = ['nombres', 'apellidos', 'fecha_nacimiento', 'celular', 'email', 'estado', 'tipo_documento', 'numero_documento'];
+    private const CAMPOS = ['nombres', 'apellidos', 'fecha_nacimiento', 'celular', 'email', 'estado'];
 
     protected function setUp(): void
     {
@@ -52,24 +52,14 @@ class TarjetaUnicaTest extends TestCase
     public function test_editar_muestra_los_valores_en_la_misma_tarjeta(): void
     {
         $persona = Persona::factory()->deSede($this->A['sede']->id)->create([
-            'nombres' => 'Marta', 'apellidos' => 'Lucero', 'celular' => '3201112233', 'email' => 'marta@correo.co', 'tipo_documento' => 'CC', 'numero_documento' => '5566778899',
+            'nombres' => 'Marta', 'apellidos' => 'Lucero', 'celular' => '3201112233', 'email' => 'marta@correo.co',
         ]);
 
         $tarjeta = $this->seccion($this->get(route('personas.edit', $persona))->assertOk()->getContent(), 'seccion-personal');
 
-        foreach (['Marta', 'Lucero', '320 111 2233', 'marta@correo.co', '5566778899'] as $valor) {
+        foreach (['Marta', 'Lucero', '320 111 2233', 'marta@correo.co'] as $valor) {
             $this->assertStringContainsString($valor, str_replace('3201112233', '320 111 2233', $tarjeta), $valor);
         }
-    }
-
-    public function test_las_reglas_de_documento_dependen_del_estado(): void
-    {
-        $base = ['nombres' => 'Luis', 'apellidos' => 'Díaz', 'celular' => '3105550000'];
-
-        $this->post(route('personas.store'), $base + ['estado' => 'miembro_activo'])->assertSessionHasErrors('numero_documento');
-        $this->post(route('personas.store'), $base + ['estado' => 'visitante'])->assertSessionHasNoErrors();
-        $this->post(route('personas.store'), ['nombres' => 'Ana', 'apellidos' => 'Cel', 'celular' => '3105551111', 'estado' => 'celula'])->assertSessionHasNoErrors();
-        $this->assertSame(2, Persona::withoutGlobalScopes()->whereIn('estado', ['visitante', 'celula'])->count());
     }
 
     public function test_siguen_las_reglas_de_contacto_y_de_duplicados(): void
@@ -81,13 +71,12 @@ class TarjetaUnicaTest extends TestCase
         $this->post(route('personas.store'), $datos)->assertSessionHas('duplicado');
     }
 
-    public function test_la_ficha_agrupa_contacto_estado_y_documento_en_el_bloque_de_datos_personales(): void
+    public function test_la_ficha_agrupa_contacto_estado_en_el_bloque_de_datos_personales(): void
     {
         $persona = Persona::factory()->deSede($this->A['sede']->id)->create(['nombres' => 'Marta', 'apellidos' => 'Lucero', 'celular' => '3201112233', 'email' => 'marta@correo.co']);
 
         $this->get(route('personas.show', $persona))
             ->assertOk()
-            ->assertSee('Documento')
             ->assertSee('Celular')
             ->assertSee('Correo')
             ->assertSee('marta@correo.co')

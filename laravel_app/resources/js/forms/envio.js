@@ -1,6 +1,6 @@
 /**
  * Envío seguro: botón con progreso (sin dobles envíos) y aviso al salir con cambios sin guardar.
- * No se guardan borradores ni datos en el navegador: la huella vive solo en memoria.
+ * La huella vive solo en memoria. El respaldo ante un envío fallido vive aparte (borrador.js, solo en la sesión).
  */
 
 /** Huella de los valores actuales del formulario (solo en memoria). */

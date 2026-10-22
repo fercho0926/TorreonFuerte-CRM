@@ -1,0 +1,3 @@
+tests/movil/.auth/
+test-results/
+playwright-report/

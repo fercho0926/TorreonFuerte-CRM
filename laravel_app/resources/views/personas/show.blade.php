@@ -44,9 +44,6 @@
             @include('partials.acciones-contacto', ['persona' => $persona])
         </div>
         <dl class="row">
-            <dt class="col-sm-3">Documento</dt>
-            <dd class="col-sm-9">{{ $persona->numero_documento ? $persona->tipo_documento.' '.$persona->numero_documento : '—' }}</dd>
-
             <dt class="col-sm-3">Fecha de nacimiento</dt>
             <dd class="col-sm-9">
                 @if($persona->fecha_nacimiento)
@@ -89,7 +86,7 @@
             <h3 class="card-title">Personas a su cargo ({{ $persona->miembros->count() }})</h3>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover">
+            <table class="tabla-apilable table table-hover">
                 <thead>
                     <tr>
                         <th>Nombre</th>
@@ -99,8 +96,8 @@
                 <tbody>
                     @foreach($persona->miembros as $miembro)
                         <tr>
-                            <td><a href="{{ route('personas.show', $miembro) }}">{{ $miembro->nombre_completo }}</a></td>
-                            <td>{{ $miembro->celular ?? '—' }}</td>
+                            <td data-etiqueta="Nombre" data-primaria><a href="{{ route('personas.show', $miembro) }}">{{ $miembro->nombre_completo }}</a></td>
+                            <td data-etiqueta="Celular">{{ $miembro->celular ?? '—' }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -134,7 +131,7 @@
         <h3 class="card-title">Encuentros ({{ $persona->encuentros->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-nowrap">
+        <table class="tabla-apilable table table-hover text-nowrap">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -146,16 +143,16 @@
             <tbody>
                 @forelse($persona->encuentros as $encuentro)
                     <tr>
-                        <td><a href="{{ route('encuentros.show', $encuentro) }}">{{ $encuentro->nombre }}</a></td>
-                        <td>{{ $encuentro->fecha_realizacion->translatedFormat('j \d\e F \d\e Y') }}</td>
-                        <td>
+                        <td data-etiqueta="Nombre" data-primaria><a href="{{ route('encuentros.show', $encuentro) }}">{{ $encuentro->nombre }}</a></td>
+                        <td data-etiqueta="Fecha">{{ $encuentro->fecha_realizacion->translatedFormat('j \d\e F \d\e Y') }}</td>
+                        <td data-etiqueta="Asistió">
                             @if($encuentro->pivot->asistio)
                                 <x-ui.estado valor="si" />
                             @else
                                 <x-ui.estado valor="no" />
                             @endif
                         </td>
-                        <td>{{ $encuentro->pivot->valor_pagado !== null ? '$'.number_format($encuentro->pivot->valor_pagado, 2) : '—' }}</td>
+                        <td data-etiqueta="Valor pagado">{{ $encuentro->pivot->valor_pagado !== null ? '$'.number_format($encuentro->pivot->valor_pagado, 2) : '—' }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -172,7 +169,7 @@
         <h3 class="card-title">Eventos ({{ $persona->inscripcionesEventos->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover text-nowrap">
+        <table class="tabla-apilable table table-hover text-nowrap">
             <thead>
                 <tr>
                     <th>Nombre</th>
@@ -186,12 +183,12 @@
             <tbody>
                 @forelse($persona->inscripcionesEventos as $inscripcion)
                     <tr>
-                        <td><a href="{{ route('eventos.show', $inscripcion->evento) }}">{{ $inscripcion->evento->nombre }}</a></td>
-                        <td>{{ $inscripcion->evento->fecha->translatedFormat('j \d\e F \d\e Y') }}</td>
-                        <td>${{ number_format($inscripcion->costoAplicable(), 2) }}</td>
-                        <td>${{ number_format($inscripcion->totalPagado(), 2) }}</td>
-                        <td>${{ number_format($inscripcion->saldoPendiente(), 2) }}</td>
-                        <td>
+                        <td data-etiqueta="Nombre" data-primaria><a href="{{ route('eventos.show', $inscripcion->evento) }}">{{ $inscripcion->evento->nombre }}</a></td>
+                        <td data-etiqueta="Fecha">{{ $inscripcion->evento->fecha->translatedFormat('j \d\e F \d\e Y') }}</td>
+                        <td data-etiqueta="Costo">${{ number_format($inscripcion->costoAplicable(), 2) }}</td>
+                        <td data-etiqueta="Pagado">${{ number_format($inscripcion->totalPagado(), 2) }}</td>
+                        <td data-etiqueta="Saldo">${{ number_format($inscripcion->saldoPendiente(), 2) }}</td>
+                        <td data-etiqueta="Estado">
                             @if($inscripcion->estaPagado())
                                 <x-ui.estado valor="pagado" />
                             @else
@@ -238,7 +235,7 @@
             <h3 class="card-title">Historial de cambios</h3>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-sm table-hover">
+            <table class="tabla-apilable table table-sm table-hover">
                 <thead>
                     <tr>
                         <th>Fecha</th>
@@ -250,10 +247,10 @@
                 <tbody>
                     @forelse($persona->cambios as $cambio)
                         <tr>
-                            <td class="text-nowrap">{{ $cambio->created_at->translatedFormat('j M Y H:i') }}</td>
-                            <td>{{ $cambio->etiqueta }}</td>
-                            <td>{{ $cambio->usuario?->name ?? '—' }}</td>
-                            <td class="small text-muted">{{ $cambio->despues ? json_encode($cambio->despues, JSON_UNESCAPED_UNICODE) : '' }}</td>
+                            <td class="text-nowrap" data-etiqueta="Fecha" data-primaria>{{ $cambio->created_at->translatedFormat('j M Y H:i') }}</td>
+                            <td data-etiqueta="Acción">{{ $cambio->etiqueta }}</td>
+                            <td data-etiqueta="Usuario">{{ $cambio->usuario?->name ?? '—' }}</td>
+                            <td class="small text-muted" data-etiqueta="Detalle">{{ $cambio->despues ? json_encode($cambio->despues, JSON_UNESCAPED_UNICODE) : '' }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="text-center">Sin cambios registrados.</td></tr>

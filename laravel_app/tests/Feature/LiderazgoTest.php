@@ -25,16 +25,6 @@ class LiderazgoTest extends TestCase
         $this->assertTrue($persona->es_lider);
     }
 
-    public function test_designar_exige_documento(): void
-    {
-        $this->comoAdmin();
-        $persona = Persona::factory()->visitante()->create();
-
-        $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id])
-            ->assertSessionHasErrors('persona_id');
-        $this->assertFalse($persona->fresh()->es_lider);
-    }
-
     public function test_quitar_rol_con_dependientes_sin_decision_responde_422_con_conteos(): void
     {
         $this->comoAdmin();

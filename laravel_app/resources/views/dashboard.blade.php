@@ -5,35 +5,39 @@
 @section('page-title', 'Panel de administración')
 
 @section('content')
+<div class="d-lg-none">
+    @include('partials.accesos-rapidos')
+</div>
+
 @if($resumenSedes)
     <div class="card card-primary card-outline mb-4">
         <div class="card-header"><h3 class="card-title">Resumen por sede</h3></div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover mb-0">
+            <table class="tabla-apilable table table-hover mb-0">
                 <thead>
                     <tr><th>Sede</th><th>Estado</th><th>Personas</th><th>Líderes</th><th>Células</th><th>Eventos próximos</th><th>Recaudo de eventos</th></tr>
                 </thead>
                 <tbody>
                     @foreach($resumenSedes as $fila)
                         <tr>
-                            <td><a href="{{ route('sedes.show', $fila['sede']) }}">{{ $fila['sede']->nombre }}</a></td>
-                            <td>{{ $fila['sede']->activa ? 'Activa' : 'Inactiva' }}</td>
-                            <td>{{ $fila['personas'] }}</td>
-                            <td>{{ $fila['lideres'] }}</td>
-                            <td>{{ $fila['celulas'] }}</td>
-                            <td>{{ $fila['eventos_proximos'] }}</td>
-                            <td>${{ number_format($fila['recaudo'], 2) }}</td>
+                            <td data-etiqueta="Sede" data-primaria><a href="{{ route('sedes.show', $fila['sede']) }}">{{ $fila['sede']->nombre }}</a></td>
+                            <td data-etiqueta="Estado">{{ $fila['sede']->activa ? 'Activa' : 'Inactiva' }}</td>
+                            <td data-etiqueta="Personas">{{ $fila['personas'] }}</td>
+                            <td data-etiqueta="Líderes">{{ $fila['lideres'] }}</td>
+                            <td data-etiqueta="Células">{{ $fila['celulas'] }}</td>
+                            <td data-etiqueta="Eventos próximos">{{ $fila['eventos_proximos'] }}</td>
+                            <td data-etiqueta="Recaudo de eventos">${{ number_format($fila['recaudo'], 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
                     <tr class="fw-bold">
                         <td colspan="2">Total global (todas las sedes)</td>
-                        <td>{{ $resumenSedes->sum('personas') }}</td>
-                        <td>{{ $resumenSedes->sum('lideres') }}</td>
-                        <td>{{ $resumenSedes->sum('celulas') }}</td>
-                        <td>{{ $resumenSedes->sum('eventos_proximos') }}</td>
-                        <td>${{ number_format($resumenSedes->sum('recaudo'), 2) }}</td>
+                        <td data-etiqueta="Personas" data-primaria>{{ $resumenSedes->sum('personas') }}</td>
+                        <td data-etiqueta="Líderes">{{ $resumenSedes->sum('lideres') }}</td>
+                        <td data-etiqueta="Células">{{ $resumenSedes->sum('celulas') }}</td>
+                        <td data-etiqueta="Eventos próximos">{{ $resumenSedes->sum('eventos_proximos') }}</td>
+                        <td data-etiqueta="Recaudo de eventos">${{ number_format($resumenSedes->sum('recaudo'), 2) }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -64,7 +68,7 @@
         <div class="card card-info card-outline mb-4">
             <div class="card-header"><h3 class="card-title"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>Próximos eventos</h3></div>
             <div class="card-body table-responsive p-0">
-                <table class="table table-hover align-middle mb-0">
+                <table class="tabla-apilable table table-hover align-middle mb-0">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -78,12 +82,12 @@
                     <tbody>
                         @forelse($proximosEventos as $evento)
                             <tr>
-                                <td><a href="{{ route('eventos.show', $evento) }}">{{ $evento->nombre }}</a></td>
-                                <td>{{ $evento->tipo }}</td>
-                                <td>{{ $evento->fecha->format('Y-m-d') }}</td>
-                                <td><x-ui.insignia color="secondary">{{ $evento->inscripciones->count() }}</x-ui.insignia></td>
-                                <td>${{ number_format($evento->totalEsperado(), 2) }}</td>
-                                <td>${{ number_format($evento->totalRecaudado(), 2) }}</td>
+                                <td data-etiqueta="Nombre" data-primaria><a href="{{ route('eventos.show', $evento) }}">{{ $evento->nombre }}</a></td>
+                                <td data-etiqueta="Tipo">{{ $evento->tipo }}</td>
+                                <td data-etiqueta="Fecha">{{ $evento->fecha->format('Y-m-d') }}</td>
+                                <td data-etiqueta="Inscritos"><x-ui.insignia color="secondary">{{ $evento->inscripciones->count() }}</x-ui.insignia></td>
+                                <td data-etiqueta="Esperado">${{ number_format($evento->totalEsperado(), 2) }}</td>
+                                <td data-etiqueta="Recaudado">${{ number_format($evento->totalRecaudado(), 2) }}</td>
                             </tr>
                         @empty
                             <tr><td colspan="6"><x-ui.vacio mensaje="No hay eventos próximos programados." icono="fa-calendar" /></td></tr>
@@ -93,20 +97,8 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card card-primary card-outline mb-4">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-bolt me-1" aria-hidden="true"></i>Accesos rápidos</h3></div>
-            <div class="card-body d-grid gap-2">
-                @puede('crear')
-                    <a href="{{ route('personas.create') }}" class="btn btn-primary"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>Registrar persona</a>
-                @endpuede
-                @puede('designarLider')
-                    <a href="{{ route('lideres.designar') }}" class="btn btn-outline-primary"><i class="fas fa-user-tie me-1" aria-hidden="true"></i>Designar líder</a>
-                @endpuede
-                <a href="{{ route('eventos.create') }}" class="btn btn-outline-primary"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>Crear evento</a>
-                <a href="{{ route('celulas.index') }}" class="btn btn-outline-secondary"><i class="fas fa-people-arrows me-1" aria-hidden="true"></i>Ver células</a>
-            </div>
-        </div>
+    <div class="col-lg-4 d-none d-lg-block">
+        @include('partials.accesos-rapidos')
     </div>
 </div>
 

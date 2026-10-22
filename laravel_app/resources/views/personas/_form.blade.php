@@ -8,7 +8,6 @@
         fn ($l) => $l->numero_documento ? 'Doc. '.$l->numero_documento : ($l->celular ? 'Cel. '.$l->celular : null)
     );
     $opcionesEstado = collect(\App\Models\Persona::ESTADOS)->map(fn ($etiqueta, $valor) => ['id' => $valor, 'texto' => $etiqueta])->values()->all();
-    $opcionesDocumento = collect(\App\Models\Persona::TIPOS_DOCUMENTO)->map(fn ($tipo) => ['id' => $tipo, 'texto' => $tipo])->all();
 @endphp
 
 @if($duplicado)
@@ -26,19 +25,15 @@
     </div>
 @endif
 
-<x-form.section titulo="Datos personales" descripcion="Nombre, contacto, estado y documento. Basta con el celular o el correo; el documento es obligatorio solo para miembros activos y líderes." icono="fa-user" id="seccion-personal">
+<x-form.section titulo="Datos personales" descripcion="Nombre, contacto y estado. Basta con el celular o el correo." icono="fa-user" id="seccion-personal">
     <x-form.input name="nombres" label="Nombres" icono="fa-user" :required="true" ejemplo="Ej. Ana María" :value="$persona?->nombres" maxlength="255" />
     <x-form.input name="apellidos" label="Apellidos" icono="fa-user" :required="true" ejemplo="Ej. Pérez Soto" :value="$persona?->apellidos" maxlength="255" />
     <x-form.date name="fecha_nacimiento" label="Fecha de nacimiento" :value="$persona?->fecha_nacimiento" max="hoy" atajos="" col="col-md-4"
         ayuda="Opcional. Con ella se calcula la edad." />
-    <x-form.input name="celular" label="Celular" type="tel" icono="fa-phone" mascara="celular" ejemplo="310 555 9999" :value="$persona?->celular" maxlength="20" col="col-md-4" />
-    <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" ejemplo="nombre@correo.com" :value="$persona?->email" maxlength="255" col="col-md-4" />
+    <x-form.input name="celular" label="Celular" type="celular" icono="fa-phone" mascara="celular" ejemplo="310 555 9999" :value="$persona?->celular" maxlength="20" col="col-md-4" />
+    <x-form.input name="email" label="Correo" type="correo" icono="fa-envelope" ejemplo="nombre@correo.com" :value="$persona?->email" maxlength="255" col="col-md-4" />
     <x-form.select name="estado" label="Estado" icono="fa-user-check" :required="true" :opciones="$opcionesEstado" :value="$persona?->estado ?? 'visitante'" :vacio="null" col="col-md-4"
         ayuda="«En célula»: asiste a una célula y aún no es parte de la iglesia." />
-    <x-form.select name="tipo_documento" label="Tipo de documento" icono="fa-id-badge" :opciones="$opcionesDocumento" :value="$persona?->tipo_documento" vacio="Sin documento"
-        requeridoSi="estado:miembro_activo|es_lider:1" col="col-md-3" />
-    <x-form.input name="numero_documento" label="Número de documento" icono="fa-hashtag" mascara="documento" ejemplo="Solo números y letras" :value="$persona?->numero_documento"
-        requeridoSi="estado:miembro_activo|es_lider:1" col="col-md-5" maxlength="50" />
 </x-form.section>
 
 <x-form.section titulo="Ubicación" descripcion="Dónde vive la persona." icono="fa-map-marker-alt" id="seccion-ubicacion">

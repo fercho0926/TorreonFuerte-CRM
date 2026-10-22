@@ -1,3 +1,33 @@
+# --- Rendimiento en celular (spec 008): compresión, caché larga de /build y tipos de archivo ---
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Los archivos de /build llevan una huella en el nombre: pueden guardarse un año sin riesgo.
+    <FilesMatch "\.(js|css|woff2?|ttf|png|ico|svg)$">
+        ExpiresDefault "access plus 1 year"
+    </FilesMatch>
+    # El service worker, el manifiesto y la pantalla sin conexión se revisan siempre.
+    <FilesMatch "^(sw\.js|manifest\.webmanifest|offline\.html)$">
+        ExpiresDefault "access plus 0 seconds"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#/build/assets/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    <FilesMatch "^(sw\.js|manifest\.webmanifest|offline\.html)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

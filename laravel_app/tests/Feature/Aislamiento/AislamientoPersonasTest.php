@@ -86,25 +86,6 @@ class AislamientoPersonasTest extends TestCase
         $this->assertSame($this->A['sede']->id, Persona::withoutGlobalScopes()->where('nombres', 'Nueva')->value('sede_id'));
     }
 
-    public function test_el_mismo_documento_en_dos_sedes_coexiste_sin_revelarse(): void
-    {
-        $documento = $this->B['persona']->numero_documento;
-
-        $this->post(route('personas.store'), [
-            'nombres' => 'Homonima', 'apellidos' => 'Alfa', 'celular' => '3002020202', 'estado' => 'miembro_activo',
-            'tipo_documento' => 'CC', 'numero_documento' => $documento,
-        ])->assertSessionHasNoErrors();
-
-        $this->assertSame(2, Persona::withoutGlobalScopes()->where('numero_documento', $documento)->count());
-        $this->get(route('personas.index', ['q' => $documento]))->assertViewHas('pagina', fn ($p) => $p->total() === 1 && $p->first()->nombres === 'Homonima');
-
-        // Y un documento repetido dentro de la misma sede sigue siendo error.
-        $this->post(route('personas.store'), [
-            'nombres' => 'Otra', 'apellidos' => 'Alfa', 'celular' => '3003030303', 'estado' => 'miembro_activo',
-            'tipo_documento' => 'CC', 'numero_documento' => $documento,
-        ])->assertSessionHasErrors('numero_documento');
-    }
-
     public function test_sin_lider_no_muestra_personas_de_otra_sede(): void
     {
         Persona::factory()->deSede($this->A['sede']->id)->visitante()->create(['nombres' => 'HuerfanaAlfa', 'apellidos' => 'Uno']);

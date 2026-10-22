@@ -7,6 +7,7 @@
 import jQuery from 'jquery';
 import DataTable from 'datatables.net-bs5';
 import 'datatables.net-responsive-bs5';
+import { columnasSecundarias, contarFiltrosActivos, leerOrden, opcionesOrden } from './movil.js';
 
 export const ESPAÑOL = {
     emptyTable: 'No se encontraron resultados.',
@@ -57,12 +58,35 @@ export function leerFormulario(formulario) {
     return valores;
 }
 
+/** Botón «Ver más» de cada tarjeta que tiene columnas secundarias (solo se ve en teléfono). */
+function agregarVerMas(tabla) {
+    tabla.querySelectorAll('tbody tr').forEach((fila) => {
+        if (fila.querySelector('.grilla-mas') || !fila.querySelector('.grilla-sec')) return;
+        const celda = fila.querySelector('td');
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'btn btn-link grilla-mas';
+        boton.setAttribute('aria-expanded', 'false');
+        boton.setAttribute('aria-label', 'Ver más datos');
+        boton.innerHTML = '<i class="fas fa-chevron-down" aria-hidden="true"></i>';
+        boton.addEventListener('click', () => {
+            const abierta = fila.classList.toggle('abierta');
+            boton.setAttribute('aria-expanded', String(abierta));
+            boton.setAttribute('aria-label', abierta ? 'Ver menos datos' : 'Ver más datos');
+        });
+        celda?.appendChild(boton);
+    });
+}
+
 export function iniciarGrilla(tabla) {
     if (!tabla || tabla.dataset.listo) return null;
     tabla.dataset.listo = '1';
     window.jQuery = window.jQuery || jQuery;
 
     const columnas = JSON.parse(tabla.dataset.columnas);
+    // Por debajo de 768 px la tabla se ve como tarjetas (CSS) y no se usa la extensión Responsive.
+    const telefono = window.matchMedia('(max-width: 767.98px)');
+    const secundarias = columnasSecundarias(columnas);
     const opcionesPagina = JSON.parse(tabla.dataset.opcionesPagina);
     const [ordenIndice, ordenDir] = JSON.parse(tabla.dataset.orden);
     const estado = JSON.parse(tabla.dataset.estado);
@@ -106,7 +130,7 @@ export function iniciarGrilla(tabla) {
         order: [[ordenIndice, ordenDir]],
         orderCellsTop: true,
         searching: false,
-        responsive: true,
+        responsive: !telefono.matches,
         autoWidth: false,
         language: { ...ESPAÑOL, emptyTable: tabla.dataset.vacio || ESPAÑOL.emptyTable, zeroRecords: tabla.dataset.vacio || ESPAÑOL.zeroRecords },
         layout: {
@@ -119,7 +143,11 @@ export function iniciarGrilla(tabla) {
             targets: i,
             orderable: c.ordenable,
             responsivePriority: c.prioridad,
-            ...(c.acciones ? { className: 'text-end text-nowrap' } : {}),
+            ...(c.acciones ? { className: 'text-end text-nowrap grilla-celda-acciones' } : {}),
+            createdCell: (td) => {
+                td.dataset.etiqueta = c.titulo;
+                if (secundarias.includes(i)) td.classList.add('grilla-sec');
+            },
         })),
     });
 
@@ -135,6 +163,7 @@ export function iniciarGrilla(tabla) {
     api.on('xhr', () => tarjeta.querySelector('.grilla-error')?.remove());
     api.on('order.dt xhr', actualizarExportar);
     api.on('draw', () => {
+        agregarVerMas(tabla);
         const total = api.page.info().recordsDisplay;
         if (contador) contador.textContent = `${total} ${total === 1 ? 'resultado' : 'resultados'}`;
     });
@@ -149,6 +178,31 @@ export function iniciarGrilla(tabla) {
             iniciarFormulario(f);
         }));
     });
+
+    // Teléfono: panel de filtros por columna y selector de orden (la cabecera de la tabla no se ve).
+    const botonFiltros = tarjeta.querySelector('[data-grilla-filtros]');
+    const contarFiltros = () => {
+        const n = contarFiltrosActivos(Object.fromEntries(Array.from(tabla.querySelectorAll('[data-filtro]')).map((c) => [c.dataset.filtro, c.value])));
+        const marca = tarjeta.querySelector('[data-grilla-filtros-n]');
+        if (marca) marca.textContent = String(n);
+    };
+    botonFiltros?.addEventListener('click', () => {
+        const abierto = tarjeta.classList.toggle('filtros-abiertos');
+        botonFiltros.setAttribute('aria-expanded', String(abierto));
+    });
+    tabla.querySelectorAll('[data-filtro]').forEach((campo) => campo.addEventListener(campo.tagName === 'SELECT' ? 'change' : 'input', contarFiltros));
+    contarFiltros();
+
+    const selectorOrden = tarjeta.querySelector('[data-grilla-orden]');
+    if (selectorOrden) {
+        opcionesOrden(columnas).forEach(({ valor, texto }) => selectorOrden.add(new Option(texto, valor)));
+        selectorOrden.value = `${ordenIndice}:${ordenDir}`;
+        selectorOrden.addEventListener('change', () => api.order([leerOrden(selectorOrden.value)]).draw());
+        api.on('order.dt', () => { const [i, d] = api.order()[0] || [ordenIndice, ordenDir]; selectorOrden.value = `${i}:${d}`; });
+    }
+    agregarVerMas(tabla);
+    // Al cruzar los 768 px (por ejemplo, una tableta que gira) se recarga para elegir la presentación correcta.
+    telefono.addEventListener('change', () => window.location.reload());
 
     if (formulario) {
         // La búsqueda es en vivo: el botón «Buscar» solo hace falta sin JavaScript (Enter también funciona).
@@ -174,6 +228,7 @@ export function iniciarGrilla(tabla) {
         });
         window.jQuery?.(formulario).find('select').trigger('change.select2');
         filtros?.querySelectorAll('input,select').forEach((campo) => { campo.value = ''; });
+        contarFiltros();
         api.ajax.reload();
     });
 

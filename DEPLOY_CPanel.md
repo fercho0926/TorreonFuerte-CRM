@@ -112,7 +112,7 @@ Si tienes SSH, conéctate y ejecuta (ajusta rutas y usuario según tu hosting):
 
 ```bash
 cd /home/tu_usuario/tu_dominio/laravel_app
-# (opcional) si no subiste vendor
+# (opcional) si no subiste vendor; obligatorio si subiste un vendor anterior al registro por QR (usa bacon/bacon-qr-code)
 composer install --no-dev --optimize-autoloader
 
 # permisos
@@ -177,3 +177,12 @@ Ingresa con:
 - Después de subir cambios en vistas, ejecuta `php artisan view:clear && php artisan view:cache` para que las pantallas respondan más rápido.
 - Esta versión añade migraciones (columnas `celular`, `debe_cambiar_clave` y `clave_vence_en` en `users`, y las tablas `solicitudes_clave` y `registros_clave`): ejecuta `php artisan migrate`. Los usuarios existentes conservan su contraseña; para enviarles una clave nueva hay que completar su celular de WhatsApp.
 - Esta versión añade la migración `2026_10_25_000001_drop_redes` (retira la tabla `redes` y la columna `personas.red_id`; no se pierde ninguna persona): haz una copia de la base antes de ejecutar `php artisan migrate`.
+
+## Aplicación instalable en celular (HTTPS obligatorio)
+
+Para que el navegador ofrezca «Agregar a pantalla de inicio» y active el *service worker*, el sistema debe servirse por **HTTPS** (en cPanel: *SSL/TLS Status* → *Run AutoSSL*, o instalar el certificado del dominio).
+
+- La carpeta pública del sitio debe ser `laravel_app/public` (o su contenido copiado al `public_html`), de modo que `manifest.webmanifest`, `sw.js`, `offline.html`, `iconos/` y `favicon.ico` queden en la raíz del dominio.
+- `public/.htaccess` activa la compresión y la caché larga de `/build/assets`; verifica que `mod_deflate`, `mod_expires` y `mod_headers` estén habilitados (casi siempre lo están en cPanel).
+- El *service worker* solo guarda archivos de la interfaz y la pantalla «Sin conexión». Nunca guarda datos de personas ni de usuarios.
+- Tras cada despliegue con `npm run build`, los archivos de `/build/assets` cambian de nombre y los teléfonos descargan los nuevos automáticamente. Si cambias `public/sw.js`, sube también su número de `VERSION`.

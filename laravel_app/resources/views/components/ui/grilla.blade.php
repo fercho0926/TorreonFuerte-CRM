@@ -15,7 +15,7 @@
     $consulta = request()->except(['page', 'por_pagina']);
     $orden = collect($columnas)->search(fn ($c) => $c->clave === $estado['orden']);
     $orden = $orden === false ? (int) collect($columnas)->search(fn ($c) => $c->ordenable) : $orden;
-    $definiciones = collect($columnas)->map(fn ($c) => ['clave' => $c->clave, 'ordenable' => $c->ordenable, 'prioridad' => $c->prioridad, 'acciones' => $c->esAcciones])->values();
+    $definiciones = collect($columnas)->map(fn ($c) => ['clave' => $c->clave, 'ordenable' => $c->ordenable, 'prioridad' => $c->prioridad, 'acciones' => $c->esAcciones, 'titulo' => $c->titulo])->values();
     $hayFormulario = $grilla->conBusqueda() || isset($filtros);
 @endphp
 
@@ -36,6 +36,9 @@
             <span data-grilla-contador>{{ $pagina->total() }} {{ $pagina->total() === 1 ? 'resultado' : 'resultados' }}</span>
         </span>
         <div class="grilla-acciones">
+            {{-- Solo teléfono con JavaScript: panel de filtros y orden (la tabla se ve como tarjetas). --}}
+            <button type="button" class="btn btn-outline-secondary btn-sm grilla-filtros-btn" data-grilla-filtros aria-expanded="false"><i class="fas fa-filter me-1" aria-hidden="true"></i>Filtros <span class="badge text-bg-primary" data-grilla-filtros-n>0</span></button>
+            <select class="form-select form-select-sm grilla-orden" data-grilla-orden aria-label="Ordenar por"></select>
             @if($exportable)
                 <a href="{{ route($id.'.exportar', $consulta) }}" class="btn btn-outline-success btn-sm" data-grilla-exportar><i class="fas fa-file-csv me-1" aria-hidden="true"></i>Exportar CSV</a>
             @endif
@@ -81,7 +84,7 @@
                 @forelse($filas as $celdas)
                     <tr>
                         @foreach($celdas as $i => $celda)
-                            <td @class(['text-end text-nowrap' => $columnas[$i]->esAcciones])>{!! $celda !!}</td>
+                            <td @class(['text-end text-nowrap grilla-celda-acciones' => $columnas[$i]->esAcciones, 'grilla-sec' => !$columnas[$i]->esAcciones && $columnas[$i]->prioridad > 3]) data-etiqueta="{{ $columnas[$i]->titulo }}">{!! $celda !!}</td>
                         @endforeach
                     </tr>
                 @empty

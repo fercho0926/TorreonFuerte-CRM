@@ -7,6 +7,8 @@ use App\Http\Controllers\EventosController;
 use App\Http\Controllers\LideresController;
 use App\Http\Controllers\MinisteriosController;
 use App\Http\Controllers\PersonasController;
+use App\Http\Controllers\RegistroPublicoController;
+use App\Http\Controllers\RegistroQrController;
 use App\Http\Controllers\SedeActivaController;
 use App\Http\Controllers\SedesController;
 use App\Http\Controllers\SinLiderController;
@@ -146,3 +148,13 @@ Route::delete('/celulas/{celula}/miembros/{persona}', [CelulasController::class,
 
 Route::post('/celulas/{celula}/reuniones', [CelulasController::class, 'registrarReunion'])->name('celulas.reuniones.store');
 Route::delete('/celulas/{celula}/reuniones/{reunion}', [CelulasController::class, 'eliminarReunion'])->name('celulas.reuniones.destroy');
+
+// Registro por QR: formulario público (sin sesión) y gestión del QR desde las fichas.
+Route::get('/registro/{token}', [RegistroPublicoController::class, 'show'])->name('registro.show');
+Route::post('/registro/{token}/buscar', [RegistroPublicoController::class, 'buscar'])->name('registro.buscar');
+Route::post('/registro/{token}', [RegistroPublicoController::class, 'store'])->name('registro.store');
+Route::get('/registro/{token}/listo', [RegistroPublicoController::class, 'listo'])->name('registro.listo');
+
+Route::get('/registro-qr/{tipo}/{id}/qr.svg', [RegistroQrController::class, 'svg'])->name('registro-qr.svg');
+Route::post('/registro-qr/{tipo}/{id}/abrir', [RegistroQrController::class, 'abrir'])->name('registro-qr.abrir');
+Route::post('/registro-qr/{tipo}/{id}/regenerar', [RegistroQrController::class, 'regenerar'])->name('registro-qr.regenerar');

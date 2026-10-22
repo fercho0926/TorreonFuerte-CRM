@@ -77,7 +77,7 @@ class EstructuraFormulariosTest extends TestCase
 
         $seccion = fn (string $titulo) => substr($html, strpos($html, '<h3 class="fm-seccion__titulo">'.$titulo.'</h3>'));
         $this->assertStringContainsString('name="nombres"', substr($seccion('Datos personales'), 0, strpos($seccion('Datos personales'), 'fm-seccion__titulo">Ubicación') ?: 99999));
-        $this->assertLessThan(strpos($html, 'name="direccion"'), strpos($html, 'name="numero_documento"'));
+        $this->assertLessThan(strpos($html, 'name="direccion"'), strpos($html, 'name="estado"'));
         $this->assertLessThan(strpos($html, 'name="lider_id"'), strpos($html, 'name="ciudad"'));
     }
 

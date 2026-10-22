@@ -51,3 +51,12 @@ jobs:
 
       - name: Run tests
         run: php artisan test
+
+      - name: Pruebas de JavaScript
+        run: npm test
+
+      # Prueba de adaptación a celular (spec 008): usa el Chrome ya instalado en el ejecutor y una base temporal.
+      # Es informativa (no bloquea la integración); la guarda estática ya corre en «php artisan test».
+      - name: Prueba móvil (opcional)
+        continue-on-error: true
+        run: npm run test:movil

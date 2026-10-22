@@ -3,7 +3,7 @@
  * Cualquier <form> o botón con data-confirm pide confirmación con el detalle de las consecuencias.
  * Sin JavaScript el formulario se envía directamente (el servidor mantiene permisos y reglas).
  */
-import Swal from 'sweetalert2';
+import { swal } from './swal.js';
 
 function opcionesDe(el) {
     const peligro = el.dataset.confirmPeligro !== undefined && el.dataset.confirmPeligro !== 'false' && el.dataset.confirmPeligro !== '0';
@@ -27,7 +27,7 @@ function opcionesDe(el) {
 }
 
 async function confirmar(el) {
-    const resultado = await Swal.fire(opcionesDe(el));
+    const resultado = await (await swal()).fire(opcionesDe(el));
 
     return resultado.isConfirmed;
 }

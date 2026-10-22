@@ -2,9 +2,10 @@
  * Calendario amigable con atajos "Hoy" y "Ayer". El campo base sigue siendo <input type="date">
  * (funciona sin JavaScript); aquí se muestra como d/m/Y y se envía como Y-m-d.
  */
-import flatpickr from 'flatpickr';
-import { Spanish } from 'flatpickr/dist/l10n/es.js';
 import { ayer, hoy } from './texto.js';
+
+// Estilos del calendario: se descargan junto con él (solo pantallas con campos de fecha).
+import 'flatpickr/dist/flatpickr.min.css';
 
 function limite(valor) {
     if (!valor) return undefined;
@@ -35,8 +36,14 @@ function agregarAtajos(instancia, atajos) {
     if (pie.children.length) instancia.calendarContainer.appendChild(pie);
 }
 
-export function iniciarFechas(form) {
-    form.querySelectorAll('input[data-fecha]').forEach((input) => {
+export async function iniciarFechas(form) {
+    const campos = form.querySelectorAll('input[data-fecha]');
+    if (!campos.length) return;
+
+    // El calendario solo se descarga en las pantallas que tienen campos de fecha (spec 008).
+    const [{ default: flatpickr }, { Spanish }] = await Promise.all([import('flatpickr'), import('flatpickr/dist/l10n/es.js')]);
+
+    campos.forEach((input) => {
         const atajos = (input.dataset.atajos ?? '').split(',').map((a) => a.trim()).filter(Boolean);
         const idOriginal = input.id;
 

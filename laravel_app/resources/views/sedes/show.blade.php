@@ -52,11 +52,11 @@
 <div class="card mb-4">
     <div class="card-header"><h3 class="card-title">Usuarios de la sede ({{ $usuarios->count() }})</h3></div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-sm table-hover mb-0">
+        <table class="tabla-apilable table table-sm table-hover mb-0">
             <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th></tr></thead>
             <tbody>
                 @forelse($usuarios as $usuario)
-                    <tr><td>{{ $usuario->name }}</td><td>{{ $usuario->email }}</td><td>{{ \App\Models\User::ROLE_LABELS[$usuario->role] ?? $usuario->role }}</td></tr>
+                    <tr><td data-etiqueta="Nombre" data-primaria>{{ $usuario->name }}</td><td data-etiqueta="Correo">{{ $usuario->email }}</td><td data-etiqueta="Rol">{{ \App\Models\User::ROLE_LABELS[$usuario->role] ?? $usuario->role }}</td></tr>
                 @empty
                     <tr><td colspan="3" class="text-center">Sin usuarios.</td></tr>
                 @endforelse
@@ -68,14 +68,14 @@
 <div class="card mb-4">
     <div class="card-header"><h3 class="card-title">Historial de la sede</h3></div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-sm table-hover mb-0">
+        <table class="tabla-apilable table table-sm table-hover mb-0">
             <thead><tr><th>Fecha</th><th>Acción</th><th>Usuario</th></tr></thead>
             <tbody>
                 @forelse($sede->cambios as $cambio)
                     <tr>
-                        <td class="text-nowrap">{{ $cambio->created_at->translatedFormat('j M Y H:i') }}</td>
-                        <td>{{ $cambio->etiqueta }}</td>
-                        <td>{{ $cambio->usuario?->name ?? '—' }}</td>
+                        <td class="text-nowrap" data-etiqueta="Fecha" data-primaria>{{ $cambio->created_at->translatedFormat('j M Y H:i') }}</td>
+                        <td data-etiqueta="Acción">{{ $cambio->etiqueta }}</td>
+                        <td data-etiqueta="Usuario">{{ $cambio->usuario?->name ?? '—' }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="3" class="text-center">Sin cambios registrados.</td></tr>

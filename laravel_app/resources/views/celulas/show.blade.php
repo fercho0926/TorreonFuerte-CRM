@@ -58,7 +58,7 @@
         <h3 class="card-title">Miembros ({{ $celula->miembros->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover align-middle mb-0">
+        <table class="tabla-apilable table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Nombre completo</th>
@@ -73,12 +73,12 @@
             <tbody>
                 @forelse($celula->miembros as $miembro)
                     <tr>
-                        <td>{{ $miembro->nombre_completo }}</td>
-                        <td>{{ $miembro->tipo_documento }} {{ $miembro->numero_documento }}</td>
-                        <td>{{ $miembro->celular ?? '—' }}</td>
-                        <td><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
+                        <td data-etiqueta="Nombre completo" data-primaria>{{ $miembro->nombre_completo }}</td>
+                        <td data-etiqueta="Documento">{{ $miembro->tipo_documento }} {{ $miembro->numero_documento }}</td>
+                        <td data-etiqueta="Celular">{{ $miembro->celular ?? '—' }}</td>
+                        <td data-etiqueta="Estado"><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
                         @if($puedeAdministrar)
-                            <td>
+                            <td data-etiqueta="Acciones">
                                 <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a esta persona de la célula?"
                                     :mensaje="$miembro->nombre_completo.' dejará de pertenecer a esta célula; su historial se conserva.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
                             </td>
@@ -115,7 +115,7 @@
         <h3 class="card-title">Historial de reuniones ({{ $celula->reuniones->count() }})</h3>
     </div>
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover align-middle mb-0">
+        <table class="tabla-apilable table table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -129,11 +129,11 @@
             <tbody>
                 @forelse($celula->reuniones as $reunion)
                     <tr>
-                        <td>{{ $reunion->fecha->format('Y-m-d') }}</td>
-                        <td>{{ $reunion->tema ?? '—' }}</td>
-                        <td><x-ui.insignia color="info">{{ $reunion->totalAsistio() }} / {{ $reunion->asistentes->count() }}</x-ui.insignia></td>
+                        <td data-etiqueta="Fecha" data-primaria>{{ $reunion->fecha->format('Y-m-d') }}</td>
+                        <td data-etiqueta="Tema">{{ $reunion->tema ?? '—' }}</td>
+                        <td data-etiqueta="Asistencia"><x-ui.insignia color="info">{{ $reunion->totalAsistio() }} / {{ $reunion->asistentes->count() }}</x-ui.insignia></td>
                         @if($puedeAdministrar)
-                            <td>
+                            <td data-etiqueta="">
                                 <x-form.confirm :action="route('celulas.reuniones.destroy', [$celula, $reunion])" method="DELETE" titulo="¿Eliminar esta reunión?"
                                     mensaje="Se borrará la reunión y su registro de asistencia." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="sm">Eliminar</x-form.confirm>
                             </td>
@@ -148,4 +148,6 @@
         </table>
     </div>
 </div>
+
+@include('partials.panel-registro-qr', ['destino' => $celula])
 @endsection

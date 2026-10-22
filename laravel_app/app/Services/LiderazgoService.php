@@ -100,10 +100,6 @@ class LiderazgoService
 
     public function designarLider(Persona $persona, ?User $por = null): Persona
     {
-        if (!$persona->numero_documento) {
-            throw ValidationException::withMessages(['persona_id' => 'Para designar un líder la persona debe tener documento de identidad registrado.']);
-        }
-
         return DB::transaction(function () use ($persona, $por) {
             $antes = ['es_lider' => $persona->es_lider];
 

@@ -26,14 +26,6 @@ class EstadoEnCelulaTest extends TestCase
         $this->assertNull($persona->numero_documento);
     }
 
-    public function test_el_documento_sigue_siendo_obligatorio_para_miembros_activos(): void
-    {
-        $this->comoPastor();
-
-        $this->post(route('personas.store'), ['nombres' => 'Luis', 'apellidos' => 'Díaz', 'celular' => '3105550000', 'estado' => 'miembro_activo'])
-            ->assertSessionHasErrors('numero_documento');
-    }
-
     public function test_cuenta_como_activa_y_no_aparece_en_sin_lider(): void
     {
         $this->comoPastor();

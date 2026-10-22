@@ -89,7 +89,7 @@
     @else
         {{-- Grilla compacta con altura máxima: no alarga la página aunque tenga muchas personas. --}}
         <div class="card-body table-responsive p-0" style="max-height: 20rem; overflow-y: auto;">
-            <table class="table table-sm table-hover align-middle mb-0">
+            <table class="tabla-apilable table table-sm table-hover align-middle mb-0">
                 <thead class="sticky-top bg-body">
                     <tr>
                         <th>Nombre</th>
@@ -101,10 +101,10 @@
                 <tbody>
                     @foreach($miembros as $miembro)
                         <tr>
-                            <td><a href="{{ route('personas.show', $miembro) }}">{{ $miembro->nombre_completo }}</a></td>
-                            <td><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
-                            <td>{{ $miembro->celular ?? '—' }}</td>
-                            <td>{{ $miembro->celulas->pluck('nombre')->implode(', ') ?: '—' }}</td>
+                            <td data-etiqueta="Nombre" data-primaria><a href="{{ route('personas.show', $miembro) }}">{{ $miembro->nombre_completo }}</a></td>
+                            <td data-etiqueta="Estado"><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
+                            <td data-etiqueta="Celular">{{ $miembro->celular ?? '—' }}</td>
+                            <td data-etiqueta="Célula">{{ $miembro->celulas->pluck('nombre')->implode(', ') ?: '—' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

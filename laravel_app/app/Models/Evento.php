@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\TieneRegistroQr;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'sede_id',
+    'registro_abierto',
     'nombre',
     'tipo',
     'fecha',
@@ -20,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Evento extends Model
 {
-    use HasFactory, PerteneceASede;
+    use HasFactory, PerteneceASede, TieneRegistroQr;
 
     public const TIPOS = [
         'Cena de varones',

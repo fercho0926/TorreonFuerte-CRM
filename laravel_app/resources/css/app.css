@@ -1,9 +1,6 @@
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 @import 'admin-lte/dist/css/adminlte.min.css';
-@import 'select2/dist/css/select2.min.css';
-@import 'select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css';
-@import 'flatpickr/dist/flatpickr.min.css';
-@import 'sweetalert2/dist/sweetalert2.min.css';
 @import './grilla.css';
 @import './forms.css';
 @import './marca.css';
+@import './movil.css';

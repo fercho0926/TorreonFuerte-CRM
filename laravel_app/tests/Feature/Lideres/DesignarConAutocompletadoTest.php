@@ -29,7 +29,6 @@ class DesignarConAutocompletadoTest extends TestCase
         $this->assertStringContainsString('data-fuente="'.route('personas.buscar').'"', $html);
         $this->assertStringContainsString('&quot;sin_lideres&quot;:1', $html);
         $this->assertStringContainsString('&quot;activas&quot;:1', $html);
-        $this->assertStringContainsString('data-aviso-sin-documento="#aviso-sin-documento"', $html);
         $this->assertStringNotContainsString('name="red_id"', $html);
         $this->assertStringNotContainsString('>Buscar<', $html);
         $this->assertStringContainsString('Designar líder', $html);
@@ -59,15 +58,6 @@ class DesignarConAutocompletadoTest extends TestCase
         $this->assertFalse($inactiva->fresh()->es_lider);
     }
 
-    public function test_sin_documento_no_se_designa(): void
-    {
-        $sinDocumento = Persona::factory()->deSede($this->A['sede']->id)->visitante()->create();
-
-        $this->post(route('lideres.designar.store'), ['persona_id' => $sinDocumento->id])->assertSessionHasErrors('persona_id');
-
-        $this->assertFalse($sinDocumento->fresh()->es_lider);
-    }
-
     public function test_sin_elegir_persona_pide_elegirla(): void
     {
         $this->post(route('lideres.designar.store'), [])->assertSessionHasErrors(['persona_id' => 'Elige a la persona que será líder.']);
@@ -86,14 +76,5 @@ class DesignarConAutocompletadoTest extends TestCase
 
         $this->get(route('lideres.designar'))->assertForbidden();
         $this->post(route('lideres.designar.store'), ['persona_id' => $this->A['persona']->id])->assertForbidden();
-    }
-
-    public function test_tras_un_error_se_conserva_la_persona_elegida(): void
-    {
-        $sinDocumento = Persona::factory()->deSede($this->A['sede']->id)->visitante()->create(['nombres' => 'Gema', 'apellidos' => 'Elegida']);
-
-        $this->from(route('lideres.designar'))->post(route('lideres.designar.store'), ['persona_id' => $sinDocumento->id]);
-
-        $this->followingRedirects()->get(route('lideres.designar'))->assertSee('Gema Elegida');
     }
 }

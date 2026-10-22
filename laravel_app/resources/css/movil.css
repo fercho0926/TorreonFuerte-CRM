@@ -1,0 +1,185 @@
+/*
+ * Diseño primero para celular (spec 008, constitución principio VII).
+ * Valores de diseño, reglas táctiles (controles de 44 px, letra de 16 px en campos), barra superior y
+ * tablas apilables. En escritorio (≥ 768 px y puntero fino) nada de esto cambia la presentación.
+ */
+
+:root {
+    --tactil-min: 44px;
+    --campo-letra: 16px;
+    --quiebre-movil: 768px;
+    --seguro-sup: env(safe-area-inset-top, 0px);
+    --seguro-der: env(safe-area-inset-right, 0px);
+    --seguro-inf: env(safe-area-inset-bottom, 0px);
+    --seguro-izq: env(safe-area-inset-left, 0px);
+}
+
+@media (max-width: 767.98px), (pointer: coarse) {
+    /* ---------- Controles tocables de al menos 44 px ---------- */
+    .btn, .nav-link, .page-link, .dropdown-item {
+        min-height: var(--tactil-min);
+    }
+
+    .btn, .nav-link, .page-link {
+        min-width: var(--tactil-min);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+    }
+
+    .btn-sm, .btn-group-sm > .btn {
+        padding: .4rem .75rem;
+    }
+
+    .form-select, .form-control, body .select2-container .select2-selection {
+        min-height: var(--tactil-min);
+    }
+
+    body .select2-container--bootstrap-5 .select2-selection--multiple .select2-search__field {
+        min-width: var(--tactil-min);
+        min-height: var(--tactil-min);
+    }
+
+    /* Casillas e interruptores: toda la fila de la etiqueta se pulsa. */
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        min-height: var(--tactil-min);
+        padding-left: 0;
+    }
+
+    .form-check .form-check-input { float: none; margin: 0; flex: 0 0 auto; }
+    .form-check .form-check-label { display: flex; align-items: center; min-height: var(--tactil-min); flex: 1 1 auto; padding-block: .25rem; }
+    .form-switch .form-check-input { width: 2.75em; height: 1.5em; }
+
+    /* Botones de fila y de formularios en línea (reglas de escritorio con más especificidad). */
+    .table .btn, .table .btn-sm,
+    .fm-form[data-modo] .btn,
+    .fm-form[data-modo] .fm-campo .form-control,
+    .fm-form[data-modo] .fm-campo .form-select {
+        min-width: var(--tactil-min);
+        min-height: var(--tactil-min);
+    }
+
+    .table td .d-inline-flex { gap: .5rem !important; }
+
+    /* Enlaces que son toda una fila o un pie de tarjeta. */
+    .list-group-item > a, .card-footer > a, .small-box .small-box-footer {
+        display: flex;
+        align-items: center;
+        min-height: var(--tactil-min);
+    }
+
+    .small-box .small-box-footer { justify-content: center; }
+
+    .fm-lista__marca .form-check-label { min-width: var(--tactil-min); min-height: var(--tactil-min); }
+
+    body .select2-container .select2-search--inline .select2-search__field {
+        min-width: var(--tactil-min);
+        min-height: var(--tactil-min);
+    }
+
+    /* ---------- Letra de campos de 16 px (evita el acercamiento de Safari en iPhone) ---------- */
+    body input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+    body select,
+    body textarea,
+    body .form-control-sm,
+    body .form-select-sm,
+    body .select2-selection__rendered,
+    body .select2-search__field,
+    body .dt-container select,
+    body .dt-container input {
+        font-size: var(--campo-letra);
+    }
+
+    /* ---------- Barra superior ---------- */
+    .app-header .navbar-nav .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: var(--tactil-min);
+        min-height: var(--tactil-min);
+        padding: .5rem .75rem;
+    }
+
+    .app-header { padding-top: var(--seguro-sup); }
+
+    #sede-activa {
+        height: var(--tactil-min);
+        width: min(46vw, 15rem);
+        text-overflow: ellipsis;
+    }
+
+    .app-header .navbar-nav > .nav-item > form { margin: 0; }
+
+    .sidebar-brand .brand-link { display: flex; align-items: center; min-height: var(--tactil-min); }
+}
+
+/* Franja del aviso «solo consulta» (administrador en todas las sedes): solo teléfono. */
+.aviso-sede-movil {
+    display: none;
+    margin: 0;
+    padding: .35rem 1rem;
+    background: var(--bs-warning-bg-subtle, #fff3cd);
+    color: var(--bs-warning-text-emphasis, #664d03);
+    font-size: .875rem;
+    text-align: center;
+    border-bottom: 1px solid var(--bs-warning-border-subtle, #ffe69c);
+}
+
+@media (max-width: 767.98px) {
+    .aviso-sede-movil { display: block; }
+}
+
+/* Tarjetas de totales del tablero: las cifras grandes (importes) no deben ensanchar la página. */
+.small-box .inner h3 { font-size: clamp(1.4rem, 7.5vw, 2.2rem); overflow-wrap: anywhere; }
+.small-box { overflow: hidden; }
+
+/* Acciones fijas al pie de los formularios: respetan la barra del sistema y el teclado en pantalla. */
+@media (max-width: 767.98px) {
+    .fm-acciones { padding-bottom: calc(.75rem + var(--seguro-inf)); }
+    .app-wrapper { min-height: 100dvh; }
+}
+
+/* ---------- Tablas apilables: tarjetas en teléfono, tabla normal desde 768 px ---------- */
+@media (max-width: 767.98px) {
+    .table-responsive:has(> .tabla-apilable), .card-body:has(> .tabla-apilable) { overflow: visible; }
+
+    .tabla-apilable:not(.fm-lista__tabla), .tabla-apilable:not(.fm-lista__tabla) tbody,
+    .tabla-apilable:not(.fm-lista__tabla) tfoot, .tabla-apilable:not(.fm-lista__tabla) tr,
+    .tabla-apilable:not(.fm-lista__tabla) td { display: block; width: 100%; }
+
+    /* Encabezado fuera de la vista pero disponible para lectores de pantalla. */
+    .tabla-apilable:not(.fm-lista__tabla) thead { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+    .tabla-apilable:not(.fm-lista__tabla) tr {
+        margin: 0 0 .5rem; padding: .6rem .9rem; background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color); border-radius: .65rem;
+    }
+    .tabla-apilable:not(.fm-lista__tabla) td {
+        display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+        padding: .3rem 0; border: 0; text-align: right; white-space: normal !important;
+    }
+    .tabla-apilable:not(.fm-lista__tabla) td[data-etiqueta]:not([data-etiqueta=""])::before {
+        content: attr(data-etiqueta); flex: 0 0 38%; max-width: 38%; text-align: left; font-size: .8rem; font-weight: 600; color: var(--bs-secondary-color);
+    }
+    .tabla-apilable:not(.fm-lista__tabla) td[data-primaria] { display: block; text-align: left; font-size: 1.05rem; font-weight: 600; }
+    .tabla-apilable:not(.fm-lista__tabla) td[data-primaria]::before { display: none; }
+    .tabla-apilable:not(.fm-lista__tabla) td[colspan] { display: block; text-align: center; }
+    .tabla-apilable:not(.fm-lista__tabla) tr:has(> td[colspan]) { border: 0; padding: 0; }
+    .tabla-apilable:not(.fm-lista__tabla).table-hover > tbody > tr:hover > * { background: transparent; }
+    /* Textos largos (correos, nombres de sede) se parten en vez de ensanchar la página. */
+    .tabla-apilable:not(.fm-lista__tabla) td, table.grilla tbody td { min-width: 0; overflow-wrap: anywhere; }
+    .tabla-apilable:not(.fm-lista__tabla) tfoot tr { background: var(--bs-tertiary-bg); font-weight: 600; }
+}
+
+/* Cajas de información y marca de agua: nunca ensanchan la página. */
+.info-box, .info-box .info-box-content { min-width: 0; }
+.info-box .info-box-content { overflow: hidden; }
+.info-box .info-box-text, .info-box .info-box-number { overflow: hidden; text-overflow: ellipsis; }
+.marca-agua-sede span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }

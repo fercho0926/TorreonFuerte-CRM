@@ -2,7 +2,7 @@
  * Avisos de éxito discretos que se cierran solos. Los mensajes de error permanecen visibles.
  * Sin JavaScript, los mensajes siguen apareciendo como alertas normales.
  */
-import Swal from 'sweetalert2';
+import { swal } from './swal.js';
 
 export const DURACION_AVISO_MS = 5000;
 
@@ -12,7 +12,7 @@ export function iniciarAvisos() {
         if (!mensaje) return;
 
         aviso.hidden = true;
-        Swal.fire({
+        swal().then((Swal) => Swal.fire({
             toast: true,
             position: 'top-end',
             icon: 'success',
@@ -21,13 +21,13 @@ export function iniciarAvisos() {
             timer: DURACION_AVISO_MS,
             timerProgressBar: true,
             customClass: { popup: 'fm-aviso-exito' },
-        });
+        }));
     });
 }
 
 /** Aviso breve (toast) con un texto cualquiera, por ejemplo «Mensaje copiado». */
 export function avisoBreve(mensaje) {
-    Swal.fire({
+    swal().then((Swal) => Swal.fire({
         toast: true,
         position: 'top-end',
         icon: 'success',
@@ -35,5 +35,5 @@ export function avisoBreve(mensaje) {
         showConfirmButton: false,
         timer: 2500,
         customClass: { popup: 'fm-aviso-exito' },
-    });
+    }));
 }

@@ -59,4 +59,6 @@
         </div>
     </x-form.section>
 </x-form.layout>
+
+@include('partials.panel-registro-qr', ['destino' => $encuentro])
 @endsection

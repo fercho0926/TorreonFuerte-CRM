@@ -9,7 +9,7 @@
 
         <x-form.layout :action="route('recuperacion.store')" modo="login" guardar="Pedir nueva clave" icono="fa-paper-plane" :leyenda="false">
             <x-form.section titulo="Recuperar acceso" icono="fa-key" id="seccion-recuperar">
-                <x-form.input name="email" label="Correo electrónico" type="email" icono="fa-envelope" :required="true" ejemplo="nombre@correo.com" col="col-12" />
+                <x-form.input name="email" label="Correo electrónico" type="correo" icono="fa-envelope" :required="true" ejemplo="nombre@correo.com" col="col-12" />
             </x-form.section>
         </x-form.layout>
 

@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ResuelveSede
 {
     /** Rutas (por nombre) que pueden escribir aunque no haya sede activa. */
-    private const EXENTAS = ['login.post', 'logout', 'sede-activa.update', 'sedes.*', 'users.*', 'users.clave.*', 'claves.*', 'solicitudes-clave.*', 'recuperacion.*', 'cambiar-clave.*', 'cuenta.*'];
+    private const EXENTAS = ['login.post', 'logout', 'sede-activa.update', 'sedes.*', 'users.*', 'users.clave.*', 'claves.*', 'solicitudes-clave.*', 'recuperacion.*', 'registro.*', 'cambiar-clave.*', 'cuenta.*'];
 
     public function __construct(private SedeContext $contexto)
     {

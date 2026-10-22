@@ -20,6 +20,9 @@ Las pantallas DEBEN seguir funcionando sin JavaScript (formularios, filtros, pag
 ### VI. Simplicidad
 Se prefiere reutilizar componentes y servicios existentes (componentes `x-form.*` y `x-ui.*`, `AlcanceService`, `Estados`, `Permisos`) antes que crear abstracciones nuevas. Ningún `<form>` se escribe a mano fuera de los componentes de formulario.
 
+### VII. Diseño primero para celular
+La mayor parte del uso es desde el celular, así que toda pantalla se diseña primero para teléfono: sin desplazamiento horizontal de la página entre 320 y 1920 px, todo control tocable de al menos 44 × 44 px, campos de texto con letra de al menos 16 px, tablas que se apilan como tarjetas por debajo de 768 px (clase `tabla-apilable` o grilla estándar) y teclado adecuado por tipo de dato. La aplicación se puede instalar en la pantalla de inicio y **no guarda datos de personas, líderes, células, eventos ni usuarios en el teléfono** (solo archivos de la interfaz y la pantalla «Sin conexión»). Una funcionalidad no se da por terminada si `npm run test:movil` falla; las excepciones se declaran con motivo en `tests/movil/excepciones.json`, que debe permanecer vacía salvo causa justificada.
+
 ## Restricciones Técnicas
 
 - PHP 8.3 y Laravel 13; vistas Blade; AdminLTE 4 sobre Bootstrap 5; Vite; DataTables 2 para las grillas.
@@ -34,6 +37,6 @@ Se prefiere reutilizar componentes y servicios existentes (componentes `x-form.*
 
 ## Gobernanza
 
-Esta constitución prevalece sobre otras prácticas del proyecto. Las enmiendas se documentan aquí con su fecha y motivo, y toda revisión de código verifica el cumplimiento de los principios II y III.
+Esta constitución prevalece sobre otras prácticas del proyecto. Las enmiendas se documentan aquí con su fecha y motivo, y toda revisión de código verifica el cumplimiento de los principios II, III y VII.
 
-**Versión**: 1.0.0 | **Ratificada**: 2026-10-19 | **Última enmienda**: 2026-10-19
+**Versión**: 1.1.0 | **Ratificada**: 2026-10-19 | **Última enmienda**: 2026-10-19 (se agrega el principio VII, spec 008)

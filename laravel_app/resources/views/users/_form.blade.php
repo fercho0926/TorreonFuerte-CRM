@@ -7,12 +7,12 @@
 
 <x-form.section titulo="Cuenta" descripcion="Nombre y correo con el que la persona inicia sesión." icono="fa-user-circle" id="seccion-cuenta">
     <x-form.input name="name" label="Nombre" icono="fa-user" :required="true" :value="$user?->name" maxlength="255" />
-    <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" :required="true" :value="$user?->email" maxlength="255"
+    <x-form.input name="email" label="Correo" type="correo" icono="fa-envelope" :required="true" :value="$user?->email" maxlength="255"
         ayuda="Debe ser único en todo el sistema." />
 </x-form.section>
 
 <x-form.section titulo="WhatsApp" descripcion="Aquí se envía la clave temporal para que la persona entre; tú nunca escribes ni ves su contraseña." icono="fa-comment-dots" id="seccion-whatsapp">
-    <x-form.input name="celular" label="Celular de WhatsApp" type="tel" icono="fa-phone" :required="false" :value="$user?->celular" mascara="celular" maxlength="20" ejemplo="310 555 9999"
+    <x-form.input name="celular" label="Celular de WhatsApp" type="celular" icono="fa-phone" :required="false" :value="$user?->celular" mascara="celular" maxlength="20" ejemplo="310 555 9999"
         :ayuda="$editando ? 'Necesario para enviarle una clave nueva.' : 'Si lo dejas vacío se usa el celular de la persona vinculada. Con él se genera la clave y se abre WhatsApp.'" />
 </x-form.section>
 

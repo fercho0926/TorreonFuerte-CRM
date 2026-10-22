@@ -21,9 +21,9 @@
     <x-form.section titulo="Cuenta nueva" descripcion="Completa estos datos solo si no designas una cuenta existente." icono="fa-user-plus" id="seccion-cuenta-nueva">
         <x-form.input name="nombres" label="Nombres" icono="fa-user" />
         <x-form.input name="apellidos" label="Apellidos" icono="fa-user" />
-        <x-form.input name="email" label="Correo" type="email" icono="fa-envelope" col="col-md-5" />
+        <x-form.input name="email" label="Correo" type="correo" icono="fa-envelope" col="col-md-5" />
         <x-form.input name="password" label="Contraseña inicial" type="password" icono="fa-lock" minlength="8" col="col-md-4" />
-        <x-form.input name="celular" label="Celular" type="tel" icono="fa-phone" mascara="celular" col="col-md-3" />
+        <x-form.input name="celular" label="Celular" type="celular" icono="fa-phone" mascara="celular" col="col-md-3" />
     </x-form.section>
 </x-form.layout>
 @endsection

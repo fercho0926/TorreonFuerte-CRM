@@ -20,7 +20,7 @@
         <p class="text-muted">{{ $vacio }}</p>
     @else
         <div class="table-responsive-md">
-            <table class="table table-hover fm-lista__tabla mb-0">
+            <table class="table table-hover fm-lista__tabla tabla-apilable mb-0">
                 <thead>
                     <tr>
                         <th scope="col">Persona</th>

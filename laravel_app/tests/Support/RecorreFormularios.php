@@ -77,7 +77,7 @@ trait RecorreFormularios
     protected function camposEsperados(): array
     {
         return [
-            'persona (crear)' => ['nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento', 'estado', 'tipo_documento', 'numero_documento', 'direccion', 'barrio', 'ciudad', 'lider_id', 'es_lider'],
+            'persona (crear)' => ['nombres', 'apellidos', 'celular', 'email', 'fecha_nacimiento', 'estado', 'direccion', 'barrio', 'ciudad', 'lider_id', 'es_lider'],
             'célula (crear)' => ['nombre', 'sede', 'estado', 'lider_id', 'co_lider_id', 'dia_reunion', 'hora_reunion', 'lugar_reunion'],
             'encuentro (crear)' => ['nombre', 'fecha_realizacion', 'estado', 'personas[]'],
             'evento (crear)' => ['nombre', 'tipo', 'fecha', 'costo', 'estado', 'personas[]'],

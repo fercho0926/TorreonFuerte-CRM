@@ -56,12 +56,12 @@ class SinLiderGrilla extends Grilla
                 ->ordena('personas.estado')
                 ->filtraLista(collect(Persona::ESTADOS)->except(['inactivo', 'celula'])->all(), 'personas.estado')
                 ->valor(fn (Persona $p) => $p->estado_etiqueta)
-                ->prioridad(3),
+                ->prioridad(4),
             Columna::make('celular', 'Contacto')
                 ->ordena('personas.celular')
                 ->filtraTexto(fn (Builder $q, string $valor) => $q->where('personas.celular', 'like', '%'.preg_replace('/\D+/', '', $valor).'%'))
                 ->valor(fn (Persona $p) => $p->celular)
-                ->prioridad(4),
+                ->prioridad(3),
             Columna::make('asignar', 'Asignar líder')->prioridad(2)->sinExportar(),
         ];
     }

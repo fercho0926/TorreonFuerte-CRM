@@ -20,19 +20,11 @@ class CamposAyudaTest extends TestCase
         $this->comoAdminEnSede($this->A['sede']);
     }
 
-    public function test_persona_declara_las_reglas_de_dependencia(): void
-    {
-        $html = $this->get(route('personas.create'))->getContent();
-
-        $this->assertSame(2, substr_count($html, 'data-requerido-si="estado:miembro_activo|es_lider:1"'), 'Tipo y número de documento obligatorios según estado o liderazgo');
-    }
-
-    public function test_celular_documento_y_fecha_ayudan_a_escribir(): void
+    public function test_celular_y_fecha_ayudan_a_escribir(): void
     {
         $html = $this->get(route('personas.create'))->getContent();
 
         $this->assertMatchesRegularExpression('/<input type="tel" id="fm-celular"[^>]*inputmode="tel"[^>]*data-mascara="celular"/s', $html);
-        $this->assertMatchesRegularExpression('/id="fm-numero_documento"[^>]*data-mascara="documento"/s', $html);
         $this->assertMatchesRegularExpression('/<input type="date" id="fm-fecha_nacimiento"[^>]*data-fecha[^>]*max="'.now()->toDateString().'"[^>]*data-max="hoy"/s', $html);
         $this->assertMatchesRegularExpression('/id="fm-email"[^>]*type|type="email" id="fm-email"/s', $html);
     }

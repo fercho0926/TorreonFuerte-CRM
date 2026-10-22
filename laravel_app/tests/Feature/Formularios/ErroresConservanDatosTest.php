@@ -45,21 +45,6 @@ class ErroresConservanDatosTest extends TestCase
         $this->assertSame(0, Persona::where('apellidos', 'Apellido Escrito')->count());
     }
 
-    public function test_documento_repetido_marca_el_campo_y_conserva_el_resto(): void
-    {
-        $documento = $this->A['persona']->numero_documento;
-
-        $html = $this->from(route('personas.create'))->followingRedirects()->post(route('personas.store'), [
-            'nombres' => 'Nuevo', 'apellidos' => 'Repetido', 'celular' => '3001112222', 'estado' => 'miembro_activo',
-            'tipo_documento' => 'CC', 'numero_documento' => $documento,
-        ])->getContent();
-
-        $this->assertMatchesRegularExpression('/id="fm-numero_documento"[^>]*aria-invalid="true"/s', $html);
-        $this->assertStringContainsString('value="Nuevo"', $html);
-        $this->assertStringContainsString('value="'.$documento.'"', $html);
-        $this->assertStringContainsString('href="#fm-numero_documento"', $html);
-    }
-
     public function test_celula_y_evento_con_error_conservan_los_datos(): void
     {
         $html = $this->from(route('celulas.create'))->followingRedirects()->post(route('celulas.store'), [

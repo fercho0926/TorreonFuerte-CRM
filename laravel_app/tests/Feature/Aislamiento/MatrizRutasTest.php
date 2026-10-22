@@ -21,8 +21,11 @@ class MatrizRutasTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
 
-    /** Rutas que no manejan datos de una sede. */
-    private const IGNORADAS = ['login', 'login.post', 'logout', 'up', 'storage.local'];
+    /**
+     * Rutas que no manejan datos de una sede. Las `registro.*` son públicas por diseño (el token del QR
+     * es la llave) y su aislamiento se prueba en tests/Feature/RegistroQr.
+     */
+    private const IGNORADAS = ['login', 'login.post', 'logout', 'up', 'storage.local', 'registro.show', 'registro.buscar', 'registro.store', 'registro.listo'];
 
     protected function setUp(): void
     {
@@ -60,6 +63,9 @@ class MatrizRutasTest extends TestCase
             'registro' => $registro->id,
             'solicitud' => $solicitud->id,
             'sede' => $this->B['sede']->id,
+            // registro-qr.*: el tipo y el id de un evento de la sede B.
+            'tipo' => 'evento',
+            'id' => $this->B['evento']->id,
         ];
     }
 

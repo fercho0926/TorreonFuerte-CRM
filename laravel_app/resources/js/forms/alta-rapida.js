@@ -4,7 +4,7 @@
  * (POST data-crear) y la deja seleccionada. Si el servidor avisa de un posible duplicado, pide
  * confirmar antes de crearla.
  */
-import Swal from 'sweetalert2';
+import { swal } from './swal.js';
 
 /** Datos del diálogo listos para enviar: sin espacios sobrantes y sin campos vacíos. */
 export function datosDeAlta(valores) {
@@ -76,7 +76,7 @@ export async function abrirAltaRapida(select, $) {
     let confirmar = false;
 
     for (;;) {
-        const resultado = await Swal.fire({
+        const resultado = await (await swal()).fire({
             title: 'Crear persona nueva',
             html: HTML_DIALOGO,
             showCancelButton: true,
@@ -113,7 +113,7 @@ export async function abrirAltaRapida(select, $) {
         }
 
         if (respuesta.tipo === 'duplicado') {
-            const decision = await Swal.fire({
+            const decision = await (await swal()).fire({
                 icon: 'warning',
                 title: 'Posible duplicado',
                 text: `Ya existe «${respuesta.duplicado.nombre ?? 'una persona'}» con los mismos datos. ¿Crear otra de todos modos?`,

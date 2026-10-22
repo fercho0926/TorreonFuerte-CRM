@@ -27,3 +27,68 @@
 .grilla-card div.dt-container div.dt-processing { z-index: 2; }
 
 table.dataTable > tbody > tr.child ul.dtr-details { width: 100%; }
+
+/* ---------- Teléfono: la tabla se ve como lista de tarjetas (spec 008) ---------- */
+
+/* Controles de teléfono: ocultos en escritorio. */
+.grilla-filtros-btn, .grilla-orden { display: none; }
+
+@media (max-width: 767.98px) {
+    .grilla-card { border-radius: .75rem; }
+    .grilla-card .table-responsive { overflow: visible; }
+    .grilla-card .grilla-barra { gap: .5rem; padding: .5rem .75rem; }
+    .grilla-card .grilla-acciones { flex-wrap: wrap; width: 100%; }
+    .grilla-card .grilla-acciones > * { flex: 1 1 auto; }
+
+    table.grilla, table.grilla tbody, table.grilla tr, table.grilla td, table.grilla thead { display: block; width: 100%; }
+    table.grilla { border: 0; }
+
+    /* La cabecera de títulos no se ve (cada celda trae su etiqueta); la fila de filtros va en un panel. */
+    table.grilla thead tr:first-child { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    table.grilla thead tr.grilla-filtros { display: none; }
+    .grilla-js .grilla-filtros-btn, .grilla-js .grilla-orden { display: inline-flex; }
+    .grilla-js .grilla-orden { display: block; }
+    .grilla-js.filtros-abiertos table.grilla thead tr.grilla-filtros {
+        display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; padding: .75rem; background: var(--bs-tertiary-bg);
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    .grilla-js.filtros-abiertos table.grilla thead tr.grilla-filtros th { display: block; padding: 0; border: 0; background: transparent; }
+    .grilla-js.filtros-abiertos table.grilla thead tr.grilla-filtros th:empty { display: none; }
+    .grilla-js.filtros-abiertos table.grilla thead tr.grilla-filtros th:has(.dt-column-header:empty) { display: none; }
+
+    /* Cada fila es una tarjeta. */
+    table.grilla tbody tr {
+        position: relative; margin: .5rem; width: auto; padding: .75rem 1rem; background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color); border-radius: .65rem;
+    }
+    table.grilla.table-hover > tbody > tr:hover > * { background: transparent; }
+    table.grilla tbody td {
+        display: flex; align-items: center; justify-content: space-between; gap: .75rem; width: 100%;
+        padding: .3rem 0; border: 0; text-align: right;
+    }
+    table.grilla tbody td::before {
+        content: attr(data-etiqueta); flex: 0 0 38%; max-width: 38%; text-align: left; font-size: .8rem; font-weight: 600; color: var(--bs-secondary-color);
+    }
+    /* La primera celda es el título de la tarjeta. */
+    table.grilla tbody td:first-child { display: block; padding-right: 3rem; text-align: left; font-size: 1.05rem; }
+    table.grilla tbody td:first-child::before { display: none; }
+    table.grilla tbody td.grilla-celda-acciones { justify-content: flex-end; flex-wrap: wrap; margin-top: .35rem; padding-top: .6rem; border-top: 1px solid var(--bs-border-color); }
+    table.grilla tbody td.grilla-celda-acciones::before { display: none; }
+    table.grilla tbody tr.grilla-vacio-servidor { border: 0; padding: 0; }
+    table.grilla tbody tr.grilla-vacio-servidor td::before { display: none; }
+
+    /* Con JavaScript las columnas secundarias van bajo «Ver más». */
+    .grilla-js tbody td.grilla-sec { display: none; }
+    .grilla-js tbody tr.abierta td.grilla-sec { display: flex; }
+    .grilla-js .grilla-mas { position: absolute; top: .25rem; right: .25rem; z-index: 1; padding: 0; color: var(--bs-secondary-color); }
+    .grilla-js tr.abierta .grilla-mas i { transform: rotate(180deg); }
+
+    /* Paginador y filas por página en una columna legible. */
+    .grilla-card div.dt-container .row { flex-direction: column; gap: .5rem; align-items: stretch; text-align: center; }
+    .grilla-card div.dt-container .dt-paging .pagination { justify-content: center; flex-wrap: wrap; }
+    .grilla-card div.dt-container .dt-length { justify-content: center; }
+}
+
+@media (min-width: 768px) {
+    .grilla-mas { display: none; }
+}

@@ -7,7 +7,11 @@
     $clave = \App\Support\Formulario::clave($name);
     $tieneError = $errors->has($clave);
     $descrito = trim(($ayuda ? $id.'-ayuda ' : '').$id.'-error');
-    $modo = ['tel' => 'tel', 'number' => 'numeric', 'email' => 'email'][$type] ?? null;
+    // Tipos con teclado propio en celular: celular (marcador), correo (con arroba) y numero (solo dígitos).
+    $alias = ['celular' => 'tel', 'correo' => 'email', 'numero' => 'text'];
+    $teclado = ['celular' => 'tel', 'correo' => 'email', 'numero' => 'numeric'][$type] ?? null;
+    $type = $alias[$type] ?? $type;
+    $modo = $teclado ?? (['tel' => 'tel', 'number' => 'numeric', 'email' => 'email'][$type] ?? null);
     $auto = ['password' => 'new-password', 'email' => 'email', 'tel' => 'tel'][$type] ?? 'off';
     $actual = $type === 'password' ? '' : old($clave, $value);
 @endphp

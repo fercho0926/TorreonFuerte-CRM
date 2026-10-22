@@ -70,6 +70,15 @@ Para crear una grilla nueva (ejemplo: módulo `talleres`):
 
 Los datos sensibles (como usuarios o solicitudes de clave) restringen la exportación sobrescribiendo `puedeExportar()`; el botón y la ruta respetan esa regla. Diseño completo en `specs/007-grillas-datatables/`.
 
+## Diseño para celular
+
+La mayor parte del uso es desde el celular (constitución, principio VII). Reglas: sin desplazamiento horizontal de la página entre 320 y 1920 px; controles de al menos 44 px y letra de 16 px en campos (CSS global en `resources/css/movil.css`, solo en teléfono); los listados son grillas que se ven como tarjetas en teléfono (botón «Filtros», selector de orden y «Ver más»); toda otra tabla lleva la clase `tabla-apilable` y un `data-etiqueta` por celda para apilarse como tarjetas; los campos usan `type="celular"`, `"correo"` o `"numero"` para abrir el teclado adecuado.
+
+- **Aplicación instalable**: manifiesto (`public/manifest.webmanifest`), iconos (`npm run iconos` los genera desde `resources/iconos/*.svg`), `public/sw.js` y `public/offline.html`. El *service worker* solo guarda archivos de la interfaz (`/build/assets`, `/iconos`) y la pantalla «Sin conexión»; **nunca datos**. Solo se registra en HTTPS (o `localhost`), así que el hosting debe servir el sistema por HTTPS.
+- **Ligereza**: DataTables, Select2/jQuery, el calendario y SweetAlert2 se descargan solo en las pantallas que los usan. `public/.htaccess` activa compresión y caché larga de `/build/assets`.
+- **Prueba permanente**: `npm run test:movil` (Playwright con el Chrome instalado; base temporal sembrada y servidor propio, nunca toca `database/database.sqlite`) recorre las pantallas a 320, 360, 390, 430 y 740 px (horizontal) y falla ante desborde, controles pequeños, letra menor a 16 px, tablas sin adaptar o texto cortado, además de probar el menú, los listados, los formularios, la carga en «4G lenta», el peso y la instalación. Las excepciones van con motivo en `laravel_app/tests/movil/excepciones.json` (vacío por defecto). `php artisan test --filter=Movil` ejecuta las guardas estáticas sin navegador.
+- Variable `MOVIL_REPORTE=ruta.jsonl` guarda todos los hallazgos de la auditoría para analizarlos en conjunto.
+
 ## Usuarios y claves por WhatsApp
 
 Nadie escribe ni conoce la contraseña de otra persona. El flujo es:
@@ -130,6 +139,18 @@ El CRM sirve a varias iglesias (**sedes**) en una sola base de datos. Cada sede 
 3. Entra como admin, renombra la primera sede si hace falta y crea las demás desde *Sedes*.
 
 > ⚠️ `php artisan migrate:fresh` borra la base indicada en `.env`. Para probar sin riesgo usa una base temporal: `DB_DATABASE=<ruta>\prueba.sqlite php artisan migrate:fresh --seed`.
+
+## Registro por QR (eventos, encuentros y células)
+
+Cada evento, encuentro y célula tiene un **QR y un enlace de registro** (`/registro/{token}`) para que las personas se inscriban solas desde el celular, sin iniciar sesión.
+
+- **Administración**: en la ficha de cada uno (panel «Registro por QR») se ve el QR, se copia el enlace, se **descarga el QR** (SVG), se **abre o cierra** el registro y se **regenera** el enlace (el anterior deja de funcionar). Lo gestionan admin y pastor; el líder, solo el de su célula. El registro se cierra solo si el evento o encuentro no está *planificado* o la célula no está *activa*.
+- **Formulario público**: la persona escribe su celular (y, opcional, su cédula). Si ya existe en **su sede** se precargan sus datos y se inscribe sin duplicar; si no, se crea en Personas como *Visitante* (en célula, *En célula*) y se inscribe. Obligatorios: nombres, apellidos, celular y fecha de nacimiento. Funciona sin JavaScript (paso 1 y paso 2 del servidor).
+- **No se modifica a nadie**: si la persona existente corrige un dato, queda como **nota** en «Registrados por QR».
+- **Otra sede**: si el celular o la cédula son de una persona de otra sede, no se precarga ni se revela nada; el registro queda como «De otra sede» con lo que escribió, sin enlace a ficha.
+- **Conflictos**: cédula y celular de personas distintas, celular repetido, o persona inactiva/eliminada: no se inscribe; se muestra un mensaje o queda como «Pendiente» para el administrador.
+- **Límites**: 30 consultas por minuto por IP y 10 envíos por 10 minutos por IP y celular (responde 429).
+- **Despliegue**: usa la librería `bacon/bacon-qr-code` (PHP puro); ejecuta `composer install` si no subes `vendor`. Corre `php artisan migrate` (los enlaces de los registros existentes se generan solos).
 
 ## Despliegue
 

@@ -37,6 +37,18 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale('es');
         Paginator::useBootstrapFive();
 
+        // QR de registro: administración y pastor de la sede; el líder solo el de su propia célula.
+        Gate::define('gestionarRegistroQr', function (User $user, $destino) {
+            if ($user->tieneAccesoTotal()) {
+                return true;
+            }
+
+            return $user->role === 'lider_celula'
+                && $destino instanceof \App\Models\Celula
+                && $user->persona_id !== null
+                && in_array($user->persona_id, [$destino->lider_id, $destino->co_lider_id], true);
+        });
+
         // @puede('editar', $persona) ... @endpuede — la app usa sesión propia, no Auth de Laravel.
         Blade::if('puede', fn (string $habilidad, mixed $argumento = Persona::class) => Permisos::puede($habilidad, $argumento));
 

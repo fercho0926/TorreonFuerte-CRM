@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Torreón Fuerte">
+  <rect width="512" height="512" rx="96" fill="#0d6efd"/>
+  <g fill="#fff">
+    <rect x="244" y="64" width="24" height="76"/>
+    <rect x="218" y="90" width="76" height="24"/>
+    <polygon points="256,140 140,236 372,236"/>
+    <rect x="164" y="236" width="184" height="196"/>
+  </g>
+  <g fill="#0d6efd">
+    <rect x="230" y="334" width="52" height="98"/>
+    <circle cx="256" cy="286" r="20"/>
+  </g>
+</svg>

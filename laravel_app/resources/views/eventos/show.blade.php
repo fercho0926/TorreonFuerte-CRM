@@ -56,6 +56,7 @@
     </x-form.section>
 </x-form.layout>
 
+@php($inscritasPorQr = $evento->registrosQr()->whereNotNull('persona_id')->pluck('persona_id')->all())
 <h3 class="mb-3">Personas inscritas ({{ $evento->inscripciones->count() }})</h3>
 
 @forelse($evento->inscripciones as $inscripcion)
@@ -63,6 +64,9 @@
         <div class="card-header">
             <h3 class="card-title">
                 {{ $inscripcion->persona->nombre_completo }}
+                @if(in_array($inscripcion->persona_id, $inscritasPorQr, true))
+                    <x-ui.insignia color="primary" title="Se registró con el QR">QR</x-ui.insignia>
+                @endif
                 @if($inscripcion->estaPagado())
                     <x-ui.estado valor="pagado" />
                 @else
@@ -84,7 +88,7 @@
             </div>
 
             @if($inscripcion->pagos->isNotEmpty())
-                <table class="table table-sm table-bordered">
+                <table class="tabla-apilable table table-sm table-bordered">
                     <thead>
                         <tr>
                             <th>Fecha</th>
@@ -96,10 +100,10 @@
                     <tbody>
                         @foreach($inscripcion->pagos as $pago)
                             <tr>
-                                <td>{{ $pago->fecha_pago->format('Y-m-d') }}</td>
-                                <td>${{ number_format($pago->monto, 2) }}</td>
-                                <td>{{ $pago->notas ?? '—' }}</td>
-                                <td>
+                                <td data-etiqueta="Fecha" data-primaria>{{ $pago->fecha_pago->format('Y-m-d') }}</td>
+                                <td data-etiqueta="Monto">${{ number_format($pago->monto, 2) }}</td>
+                                <td data-etiqueta="Notas">{{ $pago->notas ?? '—' }}</td>
+                                <td data-etiqueta="">
                                     <x-form.confirm :action="route('eventos.pagos.destroy', [$evento, $inscripcion, $pago])" method="DELETE" titulo="¿Eliminar este abono?"
                                         :mensaje="'Se borrará el abono de $'.number_format($pago->monto, 2).' registrado el '.$pago->fecha_pago->format('d/m/Y').'.'" boton="Eliminar" :peligro="true" variante="outline-danger">Eliminar</x-form.confirm>
                                 </td>
@@ -123,4 +127,6 @@
 @empty
     <div class="alert alert-info">Este evento aún no tiene personas inscritas.</div>
 @endforelse
+
+@include('partials.panel-registro-qr', ['destino' => $evento])
 @endsection

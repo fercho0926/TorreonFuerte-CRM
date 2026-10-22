@@ -185,7 +185,7 @@
     }
     .fm-lista__marca { margin-left: auto; }
     .fm-lista__marca .form-switch { transform: scale(1.4); transform-origin: right center; margin-right: .75rem; }
-    .fm-lista__marca .form-check-label { min-width: 2.5rem; min-height: 1.5rem; }
+    .fm-lista__marca .form-check-label { min-width: 2.75rem; min-height: 2.75rem; }
 }
 
 .fm-lista__campo input { min-width: 8rem; }

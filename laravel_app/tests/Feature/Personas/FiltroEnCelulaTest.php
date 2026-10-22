@@ -55,10 +55,7 @@ class FiltroEnCelulaTest extends TestCase
 
         $base = ['nombres' => 'Invitada', 'apellidos' => 'Delagua', 'celular' => $this->invitada->celular];
 
-        // Para ser miembro activo se exige el documento.
-        $this->put(route('personas.update', $this->invitada), $base + ['estado' => 'miembro_activo'])->assertSessionHasErrors('numero_documento');
-
-        $this->put(route('personas.update', $this->invitada), $base + ['estado' => 'miembro_activo', 'tipo_documento' => 'CC', 'numero_documento' => '4455667788'])
+        $this->put(route('personas.update', $this->invitada), $base + ['estado' => 'miembro_activo'])
             ->assertSessionHasNoErrors();
 
         $this->assertSame('miembro_activo', $this->invitada->fresh()->estado);

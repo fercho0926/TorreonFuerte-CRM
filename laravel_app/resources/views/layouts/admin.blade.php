@@ -3,8 +3,9 @@
 <html lang="es" data-bs-theme="light" data-lte-color-mode="off">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>@yield('title', 'Inicio') · {{ config('app.sistema') }}@if($sedeActual) · {{ $sedeActual->nombre }}@endif</title>
+    @include('partials.meta-aplicacion')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -36,7 +37,7 @@
                         </form>
                     </li>
                     @if($enTodasLasSedes)
-                        <li class="nav-item me-2"><span class="badge text-bg-warning">Todas las sedes: solo consulta</span></li>
+                        <li class="nav-item me-2 d-none d-md-block"><span class="badge text-bg-warning">Todas las sedes: solo consulta</span></li>
                     @endif
                 @elseif($sedeActual)
                     <li class="nav-item me-3 d-none d-sm-block"><span class="navbar-text fw-bold"><i class="fas fa-church"></i> <span class="nombre-sede">{{ $sedeActual->nombre }}</span></span></li>
@@ -96,6 +97,9 @@
     </aside>
 
     <main class="app-main">
+        @if($esAdminSede && $enTodasLasSedes)
+            <p class="aviso-sede-movil" role="status">Todas las sedes: solo consulta</p>
+        @endif
         @if($sedeActual)
             {{-- Marca de agua con el nombre de la sede en la que se está trabajando (todas las páginas). --}}
             <div class="marca-agua-sede" aria-hidden="true"><span>{{ $sedeActual->nombre }}</span></div>
