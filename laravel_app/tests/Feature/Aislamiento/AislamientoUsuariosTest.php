@@ -22,8 +22,13 @@ class AislamientoUsuariosTest extends TestCase
 
     private function datosUsuario(array $extra = []): array
     {
+        // Spec 016: la cuenta nace con su miembro; cada alta usa un celular distinto.
+        static $siguiente = 0;
+        $siguiente++;
+
         return $extra + [
-            'name' => 'Nuevo Usuario', 'email' => 'nuevo@iglesia.co', 'celular' => '3105559999', 'role' => 'lider_celula',
+            'email' => 'nuevo@iglesia.co', 'celular' => '31055500'.str_pad((string) $siguiente, 2, '0', STR_PAD_LEFT), 'role' => 'lider_celula',
+            'miembro' => ['nombres' => 'Nuevo', 'apellidos' => 'Usuario'],
         ];
     }
 
@@ -75,8 +80,10 @@ class AislamientoUsuariosTest extends TestCase
 
     public function test_no_se_vincula_una_persona_de_otra_sede(): void
     {
-        $this->post(route('users.store'), $this->datosUsuario(['email' => 'vinculo@iglesia.co', 'persona_id' => $this->B['persona']->id]))
-            ->assertSessionHasErrors('persona_id');
+        $datos = ['email' => 'vinculo@iglesia.co', 'persona_id' => $this->B['persona']->id, 'celular' => $this->B['persona']->celular] + $this->datosUsuario();
+        unset($datos['miembro']);
+
+        $this->post(route('users.store'), $datos)->assertSessionHasErrors('persona_id');
     }
 
     public function test_el_correo_es_unico_en_todo_el_sistema(): void
@@ -104,11 +111,12 @@ class AislamientoUsuariosTest extends TestCase
         $this->post(route('users.store'), $this->datosUsuario(['role' => 'pastor', 'email' => 'pastorb@iglesia.co', 'sede_id' => $this->B['sede']->id]))->assertSessionHasNoErrors();
         $this->assertSame('pastor', User::withoutGlobalScopes()->where('email', 'pastorb@iglesia.co')->value('role'));
 
-        $this->post(route('users.store'), $this->datosUsuario(['role' => 'admin', 'email' => 'otroadmin@iglesia.co']))->assertSessionHasNoErrors();
+        // El administrador también es miembro de una sede (spec 016), pero su cuenta no tiene sede.
+        $this->post(route('users.store'), $this->datosUsuario(['role' => 'admin', 'email' => 'otroadmin@iglesia.co', 'sede_id' => $this->A['sede']->id]))->assertSessionHasNoErrors();
         $this->assertNull(User::withoutGlobalScopes()->where('email', 'otroadmin@iglesia.co')->value('sede_id'));
 
-        // Sin sede (y sin sede activa) no se puede crear un usuario de sede.
-        $this->post(route('users.store'), $this->datosUsuario(['email' => 'sinsede@iglesia.co']))->assertStatus(422);
+        // Sin sede no se puede crear ninguna cuenta: el miembro debe pertenecer a una.
+        $this->post(route('users.store'), $this->datosUsuario(['email' => 'sinsede@iglesia.co']))->assertSessionHasErrors('sede_id');
         $this->assertSame(0, User::withoutGlobalScopes()->where('email', 'sinsede@iglesia.co')->count());
 
         $this->get(route('users.index'))->assertOk()->assertSee($this->A['liderUser']->email)->assertSee($this->B['liderUser']->email);

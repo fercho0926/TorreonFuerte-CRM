@@ -8,7 +8,7 @@
         {{ $user->email }}
         @break
     @case('rol')
-        <x-ui.insignia color="secondary">{{ \App\Models\User::ROLE_LABELS[$user->role] ?? $user->role }}</x-ui.insignia>
+        <x-ui.insignia color="secondary">{{ \App\Models\User::etiquetaDeRol($user->role) }}</x-ui.insignia>
         @break
     @case('sede')
         {{ $user->getRelationValue('sede')?->nombre ?? 'Todas (administrador)' }}

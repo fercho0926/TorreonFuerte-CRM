@@ -1,4 +1,4 @@
-{{-- Registrados por QR de un destino. Requiere $registros (RegistroQr con su persona). --}}
+{{-- Registrados por QR de un destino. Requiere $registros (RegistroQr con su miembro). --}}
 <x-ui.tarjeta titulo="Registrados por QR" icono="fa-user-check" :contador="$registros->count()" :tabla="true" id="registrados-qr">
     @if($registros->isEmpty())
         <p class="p-3 mb-0 text-muted">Todavía nadie se ha registrado con el QR.</p>
@@ -17,7 +17,7 @@
                 @foreach($registros as $registro)
                     <tr>
                         <td data-etiqueta="Nombre">
-                            {{-- Las personas de otra sede o pendientes no tienen ficha enlazable. --}}
+                            {{-- Los miembros de otra sede o pendientes no tienen ficha enlazable. --}}
                             @if($registro->persona && !$registro->persona->trashed() && in_array($registro->resultado, ['nueva', 'existente'], true))
                                 <a href="{{ route('personas.show', $registro->persona) }}">{{ $registro->nombreCompleto() }}</a>
                             @else

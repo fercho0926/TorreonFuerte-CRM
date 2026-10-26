@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * Formulario público del QR de un evento, encuentro o célula. No hay sesión: el token de la ruta
- * identifica el destino y toda consulta de personas queda limitada a la sede de ese destino.
+ * identifica el destino y toda consulta de miembros queda limitada a la sede de ese destino.
  */
 class RegistroPublicoController extends Controller
 {
@@ -71,7 +71,7 @@ class RegistroPublicoController extends Controller
 
         $busqueda = $this->registro->buscar($destino, $celular, $datos['numero_documento'] ?? null);
 
-        // Una persona que solo existe en otra sede se trata como nueva: no se revela que existe.
+        // Un miembro que solo existe en otra sede se trata como nueva: no se revela que existe.
         $estado = $busqueda['estado'] === RegistroPorQr::OTRA_SEDE ? RegistroPorQr::NUEVA : $busqueda['estado'];
         $persona = $estado === RegistroPorQr::EXISTENTE ? $busqueda['persona'] : null;
 
@@ -166,7 +166,7 @@ class RegistroPublicoController extends Controller
             : back()->withInput()->withErrors([$campo => $mensaje]);
     }
 
-    /** Las respuestas del registro llevan datos de personas: nunca se guardan en caché. */
+    /** Las respuestas del registro llevan datos de miembros: nunca se guardan en caché. */
     private function sinCache($respuesta)
     {
         $respuesta->headers->set('Cache-Control', 'no-store, private');

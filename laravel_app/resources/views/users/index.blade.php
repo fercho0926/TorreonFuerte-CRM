@@ -5,10 +5,13 @@
 @section('page-title', 'Usuarios registrados')
 
 @section('page-actions')
+    @puedeModulo('usuarios', 'escritura')
     <a href="{{ route('users.create') }}" class="btn btn-primary">Crear usuario</a>
+    @endpuedeModulo
 @endsection
 
 @section('content')
+@include('users._pestanas', ['activa' => 'usuarios'])
 <x-ui.grilla :grilla="$grilla" :pagina="$pagina" :estado="$estado" :por-pagina="$porPagina" :total="$total" titulo="Lista de usuarios">
     @if($sedes->isNotEmpty())
         <x-slot:filtros>

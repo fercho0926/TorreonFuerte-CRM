@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * Traslado de personas entre sedes: solo administrador (con una sede activa).
+ * Traslado de miembros entre sedes: solo administrador (con una sede activa).
  */
 class TrasladosController extends Controller
 {

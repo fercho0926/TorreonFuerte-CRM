@@ -1,4 +1,4 @@
-{{-- Celda de la grilla de líderes. Variables: $fila (Persona), $columna. --}}
+{{-- Celda de la grilla de líderes. Variables: $fila (Miembro), $columna. --}}
 @php($lider = $fila)
 @switch($columna)
     @case('nombre')

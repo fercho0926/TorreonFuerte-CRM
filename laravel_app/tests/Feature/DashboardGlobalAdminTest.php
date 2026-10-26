@@ -35,7 +35,8 @@ class DashboardGlobalAdminTest extends TestCase
             $a = $resumen[$this->A['sede']->id];
             $b = $resumen[$this->B['sede']->id];
 
-            return $a['personas'] === 3 && $b['personas'] === 5
+            // Alfa (primera sede) cuenta también al miembro dueño de la cuenta del administrador (spec 016).
+            return $a['personas'] === 4 && $b['personas'] === 5
                 && $a['lideres'] === 1 && $b['lideres'] === 1
                 && $a['celulas'] === 1 && $b['celulas'] === 1
                 && $a['eventos_proximos'] === 1 && $b['eventos_proximos'] === 1
@@ -49,7 +50,7 @@ class DashboardGlobalAdminTest extends TestCase
 
         $this->get(route('dashboard'))
             ->assertOk()
-            ->assertViewHas('personaCount', 3)
+            ->assertViewHas('personaCount', 4) // pastor, líder, miembro y el miembro del administrador (spec 016)
             ->assertViewHas('resumenSedes', null)
             ->assertDontSee('Resumen por sede')
             ->assertSee('Iglesia Alfa');

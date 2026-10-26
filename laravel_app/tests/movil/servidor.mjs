@@ -6,7 +6,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { TOKEN_REGISTRO } from './pantallas.mjs';
+import { TOKEN_REGISTRO, TOKEN_SEDE } from './pantallas.mjs';
 
 export const PUERTO = Number(process.env.MOVIL_PUERTO || 8199);
 export const URL_BASE = `http://127.0.0.1:${PUERTO}`;
@@ -29,6 +29,11 @@ export async function iniciar() {
     php(['artisan', 'migrate:fresh', '--seed', '--force'], env);
     // El formulario público del QR necesita un token conocido para poder auditarse.
     php(['artisan', 'tinker', `--execute=\\App\\Models\\Evento::withoutGlobalScopes()->whereKey(1)->update(['registro_token' => '${TOKEN_REGISTRO}']);`], env);
+    // Y el QR de miembros de la sede 1.
+    php(['artisan', 'tinker', `--execute=\\App\\Models\\Sede::whereKey(1)->update(['registro_token' => '${TOKEN_SEDE}']);`], env);
+
+    // Avances de niveles: la persona 1 con dos niveles completos, para que el camino muestre estados distintos.
+    php(['artisan', 'tinker', `--execute=$p = \\App\\Models\\Persona::withoutGlobalScopes()->find(1); foreach ([1, 2] as $n) { \\App\\Models\\AvanceNivel::withoutGlobalScopes()->create(['sede_id' => $p->sede_id, 'persona_id' => 1, 'nivel_id' => $n, 'fecha' => '2026-01-10', 'origen' => 'manual']); }`], env);
 
     proceso = spawn('php', ['-S', `127.0.0.1:${PUERTO}`, '-t', '.', join('..', 'vendor', 'laravel', 'framework', 'src', 'Illuminate', 'Foundation', 'resources', 'server.php')], {
         cwd: join(RAIZ, 'public'),

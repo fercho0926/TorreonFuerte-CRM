@@ -65,8 +65,10 @@ class TeclasFormularioTest extends TestCase
         $this->assertStringContainsString('inputmode="email"', $persona, 'correo');
 
         $this->comoAdminEnTodas();
-        $usuario = $this->get(route('users.create'))->assertOk()->getContent();
-        $this->assertStringContainsString('inputmode="email"', $usuario);
-        $this->assertStringContainsString('inputmode="tel"', $usuario);
+        // «Nuevo usuario» en dos pasos (spec 016): el celular primero y el correo de la cuenta después.
+        $paso1 = $this->get(route('users.create'))->assertOk()->getContent();
+        $this->assertStringContainsString('inputmode="tel"', $paso1);
+        $paso2 = $this->get(route('users.create', ['celular' => '3009990000', 'sede_id' => $this->A['sede']->id]))->assertOk()->getContent();
+        $this->assertStringContainsString('inputmode="email"', $paso2);
     }
 }

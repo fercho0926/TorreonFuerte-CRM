@@ -1,7 +1,7 @@
 {
     "name": "CRM Torreón Fuerte",
     "short_name": "Torreón",
-    "description": "Gestión de personas, líderes, células, eventos y ministerios de la iglesia.",
+    "description": "Gestión de miembros, líderes, células, eventos y ministerios de la iglesia.",
     "lang": "es",
     "start_url": "./dashboard",
     "scope": "./",

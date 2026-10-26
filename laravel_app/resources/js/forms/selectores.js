@@ -93,7 +93,7 @@ function barraMultiple(select, $, remoto = false) {
     select.closest('.fm-campo')?.querySelector('.invalid-feedback')?.insertAdjacentElement('beforebegin', barra);
 }
 
-/** Muestra un aviso (con enlace a editar) cuando la persona elegida no tiene documento. */
+/** Muestra un aviso (con enlace a editar) cuando el miembro elegido no tiene documento. */
 function avisoSinDocumento(select, $) {
     const aviso = document.querySelector(select.dataset.avisoSinDocumento);
     if (!aviso) return;

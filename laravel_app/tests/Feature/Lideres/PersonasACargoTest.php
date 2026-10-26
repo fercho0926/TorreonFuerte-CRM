@@ -11,7 +11,7 @@ use Tests\Support\EscenarioDosSedes;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Historia 4: grilla «Personas a su cargo» en la ficha del líder (FR-007). */
+/** Historia 4: grilla «Miembros a su cargo» en la ficha del líder (FR-007). */
 class PersonasACargoTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
@@ -37,7 +37,7 @@ class PersonasACargoTest extends TestCase
 
         $html = $this->get(route('lideres.show', $this->A['lider']))->assertOk()->getContent();
 
-        $this->assertStringContainsString('Personas a su cargo', $html);
+        $this->assertStringContainsString('Miembros a su cargo', $html);
         $this->assertStringContainsString('personas-a-cargo', $html);
         $this->assertStringContainsString('Ana Zeta', $html);
         $this->assertStringContainsString('3112223344', $html);
@@ -89,7 +89,7 @@ class PersonasACargoTest extends TestCase
         $con100 = count(DB::getQueryLog());
         DB::disableQueryLog();
 
-        $this->assertLessThanOrEqual($base + 3, $con100, 'las células de cada persona se cargan de una vez');
+        $this->assertLessThanOrEqual($base + 3, $con100, 'las células de cada miembro se cargan de una vez');
         $this->assertStringContainsString('max-height', $html);
     }
 

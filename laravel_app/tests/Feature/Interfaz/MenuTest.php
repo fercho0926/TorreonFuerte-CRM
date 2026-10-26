@@ -52,9 +52,9 @@ class MenuTest extends TestCase
         $admin = $this->crearUsuario('admin');
         $secciones = Menu::secciones($admin, [], 'personas.edit');
 
-        $migas = Menu::migas($secciones, 'Editar persona');
+        $migas = Menu::migas($secciones, 'Editar miembro');
 
-        $this->assertSame(['Inicio', 'Congregación', 'Personas', 'Editar persona'], array_column($migas, 'texto'));
+        $this->assertSame(['Inicio', 'Congregación', 'Miembros', 'Editar miembro'], array_column($migas, 'texto'));
         $this->assertNotNull($migas[0]['url']);
         $this->assertNull($migas[1]['url']);
         $this->assertNotNull($migas[2]['url']);

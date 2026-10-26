@@ -5,13 +5,18 @@
 @section('page-title', 'Detalle del ministerio')
 
 @section('page-actions')
-    <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-primary">Editar</a>
+    @puedeModulo('ministerios', 'escritura')
+        <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-primary">Editar</a>
+    @endpuedeModulo
     <a href="{{ route('ministerios.index') }}" class="btn btn-outline-secondary">Volver</a>
 @endsection
 
 @section('content')
+@include('historial._pestanas', ['url' => route('ministerios.show', $ministerio), 'pestana' => $pestana ?? 'datos'])
 
-
+@if(($pestana ?? 'datos') === 'historico')
+    @include('historial._lista', ['historico' => $historico])
+@else
 <div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $ministerio->nombre }}</h3>
@@ -38,7 +43,7 @@
     </div>
 </div>
 
-<x-form.layout :action="route('ministerios.integrantes', $ministerio)" method="PUT" modo="incrustado" guardar="Guardar cambios de integrantes" icono="fa-save" :deshabilitar="$ministerio->integrantes->isEmpty()" :leyenda="false">
+<x-form.layout :action="route('ministerios.integrantes', $ministerio)" method="PUT" modo="incrustado" guardar="Guardar cambios de integrantes" icono="fa-save" :deshabilitar="$ministerio->integrantes->isEmpty() || !\App\Support\Permisos::modulo('ministerios', 'escritura')" :leyenda="false">
     <x-form.section :titulo="'Integrantes ('.$ministerio->integrantes->count().')'" descripcion="Rol y fecha de ingreso de cada integrante." icono="fa-users" id="seccion-integrantes">
         <div class="col-12">
             <x-form.lista-asistencia name="integrantes[]" :interruptor="false" vacio="Este ministerio aún no tiene integrantes. Agrégalos desde &quot;Editar&quot;."
@@ -55,4 +60,5 @@
         </div>
     </x-form.section>
 </x-form.layout>
+@endif
 @endsection

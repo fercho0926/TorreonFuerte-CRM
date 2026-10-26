@@ -9,7 +9,7 @@ use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
 /**
- * Comprueba que los módulos que dependen de Personas siguen funcionando tras el cambio de modelo.
+ * Comprueba que los módulos que dependen de Miembros siguen funcionando tras el cambio de modelo.
  */
 class ModulosRelacionadosTest extends TestCase
 {

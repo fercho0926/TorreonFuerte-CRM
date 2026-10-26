@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * Registro hecho por una persona desde el formulario público del QR de un evento, encuentro o célula.
- * Deja la traza del origen QR (fecha y hora) y lo que la persona escribió; la inscripción real vive
- * en las tablas existentes. Las personas de otra sede solo quedan aquí, sin enlace a su ficha.
+ * Registro hecho por un miembro desde el formulario público del QR de un evento, encuentro o célula.
+ * Deja la traza del origen QR (fecha y hora) y lo que el miembro escribió; la inscripción real vive
+ * en las tablas existentes. Los miembros de otra sede solo quedan aquí, sin enlace a su ficha.
  */
 #[Fillable([
     'sede_id', 'registrable_type', 'registrable_id', 'persona_id', 'nombres', 'apellidos', 'celular',
@@ -36,7 +36,7 @@ class RegistroQr extends Model
         return $this->morphTo()->withoutGlobalScopes();
     }
 
-    /** Persona de la sede del destino (nula si es de otra sede o está pendiente). */
+    /** Miembro de la sede del destino (nula si es de otra sede o está pendiente). */
     public function persona(): BelongsTo
     {
         return $this->belongsTo(Persona::class)->withTrashed();
@@ -50,7 +50,7 @@ class RegistroQr extends Model
     public function etiquetaResultado(): string
     {
         return [
-            'nueva' => 'Nueva persona',
+            'nueva' => 'Nuevo miembro',
             'existente' => 'Ya existía',
             'de_otra_sede' => 'De otra sede',
             'pendiente' => 'Pendiente',

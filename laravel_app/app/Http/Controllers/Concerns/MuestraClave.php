@@ -20,10 +20,10 @@ trait MuestraClave
         $servicio = app(ClavesTemporales::class);
 
         // Sin celular de WhatsApp no hay a dónde enviar la clave: se lleva a quien administra a
-        // completar el celular, con un mensaje visible (no un error escondido en el formulario).
+        // completar el celular en la ficha del miembro, que es su único dueño (spec 016).
         if (Celular::limpio($objetivo->celular) === null) {
-            return redirect()->route('users.edit', $objetivo)
-                ->with('error', "{$objetivo->name} no tiene celular de WhatsApp. Escríbelo aquí, guarda y vuelve a generar la clave.");
+            return redirect()->route('personas.edit', $objetivo->persona_id)
+                ->with('error', "{$objetivo->name} no tiene celular de WhatsApp. Escríbelo en su ficha de miembro, guarda y vuelve a generar la clave.");
         }
 
         $generada = $servicio->generar($objetivo, $motivo, $preparadaPor, $solicitud, $solicitadaPor);

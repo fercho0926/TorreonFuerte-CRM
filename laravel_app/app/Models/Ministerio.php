@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\RegistraHistorial;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,9 +19,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 ])]
 class Ministerio extends Model
 {
-    use HasFactory, PerteneceASede;
+    use HasFactory, PerteneceASede, RegistraHistorial;
 
     public const ESTADOS = ['activo', 'inactivo'];
+
+    /** @return array<string, string|array<int|string, mixed>> */
+    public function camposHistorial(): array
+    {
+        return [
+            'nombre' => 'Nombre',
+            'descripcion' => 'Descripción',
+            'encargado_id' => ['Encargado', 'persona'],
+            'estado' => ['Estado', ['activo' => 'Activo', 'inactivo' => 'Inactivo']],
+        ];
+    }
 
     public function encargado(): BelongsTo
     {

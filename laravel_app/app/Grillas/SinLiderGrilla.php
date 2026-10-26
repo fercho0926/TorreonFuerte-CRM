@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
-/** Personas esperando un líder: nombre, contacto y el formulario por fila para asignarles uno. */
+/** Miembros esperando un líder: nombre, contacto y el formulario por fila para asignarles uno. */
 class SinLiderGrilla extends Grilla
 {
     private ?array $opcionesLider = null;
@@ -36,7 +36,7 @@ class SinLiderGrilla extends Grilla
 
     public function vacio(): array
     {
-        return ['mensaje' => 'No hay personas sin líder.', 'icono' => 'fa-user-check'];
+        return ['mensaje' => 'No hay miembros sin líder.', 'icono' => 'fa-user-check'];
     }
 
     public function puedeVer(?User $usuario): bool
@@ -47,7 +47,7 @@ class SinLiderGrilla extends Grilla
     protected function definirColumnas(): array
     {
         return [
-            Columna::make('nombre', 'Persona')
+            Columna::make('nombre', 'Miembro')
                 ->ordena(fn (Builder $q, string $dir) => $q->orderBy('personas.apellidos', $dir)->orderBy('personas.nombres', $dir))
                 ->filtraTexto(fn (Builder $q, string $valor) => $q->buscar($valor))
                 ->valor(fn (Persona $p) => $p->nombre_completo)

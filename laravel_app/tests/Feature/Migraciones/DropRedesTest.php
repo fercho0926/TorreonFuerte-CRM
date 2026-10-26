@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-/** La migración que retira «redes» no pierde ninguna persona, líder, célula ni ministerio (FR-014). */
+/** La migración que retira «redes» no pierde ningún miembro, líder, célula ni ministerio (FR-014). */
 class DropRedesTest extends TestCase
 {
     use RefreshDatabase;
@@ -49,7 +49,7 @@ class DropRedesTest extends TestCase
     }
 
     // Con datos reales la migración se probó sobre una copia de la base local (ver quickstart.md):
-    // personas 11, líderes 3, células 3 y ministerios 1, antes y después.
+    // miembros 11, líderes 3, células 3 y ministerios 1, antes y después.
 
     public function test_aplicarla_dos_veces_no_falla(): void
     {

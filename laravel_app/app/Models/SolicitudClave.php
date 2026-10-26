@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\RegistraHistorial;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['user_id', 'sede_id', 'estado', 'atendida_por', 'atendida_en', 'ultima_solicitud_en', 'origen_hash'])]
 class SolicitudClave extends Model
 {
-    use PerteneceASede;
+    use PerteneceASede, RegistraHistorial;
+
+    /** @return array<string, string|array<int|string, mixed>> */
+    public function camposHistorial(): array
+    {
+        return [
+            'user_id' => ['Usuario', 'usuario'],
+            'estado' => ['Estado', ['pendiente' => 'Pendiente', 'atendida' => 'Atendida', 'descartada' => 'Descartada']],
+            'atendida_por' => ['Atendida por', 'usuario'],
+            'atendida_en' => ['Atendida el', 'fecha_hora'],
+        ];
+    }
+
+    /** Volver a pedir la clave solo renueva la fecha: no es un cambio que contar. */
+    public function camposIgnorados(): array
+    {
+        return ['ultima_solicitud_en'];
+    }
+
+    public function nombreHistorial(): string
+    {
+        $usuario = User::query()->withoutGlobalScopes()->find($this->user_id);
+
+        return 'Solicitud de '.($usuario?->name ?? 'usuario #'.$this->user_id);
+    }
 
     public const PENDIENTE = 'pendiente';
 

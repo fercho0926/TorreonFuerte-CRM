@@ -23,7 +23,7 @@
         {{ $celula->getRelationValue('sede')?->nombre ?? '—' }}
         @break
     @case('acciones')
-        @php($gestiona = \App\Http\Controllers\Controller::usuarioDeLaPeticion()?->tieneAccesoTotal())
+        @php($gestiona = \App\Http\Controllers\Controller::usuarioDeLaPeticion()?->tieneAccesoTotal() && \App\Support\Permisos::modulo('celulas', 'escritura'))
         <x-ui.acciones-fila :ver="route('celulas.show', $celula)" :editar="route('celulas.edit', $celula)" :eliminar="route('celulas.destroy', $celula)" :puede-editar="$gestiona" :puede-eliminar="$gestiona" eliminar-titulo="¿Eliminar esta célula?" :nombre="$celula->nombre" />
         @break
 @endswitch

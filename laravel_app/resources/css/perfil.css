@@ -1,0 +1,63 @@
+/* Avatar de iniciales y tarjeta de perfil («User widgets» de AdminLTE 4) para la ficha del miembro. */
+
+.avatar-iniciales {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 600;
+    line-height: 1;
+    user-select: none;
+}
+.avatar-iniciales--sm { width: 36px; height: 36px; font-size: .85rem; }
+.avatar-iniciales--md { width: 64px; height: 64px; font-size: 1.25rem; }
+.avatar-iniciales--lg { width: 90px; height: 90px; font-size: 2rem; }
+
+/* El avatar del widget-user es un span, no un img: mismo borde blanco y sombra que la demo. */
+.widget-user .widget-user-image > .avatar-iniciales {
+    border: 3px solid var(--bs-body-bg);
+    box-shadow: var(--bs-box-shadow-sm);
+}
+.widget-user .widget-user-header { position: relative; }
+.widget-user .widget-user-username { overflow-wrap: anywhere; }
+.widget-user .widget-user-desc { display: flex; flex-wrap: wrap; justify-content: center; gap: .35rem; }
+.widget-user .widget-user-desc .badge { font-size: .8rem; }
+
+/* Botones de contacto bajo el avatar: tamaño cómodo para el dedo (≥ 44 px). */
+.perfil-contacto { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-bottom: .5rem; }
+.perfil-contacto .btn { min-height: 44px; display: inline-flex; align-items: center; gap: .35rem; }
+
+/* Los separadores de las cifras, como en la demo. */
+.widget-user .card-footer .row > [class*="col-"] + [class*="col-"] { border-left: var(--bs-border-width) solid var(--bs-border-color); }
+
+/* Ficha del miembro: la cabecera crece con su contenido (nombre, estado y botones de contacto) y el avatar
+   queda a caballo sobre su borde inferior, en vez de ir a una altura fija como en la demo. */
+.perfil-widget .widget-user-header { height: auto; padding-bottom: 3.25rem; }
+.perfil-widget .widget-user-image { position: relative; top: auto; margin-top: -45px; }
+.perfil-widget > .card-footer { padding-top: 0; }
+.perfil-widget .widget-user-header .perfil-contacto { margin: .75rem 0 0; }
+.perfil-widget .widget-user-header .perfil-contacto .btn { background: var(--bs-body-bg); }
+
+/* «Datos personales» como lista con icono, etiqueta y valor. */
+.perfil-datos .list-group-item {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    column-gap: .5rem;
+    align-items: start;
+}
+.perfil-datos .list-group-item > i { grid-row: span 2; margin-top: .2rem; color: var(--bs-secondary-color); text-align: center; }
+.perfil-datos-etiqueta { font-size: .75rem; text-transform: uppercase; color: var(--bs-secondary-color); }
+
+/* Células y ministerios: icono de color, nombre con detalle y una insignia a la derecha («Recently added»). */
+.perfil-item { display: flex; align-items: center; gap: .75rem; min-height: 44px; }
+.perfil-item-icono {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--bs-border-radius);
+}
+.perfil-item-cuerpo { flex: 1; min-width: 0; overflow-wrap: anywhere; }

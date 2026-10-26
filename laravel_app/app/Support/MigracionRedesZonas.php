@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 /**
  * Migra los datos de la versión anterior (red como texto, sin zonas ni estado) al modelo
- * nuevo (catálogos de redes y zonas, estado de la persona). Es idempotente y no borra datos.
+ * nuevo (catálogos de redes y zonas, estado del miembro). Es idempotente y no borra datos.
  */
 class MigracionRedesZonas
 {
@@ -33,7 +33,7 @@ class MigracionRedesZonas
 
         $resultado['conflictos'] = self::completarLiderDesdeCelulas();
 
-        Log::info('Migración de personas, redes y zonas', $resultado);
+        Log::info('Migración de miembros, redes y zonas', $resultado);
 
         return $resultado;
     }
@@ -45,7 +45,7 @@ class MigracionRedesZonas
 
     private static function migrarRedes(): int
     {
-        // Con el modelo multi-sede las redes se crean en la sede de la persona (si la columna existe).
+        // Con el modelo multi-sede las redes se crean en la sede del miembro (si la columna existe).
         $conSede = Schema::hasColumn('redes', 'sede_id') && Schema::hasColumn('personas', 'sede_id');
         $creadas = 0;
         $ids = [];
@@ -95,7 +95,7 @@ class MigracionRedesZonas
     }
 
     /**
-     * Las personas en una célula sin líder directo toman el líder de la célula. Si ya tienen
+     * Los miembros en una célula sin líder directo toman el líder de la célula. Si ya tienen
      * otro líder distinto no se modifica nada y se informa el conflicto para revisión manual.
      *
      * @return array<int, string>
@@ -113,7 +113,7 @@ class MigracionRedesZonas
             if ($fila->lider_id === null) {
                 DB::table('personas')->where('id', $fila->persona_id)->update(['lider_id' => $fila->celula_lider_id]);
             } elseif ($fila->lider_id != $fila->celula_lider_id && $fila->lider_id != $fila->co_lider_id) {
-                $conflictos[$fila->persona_id] = "Persona {$fila->persona_id} está en la célula {$fila->celula_id} pero su líder directo es {$fila->lider_id}";
+                $conflictos[$fila->persona_id] = "Miembro {$fila->persona_id} está en la célula {$fila->celula_id} pero su líder directo es {$fila->lider_id}";
             }
         }
 

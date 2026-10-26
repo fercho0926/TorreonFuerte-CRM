@@ -16,8 +16,11 @@ class ModelosConSedeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Tablas con `sede_id` que no llevan el filtro por decisión de diseño. */
-    private const SIN_FILTRO = ['sede_cambios'];
+    /**
+     * Tablas con `sede_id` que no llevan el filtro por decisión de diseño. `historial_cambios` (spec 015) se autoriza
+     * con la ficha del registro y la sede se filtra de forma explícita en `LecturaHistorial` y en `CambiosGrilla`.
+     */
+    private const SIN_FILTRO = ['historial_cambios'];
 
     public function test_todo_modelo_de_una_tabla_con_sede_usa_el_filtro_global(): void
     {
@@ -47,7 +50,7 @@ class ModelosConSedeTest extends TestCase
 
     public function test_las_tablas_de_datos_esperadas_tienen_sede_id(): void
     {
-        foreach (['personas', 'celulas', 'celula_reuniones', 'encuentros', 'eventos', 'evento_persona', 'evento_pagos', 'ministerios', 'persona_cambios', 'solicitudes_clave', 'registros_clave', 'users'] as $tabla) {
+        foreach (['personas', 'celulas', 'celula_reuniones', 'encuentros', 'eventos', 'evento_persona', 'evento_pagos', 'ministerios', 'historial_cambios', 'solicitudes_clave', 'registros_clave', 'users'] as $tabla) {
             $this->assertTrue(Schema::hasColumn($tabla, 'sede_id'), "La tabla {$tabla} no tiene sede_id");
         }
     }

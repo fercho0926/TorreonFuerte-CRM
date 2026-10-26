@@ -25,8 +25,8 @@ class PanelSolicitudesTest extends TestCase
     {
         parent::setUp();
         $this->armarDosSedes();
-        $this->A['liderUser']->forceFill(['celular' => '3105559999'])->save();
-        $this->B['liderUser']->forceFill(['celular' => '3205559999'])->save();
+        $this->A['liderUser']->persona->update(['celular' => '3105559999']);
+        $this->B['liderUser']->persona->update(['celular' => '3205559999']);
 
         $this->solicitudA = $this->crearSolicitud($this->A['liderUser']);
         $this->solicitudB = $this->crearSolicitud($this->B['liderUser']);
@@ -89,7 +89,7 @@ class PanelSolicitudesTest extends TestCase
         $registro = RegistroClave::withoutGlobalScopes()->where('user_id', $lider->id)->firstOrFail();
         $this->assertSame('recuperacion', $registro->motivo);
         $this->assertSame($this->solicitudA->id, $registro->solicitud_id);
-        $this->assertNull($registro->solicitada_por, 'la propia persona');
+        $this->assertNull($registro->solicitada_por, 'la propia miembro');
         $this->assertSame($this->A['pastor']->id, $registro->preparada_por);
     }
 
@@ -116,7 +116,7 @@ class PanelSolicitudesTest extends TestCase
     public function test_el_pastor_no_atiende_solicitudes_de_otro_pastor_ni_de_admins(): void
     {
         $otroPastor = $this->crearUsuario('pastor', null, $this->A['sede']->id);
-        $otroPastor->forceFill(['celular' => '3001112233'])->save();
+        $otroPastor->persona->update(['celular' => '3001112233']);
         $deOtroPastor = $this->crearSolicitud($otroPastor);
 
         $this->iniciarSesionComo($this->A['pastor']);
@@ -136,7 +136,7 @@ class PanelSolicitudesTest extends TestCase
 
     public function test_sin_celular_no_se_genera_la_clave_y_la_solicitud_sigue_pendiente(): void
     {
-        $this->A['liderUser']->forceFill(['celular' => null])->save();
+        $this->A['liderUser']->persona->update(['celular' => null]);
         $this->iniciarSesionComo($this->A['pastor']);
 
         $this->post(route('solicitudes-clave.atender', $this->solicitudA))->assertRedirect()->assertSessionHas('error');
@@ -169,7 +169,7 @@ class PanelSolicitudesTest extends TestCase
     private function crearUsuarioConCelular(): User
     {
         $user = $this->crearUsuario('lider_celula', null, $this->A['sede']->id);
-        $user->forceFill(['celular' => '3001112233'])->save();
+        $user->persona->update(['celular' => '3001112234']);
 
         return $user;
     }

@@ -18,9 +18,7 @@ trait ConSedes
 
     protected function comoPastorDe(Sede $sede): User
     {
-        $persona = Persona::factory()->deSede($sede->id)->create();
-
-        return $this->iniciarSesionComo($this->crearUsuario('pastor', $persona, $sede->id));
+        return $this->iniciarSesionComo($this->crearUsuario('pastor', null, $sede->id));
     }
 
     protected function comoLiderDe(Sede $sede, ?Persona $persona = null): User
@@ -33,6 +31,17 @@ trait ConSedes
     protected function comoAdminEnSede(Sede $sede): User
     {
         return $this->iniciarSesionComo($this->crearUsuario('admin'), $sede->id);
+    }
+
+    /**
+     * Admin con sede activa cuyo miembro (toda cuenta es de un miembro, spec 016) pertenece a otra sede,
+     * para que no aparezca en los datos de la sede que se prueba.
+     */
+    protected function comoAdminDeOtraSedeEn(Sede $sede): User
+    {
+        $persona = Persona::factory()->deSede($this->crearSede(['nombre' => 'Sede del administrador'])->id)->create();
+
+        return $this->iniciarSesionComo($this->crearUsuario('admin', $persona), $sede->id);
     }
 
     /**

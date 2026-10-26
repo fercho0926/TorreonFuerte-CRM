@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\RegistraHistorial;
 use App\Models\Concerns\TieneRegistroQr;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,11 +26,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Celula extends Model
 {
-    use HasFactory, PerteneceASede, TieneRegistroQr;
+    use HasFactory, PerteneceASede, RegistraHistorial, TieneRegistroQr;
 
     public const ESTADOS = ['activa', 'inactiva'];
 
     public const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    /** @return array<string, string|array<int|string, mixed>> */
+    public function camposHistorial(): array
+    {
+        return [
+            'nombre' => 'Nombre',
+            'lider_id' => ['Líder', 'persona'],
+            'co_lider_id' => ['Colíder', 'persona'],
+            'sede' => 'Lugar o sector',
+            'dia_reunion' => 'Día de reunión',
+            'hora_reunion' => 'Hora de reunión',
+            'lugar_reunion' => 'Lugar de reunión',
+            'estado' => ['Estado', ['activa' => 'Activa', 'inactiva' => 'Inactiva']],
+            'registro_abierto' => ['Registro por QR abierto', 'booleano'],
+        ];
+    }
 
     public function lider(): BelongsTo
     {

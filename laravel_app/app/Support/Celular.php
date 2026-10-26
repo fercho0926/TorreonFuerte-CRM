@@ -16,6 +16,19 @@ class Celular
         return $digitos !== '' ? $digitos : null;
     }
 
+    /**
+     * Forma canónica para buscar a un miembro por su celular: los dígitos y, si son 12 y
+     * empiezan por el indicativo de Colombia, los 10 locales («+57 300…» = «300…»).
+     */
+    public static function clave(?string $celular): ?string
+    {
+        $digitos = self::limpio($celular);
+
+        return $digitos !== null && strlen($digitos) === 12 && str_starts_with($digitos, '57')
+            ? substr($digitos, 2)
+            : $digitos;
+    }
+
     /** Número para wa.me: 10 dígitos → «57» + dígitos; en otro caso, los dígitos tal cual. */
     public static function whatsapp(?string $celular): ?string
     {

@@ -71,7 +71,7 @@
     "src": "node_modules/sweetalert2/dist/sweetalert2.min.css"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BEIrBzc8.css",
+    "file": "assets/app-XXP8UCLe.css",
     "name": "app",
     "names": [
       "app.css"
@@ -90,7 +90,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CI_Vi3bQ.js",
+    "file": "assets/app-BxvCpnye.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -102,11 +102,14 @@
       "node_modules/flatpickr/dist/esm/index.js",
       "node_modules/flatpickr/dist/l10n/es.js",
       "resources/js/jquery-global.js",
-      "resources/js/grilla/grilla.js"
+      "resources/js/grilla/grilla.js",
+      "resources/js/tablero/graficas.js",
+      "resources/js/organigrama/organigrama.js",
+      "resources/js/roles/matriz.js"
     ],
     "css": [
       "assets/app-CveviJq_.css",
-      "assets/app-BEIrBzc8.css"
+      "assets/app-XXP8UCLe.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
@@ -120,7 +123,7 @@
     ]
   },
   "resources/js/grilla/grilla.js": {
-    "file": "assets/grilla-ncuE4gpK.js",
+    "file": "assets/grilla-BIxxhRC5.js",
     "name": "grilla",
     "src": "resources/js/grilla/grilla.js",
     "isDynamicEntry": true,
@@ -145,5 +148,23 @@
     "css": [
       "assets/jquery-global-C7w8ylpV.css"
     ]
+  },
+  "resources/js/organigrama/organigrama.js": {
+    "file": "assets/organigrama-CCfT05tB.js",
+    "name": "organigrama",
+    "src": "resources/js/organigrama/organigrama.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/roles/matriz.js": {
+    "file": "assets/matriz-Bs_yO0pZ.js",
+    "name": "matriz",
+    "src": "resources/js/roles/matriz.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/tablero/graficas.js": {
+    "file": "assets/graficas-BLcU8L2O.js",
+    "name": "graficas",
+    "src": "resources/js/tablero/graficas.js",
+    "isDynamicEntry": true
   }
 }

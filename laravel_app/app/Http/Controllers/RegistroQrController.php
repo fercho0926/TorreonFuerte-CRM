@@ -33,7 +33,7 @@ class RegistroQrController extends Controller
         }
 
         $destino = $this->destino($tipo, $id);
-        $destino->update(['registro_abierto' => !$destino->registro_abierto]);
+        app(\App\Services\Historial::class)->accion('qr_cambiado', fn () => $destino->update(['registro_abierto' => !$destino->registro_abierto]));
 
         return back()->with('success', $destino->registro_abierto ? 'Registro por QR abierto.' : 'Registro por QR cerrado.');
     }
@@ -44,7 +44,8 @@ class RegistroQrController extends Controller
             return $redirect;
         }
 
-        $this->destino($tipo, $id)->regenerarToken();
+        $destino = $this->destino($tipo, $id);
+        app(\App\Services\Historial::class)->accion('qr_cambiado', fn () => $destino->regenerarToken());
 
         return back()->with('success', 'Se generó un enlace nuevo; el anterior ya no funciona.');
     }

@@ -34,6 +34,12 @@ class GuardaGrillaEstandarTest extends TestCase
         $this->assertSame([], $infractores, 'Listados con tabla simple en lugar de <x-ui.grilla> (ver README → Grillas): '.implode(', ', $infractores));
     }
 
+    /**
+     * Grillas sin exportación por decisión del responsable (excepción declarada al principio III). Spec 015: el
+     * historial («Control de cambios») no se exporta por ningún medio (clarificación 1, RF-020).
+     */
+    public const SIN_EXPORTACION = ['control-cambios'];
+
     public function test_los_listados_con_grilla_declaran_sus_rutas_de_datos_y_exportacion(): void
     {
         foreach (glob(resource_path('views/*/index.blade.php')) as $archivo) {
@@ -43,7 +49,12 @@ class GuardaGrillaEstandarTest extends TestCase
 
             $modulo = basename(dirname($archivo));
             $this->assertTrue(\Route::has("$modulo.datos"), "falta la ruta $modulo.datos");
-            $this->assertTrue(\Route::has("$modulo.exportar"), "falta la ruta $modulo.exportar");
+
+            if (in_array($modulo, self::SIN_EXPORTACION, true)) {
+                $this->assertFalse(\Route::has("$modulo.exportar"), "$modulo no debe tener ruta de exportación");
+            } else {
+                $this->assertTrue(\Route::has("$modulo.exportar"), "falta la ruta $modulo.exportar");
+            }
         }
     }
 }

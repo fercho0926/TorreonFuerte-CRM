@@ -9,6 +9,7 @@
     'icono' => null,
     'leyenda' => true,
     'deshabilitar' => false,
+    'global' => false,
 ])
 @php
     $metodo = strtoupper($method);
@@ -46,5 +47,5 @@
         {{ $slot }}
     @endif
 
-    <x-form.actions :guardar="$guardar" :cancelar="$cancelar" :modo="$modo" :boton="$boton" :metodo="$envio" :icono="$icono" :deshabilitar="$deshabilitar" />
+    <x-form.actions :guardar="$guardar" :cancelar="$cancelar" :modo="$modo" :boton="$boton" :metodo="$envio" :icono="$icono" :deshabilitar="$deshabilitar" :global="$global" />
 </form>

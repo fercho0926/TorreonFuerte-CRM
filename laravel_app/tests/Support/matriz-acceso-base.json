@@ -1,0 +1,686 @@
+{
+    "DELETE /celulas/{celula}": {
+        "admin": "302→/celulas",
+        "pastor": "302→/celulas",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "DELETE /celulas/{celula}/miembros/{persona}": {
+        "admin": "302→/celulas/1",
+        "pastor": "302→/celulas/1",
+        "lider_celula": "302→/celulas/1",
+        "user": "302→/dashboard"
+    },
+    "DELETE /celulas/{celula}/reuniones/{reunion}": {
+        "admin": "302→/celulas/1",
+        "pastor": "302→/celulas/1",
+        "lider_celula": "302→/celulas/1",
+        "user": "302→/dashboard"
+    },
+    "DELETE /encuentros/{encuentro}": {
+        "admin": "302→/encuentros",
+        "pastor": "302→/encuentros",
+        "lider_celula": "302→/encuentros",
+        "user": "302→/encuentros"
+    },
+    "DELETE /eventos/{evento}": {
+        "admin": "302→/eventos",
+        "pastor": "302→/eventos",
+        "lider_celula": "302→/eventos",
+        "user": "302→/eventos"
+    },
+    "DELETE /eventos/{evento}/personas/{inscripcion}": {
+        "admin": "302→/eventos/1",
+        "pastor": "302→/eventos/1",
+        "lider_celula": "302→/eventos/1",
+        "user": "302→/eventos/1"
+    },
+    "DELETE /eventos/{evento}/personas/{inscripcion}/pagos/{pago}": {
+        "admin": "302→/eventos/1",
+        "pastor": "302→/eventos/1",
+        "lider_celula": "302→/eventos/1",
+        "user": "302→/eventos/1"
+    },
+    "DELETE /lideres/{lider}": {
+        "admin": "422",
+        "pastor": "422",
+        "lider_celula": "403",
+        "user": "404"
+    },
+    "DELETE /ministerios/{ministerio}": {
+        "admin": "302→/ministerios",
+        "pastor": "302→/ministerios",
+        "lider_celula": "302→/ministerios",
+        "user": "302→/ministerios"
+    },
+    "DELETE /personas/{persona}": {
+        "admin": "422",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "404"
+    },
+    "DELETE /sedes/{sede}": {
+        "admin": "422",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "DELETE /users/{user}": {
+        "admin": "302→/users",
+        "pastor": "302→/users",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /cambiar-clave": {
+        "admin": "302→/dashboard",
+        "pastor": "302→/dashboard",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "GET /celulas": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /celulas/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "GET /celulas/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /celulas/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /celulas/{celula}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "302→/dashboard"
+    },
+    "GET /celulas/{celula}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "GET /dashboard": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros/{encuentro}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /encuentros/{encuentro}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos/{evento}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /eventos/{evento}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /lideres": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /lideres/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /lideres/designar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /lideres/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /lideres/{lider}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "404"
+    },
+    "GET /lideres/{lider}/quitar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "404"
+    },
+    "GET /mi-cuenta": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios/{ministerio}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /ministerios/{ministerio}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /personas": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /personas/buscar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /personas/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "403"
+    },
+    "GET /personas/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /personas/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "200"
+    },
+    "GET /personas/{persona}": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "404"
+    },
+    "GET /personas/{persona}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "200",
+        "user": "404"
+    },
+    "GET /personas/{persona}/trasladar": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /registro-miembros": {
+        "admin": "403",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /registro-qr/{tipo}/{id}/qr.svg": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/create": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/datos": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/exportar": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/{sede}": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/{sede}/edit": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/{sede}/pastores": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sedes/{sede}/registro-miembros/qr.svg": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sin-lider": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sin-lider/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /sin-lider/exportar": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /solicitudes-clave": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /solicitudes-clave/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /solicitudes-clave/exportar": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /users": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /users/create": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /users/datos": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /users/exportar": {
+        "admin": "200",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "GET /users/{user}/edit": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /celulas": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "POST /celulas/{celula}/miembros": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→/dashboard"
+    },
+    "POST /celulas/{celula}/reuniones": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→/dashboard"
+    },
+    "POST /claves/{registro}/enviada": {
+        "admin": "302→/users",
+        "pastor": "302→/users",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /encuentros": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /eventos": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /eventos/{evento}/personas": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /eventos/{evento}/personas/{inscripcion}/pagos": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /lideres/designar": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /ministerios": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /personas": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "POST /personas/rapida": {
+        "admin": "422",
+        "pastor": "422",
+        "lider_celula": "422",
+        "user": "403"
+    },
+    "POST /personas/{persona}/inactivar": {
+        "admin": "302→/personas/3",
+        "pastor": "302→/personas/3",
+        "lider_celula": "302→/personas/3",
+        "user": "404"
+    },
+    "POST /personas/{persona}/reactivar": {
+        "admin": "302→/personas/3",
+        "pastor": "302→/personas/3",
+        "lider_celula": "302→/personas/3",
+        "user": "404"
+    },
+    "POST /personas/{persona}/trasladar": {
+        "admin": "302→",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /registro-qr/{tipo}/{id}/abrir": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /registro-qr/{tipo}/{id}/regenerar": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sede-activa": {
+        "admin": "302→",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sedes": {
+        "admin": "302→",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sedes/{sede}/desactivar": {
+        "admin": "302→/sedes/1",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sedes/{sede}/reactivar": {
+        "admin": "302→/sedes/1",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sedes/{sede}/registro-miembros/abrir": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sedes/{sede}/registro-miembros/regenerar": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /sin-lider/{persona}/asignar": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /solicitudes-clave/{solicitud}/atender": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /solicitudes-clave/{solicitud}/descartar": {
+        "admin": "302→/solicitudes-clave",
+        "pastor": "302→/solicitudes-clave",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /users": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "POST /users/{user}/clave": {
+        "admin": "200",
+        "pastor": "200",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "PUT /cambiar-clave": {
+        "admin": "302→/dashboard",
+        "pastor": "302→/dashboard",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "PUT /celulas/{celula}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→/dashboard",
+        "user": "302→/dashboard"
+    },
+    "PUT /encuentros/{encuentro}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "PUT /encuentros/{encuentro}/asistencia": {
+        "admin": "302→/encuentros/1",
+        "pastor": "302→/encuentros/1",
+        "lider_celula": "302→/encuentros/1",
+        "user": "302→/encuentros/1"
+    },
+    "PUT /eventos/{evento}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "PUT /mi-cuenta/clave": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "PUT /ministerios/{ministerio}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "PUT /ministerios/{ministerio}/integrantes": {
+        "admin": "302→/ministerios/1",
+        "pastor": "302→/ministerios/1",
+        "lider_celula": "302→/ministerios/1",
+        "user": "302→/ministerios/1"
+    },
+    "PUT /personas/{persona}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "302→",
+        "user": "302→"
+    },
+    "PUT /sedes/{sede}": {
+        "admin": "302→",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "PUT /sedes/{sede}/pastores": {
+        "admin": "302→",
+        "pastor": "403",
+        "lider_celula": "403",
+        "user": "403"
+    },
+    "PUT /users/{user}": {
+        "admin": "302→",
+        "pastor": "302→",
+        "lider_celula": "403",
+        "user": "403"
+    }
+}

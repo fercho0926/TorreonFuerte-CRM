@@ -13,6 +13,7 @@ use App\Models\Sede;
 use App\Models\User;
 use App\Services\SedeContext;
 use App\Services\SedeService;
+use App\Support\Celular;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -23,19 +24,13 @@ class DatabaseSeeder extends Seeder
     /**
      * Siembra un escenario de ejemplo con TRES sedes (contraseña "password" para todos los
      * usuarios): un administrador del sistema y, por sede, pastor y pastora, un líder con su
-     * célula, personas con y sin líder, un evento con una inscripción y un pago, un encuentro y
+     * célula, miembros con y sin líder, un evento con una inscripción y un pago, un encuentro y
      * un ministerio. Solo para entornos de desarrollo.
      */
     public function run(): void
     {
         $contexto = app(SedeContext::class);
         $servicio = app(SedeService::class);
-
-        // El administrador del sistema no pertenece a ninguna sede.
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            ['name' => 'Administrador', 'role' => 'admin', 'sede_id' => null, 'celular' => '3000000000', 'password' => 'password']
-        );
 
         $sedes = [
             ['clave' => 'centro', 'nombre' => 'Torreón Fuerte Centro', 'ciudad' => 'Torreón', 'lugar' => 'Centro'],
@@ -53,6 +48,22 @@ class DatabaseSeeder extends Seeder
 
             $contexto->conSede($sede->id, fn () => $this->datosDeLaSede($sede, $d, $i));
         }
+
+        // El administrador ve todas las sedes, pero como toda cuenta es de un miembro (spec 016),
+        // su miembro pertenece a la primera sede.
+        $centro = Sede::where('nombre', $sedes[0]['nombre'])->firstOrFail();
+        $miembroAdmin = $contexto->conSede($centro->id, fn () => Persona::firstOrCreate(
+            ['sede_id' => $centro->id, 'nombres' => 'Administrador', 'apellidos' => 'Del Sistema'],
+            ['celular' => '3000000000', 'email' => 'admin@example.com', 'estado' => 'miembro_activo', 'lider_id' => $centro->pastor_persona_id]
+        ));
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            ['role' => 'admin', 'sede_id' => null, 'persona_id' => $miembroAdmin->id, 'password' => 'password']
+        );
+
+        // Sin eventos de modelo no se calcula la clave del celular: se completa aquí.
+        Persona::withoutGlobalScopes()->whereNull('celular_clave')->whereNotNull('celular')->get()
+            ->each(fn (Persona $p) => Persona::withoutGlobalScopes()->whereKey($p->id)->update(['celular_clave' => Celular::clave($p->celular)]));
     }
 
     /**
@@ -60,13 +71,14 @@ class DatabaseSeeder extends Seeder
      */
     private function datosDeLaSede(Sede $sede, array $d, int $indice): void
     {
+        // Todo líder depende del pastor de la sede, que es la cabeza (spec 016).
         $lider = Persona::firstOrCreate(
             ['sede_id' => $sede->id, 'nombres' => 'Lider', 'apellidos' => ucfirst($d['clave'])],
-            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true]
+            ['tipo_documento' => 'CC', 'numero_documento' => '10'.$indice.'0000001', 'celular' => '31'.$indice.'0000001', 'estado' => 'miembro_activo', 'es_lider' => true, 'lider_id' => $sede->pastor_persona_id]
         );
         User::updateOrCreate(
             ['email' => "lider.{$d['clave']}@example.com"],
-            ['name' => $lider->nombre_completo, 'role' => 'lider_celula', 'persona_id' => $lider->id, 'sede_id' => $sede->id, 'celular' => $lider->celular, 'password' => 'password']
+            ['role' => 'lider_celula', 'persona_id' => $lider->id, 'sede_id' => $sede->id, 'password' => 'password']
         );
 
         $miembro = Persona::firstOrCreate(

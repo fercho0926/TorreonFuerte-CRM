@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Support\Celular;
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\TieneHistorial;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -30,10 +32,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'inactivado_en',
     'trasladada_a_sede_id',
     'trasladada_en',
+    'trasladada_desde_persona_id',
 ])]
 class Persona extends Model
 {
-    use HasFactory, SoftDeletes, PerteneceASede;
+    use HasFactory, SoftDeletes, PerteneceASede, TieneHistorial;
 
     public const TIPOS_DOCUMENTO = ['CC', 'TI', 'CE', 'Pasaporte'];
 
@@ -61,7 +64,7 @@ class Persona extends Model
     }
 
     /**
-     * El líder de célula de esta persona (es a su vez otra persona).
+     * El líder de célula de este miembro (es a su vez otro miembro).
      */
     public function lider(): BelongsTo
     {
@@ -69,17 +72,61 @@ class Persona extends Model
     }
 
     /**
-     * Las personas que tienen a esta persona como líder de célula.
+     * Los miembros que tienen a este miembro como líder de célula.
      */
     public function miembros(): HasMany
     {
         return $this->hasMany(Persona::class, 'lider_id');
     }
 
-
-    public function cambios(): HasMany
+    /** @return array<string, string|array<int|string, mixed>> */
+    public function camposHistorial(): array
     {
-        return $this->hasMany(PersonaCambio::class)->latest('created_at')->latest('id');
+        return [
+            'nombres' => 'Nombres',
+            'apellidos' => 'Apellidos',
+            'tipo_documento' => 'Tipo de documento',
+            'numero_documento' => 'Número de documento',
+            'fecha_nacimiento' => ['Fecha de nacimiento', 'fecha'],
+            'celular' => 'Celular',
+            'email' => 'Correo',
+            'direccion' => 'Dirección',
+            'barrio' => 'Barrio',
+            'ciudad' => 'Ciudad',
+            'estado' => ['Estado', self::ESTADOS],
+            'lider_id' => ['Líder', 'persona'],
+            'es_lider' => ['Es líder', 'booleano'],
+            'reasignado_a' => ['Miembros reasignados a', 'persona'],
+            'trasladada_a_sede_id' => ['Trasladado a la sede', 'sede'],
+        ];
+    }
+
+    /** @return array<int, string> */
+    public function camposIgnorados(): array
+    {
+        return ['inactivado_en', 'trasladada_en', 'trasladada_desde_persona_id', 'celular_clave'];
+    }
+
+    protected static function booted(): void
+    {
+        // Forma canónica del celular para encontrar al miembro al crear su cuenta (spec 016).
+        static::saving(function (Persona $persona) {
+            $persona->celular_clave = Celular::clave($persona->celular);
+        });
+    }
+
+    /** La cuenta de acceso del miembro, si tiene (spec 016: toda cuenta es de un miembro). */
+    public function cuenta(): HasOne
+    {
+        return $this->hasOne(User::class)->withoutGlobalScopes();
+    }
+
+    /** Verdadero si es el pastor o la pastora de su sede: la cabeza del liderazgo, sin líder. */
+    public function esPastoral(): bool
+    {
+        $sede = $this->sede;
+
+        return $sede !== null && in_array($this->id, array_filter([$sede->pastor_persona_id, $sede->pastora_persona_id]), true);
     }
 
     public function getEstadoEtiquetaAttribute(): string
@@ -118,6 +165,14 @@ class Persona extends Model
         return trim("{$this->nombres} {$this->apellidos}");
     }
 
+    /** Iniciales del primer nombre y el primer apellido, para el avatar (los miembros no tienen foto). */
+    public function getInicialesAttribute(): string
+    {
+        $primera = fn (?string $texto) => mb_strtoupper(mb_substr(trim((string) $texto), 0, 1));
+
+        return $primera($this->nombres).$primera($this->apellidos);
+    }
+
     public function encuentros(): BelongsToMany
     {
         return $this->belongsToMany(Encuentro::class, 'encuentro_persona')
@@ -126,7 +181,7 @@ class Persona extends Model
     }
 
     /**
-     * Inscripciones de esta persona a eventos, con su historial de abonos.
+     * Inscripciones de este miembro a eventos, con su historial de abonos.
      */
     public function inscripcionesEventos(): HasMany
     {
@@ -141,7 +196,7 @@ class Persona extends Model
     }
 
     /**
-     * Ministerios que esta persona tiene a cargo como encargado.
+     * Ministerios que este miembro tiene a cargo como encargado.
      */
     public function ministeriosLiderados(): HasMany
     {
@@ -149,7 +204,7 @@ class Persona extends Model
     }
 
     /**
-     * Célula(s) a las que pertenece esta persona como miembro.
+     * Célula(s) a las que pertenece este miembro como miembro.
      */
     public function celulas(): BelongsToMany
     {
@@ -159,7 +214,7 @@ class Persona extends Model
     }
 
     /**
-     * Célula(s) que esta persona lidera.
+     * Célula(s) que este miembro lidera.
      */
     public function celulasLideradas(): HasMany
     {
@@ -167,11 +222,17 @@ class Persona extends Model
     }
 
     /**
-     * Célula(s) donde esta persona es co-líder.
+     * Célula(s) donde este miembro es co-líder.
      */
     public function celulasCoLideradas(): HasMany
     {
         return $this->hasMany(Celula::class, 'co_lider_id');
+    }
+
+    /** Niveles de formación que este miembro ha completado (spec 014). */
+    public function avances(): HasMany
+    {
+        return $this->hasMany(AvanceNivel::class);
     }
 
     public function scopeLideres($query)
@@ -199,6 +260,38 @@ class Persona extends Model
         return $query;
     }
 
+    /**
+     * Miembros cuyo nivel actual (el de mayor posición completado entre los niveles activos) es el indicado.
+     */
+    public function scopeEnNivel($query, int $nivelId)
+    {
+        $posicion = NivelFormacion::query()->whereKey($nivelId)->value('posicion');
+
+        if ($posicion === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn($this->qualifyColumn('id'), function ($sub) use ($posicion) {
+            $sub->select('a.persona_id')
+                ->from('avances_nivel as a')
+                ->join('niveles_formacion as n', 'n.id', '=', 'a.nivel_id')
+                ->where('n.activo', true)
+                ->groupBy('a.persona_id')
+                ->havingRaw('max(n.posicion) = ?', [$posicion]);
+        });
+    }
+
+    /** Miembros que no han completado ningún nivel activo. */
+    public function scopeSinNivel($query)
+    {
+        return $query->whereNotIn($this->qualifyColumn('id'), function ($sub) {
+            $sub->select('a.persona_id')
+                ->from('avances_nivel as a')
+                ->join('niveles_formacion as n', 'n.id', '=', 'a.nivel_id')
+                ->where('n.activo', true);
+        });
+    }
+
     public function scopeActivas($query)
     {
         return $query->where('estado', '!=', 'inactivo');
@@ -211,7 +304,7 @@ class Persona extends Model
     }
 
     /**
-     * Indica si la persona tiene historial que impide eliminarla definitivamente.
+     * Indica si el miembro tiene historial que impide eliminarlo definitivamente.
      */
     public function tieneHistorial(): bool
     {

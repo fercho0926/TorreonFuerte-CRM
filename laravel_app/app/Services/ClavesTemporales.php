@@ -47,11 +47,12 @@ class ClavesTemporales
                 ->update(['estado' => RegistroClave::REEMPLAZADA, 'updated_at' => now()]);
 
             // El cast «hashed» guarda solo el hash; esto invalida la contraseña o clave anterior.
-            $objetivo->forceFill([
+            // En el historial queda «Clave generada», nunca la clave (spec 015, RF-007).
+            app(Historial::class)->accion('clave_generada', fn () => $objetivo->forceFill([
                 'password' => $this->sinGuion($clave),
                 'debe_cambiar_clave' => true,
                 'clave_vence_en' => $vence,
-            ])->save();
+            ])->save());
 
             $registro = new RegistroClave([
                 'user_id' => $objetivo->id,

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\PerteneceASede;
+use App\Models\Concerns\RegistraHistorial;
 use App\Models\Concerns\TieneRegistroQr;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,7 +23,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Evento extends Model
 {
-    use HasFactory, PerteneceASede, TieneRegistroQr;
+    use HasFactory, PerteneceASede, RegistraHistorial, TieneRegistroQr;
+
+    /** @return array<string, string|array<int|string, mixed>> */
+    public function camposHistorial(): array
+    {
+        return [
+            'nombre' => 'Nombre',
+            'tipo' => 'Tipo',
+            'fecha' => ['Fecha', 'fecha'],
+            'lugar' => 'Lugar',
+            'costo' => ['Costo', 'dinero', 'sensible' => \App\Support\Modulos::EVENTOS],
+            'estado' => ['Estado', ['planificado' => 'Planificado', 'realizado' => 'Realizado', 'cancelado' => 'Cancelado']],
+            'descripcion' => 'Descripción',
+            'registro_abierto' => ['Registro por QR abierto', 'booleano'],
+        ];
+    }
 
     public const TIPOS = [
         'Cena de varones',

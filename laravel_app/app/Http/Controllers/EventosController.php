@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Grillas\Grilla;
 use App\Grillas\EventosGrilla;
+use App\Http\Controllers\Concerns\PestanaHistorico;
 use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
 use App\Models\Evento;
@@ -15,7 +16,7 @@ use Illuminate\Validation\Rule;
 
 class EventosController extends Controller
 {
-    use ServicioGrilla;
+    use PestanaHistorico, ServicioGrilla;
 
     protected function grilla(): Grilla
     {
@@ -63,14 +64,25 @@ class EventosController extends Controller
         return redirect()->route('eventos.index')->with('success', 'Evento creado correctamente.');
     }
 
-    public function show(Evento $evento)
+    public function show(Request $request, Evento $evento)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
-        $evento->load(['inscripciones' => function ($query) {
-            $query->with(['persona', 'pagos' => fn ($q) => $q->orderByDesc('fecha_pago')]);
+        if ($this->pestanaActiva($request) === 'historico') {
+            return view('eventos.show', [
+                'evento' => $evento,
+                'pestana' => 'historico',
+                'historico' => $this->historicoDeRegistro($request, $evento, route('eventos.show', $evento)),
+            ]);
+        }
+
+        $visibles = $this->idsDePersonasVisibles();
+
+        $evento->load(['inscripciones' => function ($query) use ($visibles) {
+            $query->with(['persona', 'pagos' => fn ($q) => $q->orderByDesc('fecha_pago')])
+                ->when($visibles !== null, fn ($q) => $q->whereIn('persona_id', $visibles));
         }]);
 
         return view('eventos.show', [
@@ -116,7 +128,7 @@ class EventosController extends Controller
     }
 
     /**
-     * Inscribe una persona adicional al evento, ya en curso.
+     * Inscribe un miembro adicional al evento, ya en curso.
      */
     public function agregarPersona(Request $request, Evento $evento)
     {
@@ -134,11 +146,11 @@ class EventosController extends Controller
             ['costo_individual' => $data['costo_individual'] ?? null]
         );
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Persona inscrita correctamente.');
+        return redirect()->route('eventos.show', $evento)->with('success', 'Miembro inscrito correctamente.');
     }
 
     /**
-     * Quita a una persona del evento, solo si no tiene abonos registrados
+     * Quita a un miembro del evento, solo si no tiene abonos registrados
      * (para no perder el historial de pagos ya hechos).
      */
     public function quitarPersona(Evento $evento, EventoPersona $inscripcion)
@@ -151,16 +163,16 @@ class EventosController extends Controller
 
         if ($inscripcion->pagos()->exists()) {
             return redirect()->route('eventos.show', $evento)
-                ->with('error', 'No se puede quitar a esta persona porque ya tiene abonos registrados.');
+                ->with('error', 'No se puede quitar a este miembro porque ya tiene abonos registrados.');
         }
 
         $inscripcion->delete();
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Persona retirada del evento.');
+        return redirect()->route('eventos.show', $evento)->with('success', 'Miembro retirado del evento.');
     }
 
     /**
-     * Registra un abono (pago total o parcial) de una persona para el evento.
+     * Registra un abono (pago total o parcial) de un miembro para el evento.
      */
     public function registrarPago(Request $request, Evento $evento, EventoPersona $inscripcion)
     {
@@ -202,7 +214,7 @@ class EventosController extends Controller
 
     private function personasDisponibles()
     {
-        return Persona::orderBy('apellidos')->orderBy('nombres')->get();
+        return $this->alcance()->personasVisibles($this->usuarioActual())->orderBy('apellidos')->orderBy('nombres')->get();
     }
 
     private function validateData(Request $request): array

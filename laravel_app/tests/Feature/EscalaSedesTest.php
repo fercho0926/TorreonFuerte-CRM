@@ -36,7 +36,7 @@ class EscalaSedesTest extends TestCase
         $this->assertSame(40, User::withoutGlobalScopes()->where('role', 'pastor')->count());
         $this->assertSame(0, array_sum(\App\Support\MigracionSedes::contarSinSede()));
 
-        // Cada pastor ve exactamente sus 2 personas pastorales, sin importar cuántas sedes haya.
+        // Cada pastor ve exactamente sus 2 miembros pastorales, sin importar cuántas sedes haya.
         $this->iniciarSesionComo(User::withoutGlobalScopes()->where('email', 'pastor7@iglesia.co')->first());
         $this->get(route('personas.index'))->assertOk()->assertViewHas('pagina', fn ($p) => $p->total() === 2);
     }
@@ -69,7 +69,7 @@ class EscalaSedesTest extends TestCase
         $this->get(route('personas.index', ['q' => 'Persona500']))->assertViewHas('pagina', fn ($p) => $p->total() >= 1);
         $segundos = microtime(true) - $inicio;
 
-        $this->assertLessThan(2.0, $segundos, 'El listado y la búsqueda con 1.000 personas deben responder en menos de 2 s');
+        $this->assertLessThan(2.0, $segundos, 'El listado y la búsqueda con 1.000 miembros deben responder en menos de 2 s');
         $this->assertSame(1000, Persona::withoutGlobalScopes()->where('sede_id', $otra->id)->count());
     }
 }

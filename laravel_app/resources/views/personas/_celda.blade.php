@@ -1,4 +1,4 @@
-{{-- Celda de la grilla de personas. Variables: $fila (Persona), $columna (nombre, estado, celular, lider, sede, acciones). --}}
+{{-- Celda de la grilla de miembros. Variables: $fila (Miembro), $columna (nombre, estado, celular, lider, sede, acciones). --}}
 @php($persona = $fila)
 @switch($columna)
     @case('nombre')
@@ -19,6 +19,9 @@
             <span class="text-muted">—</span>
         @endif
         @break
+    @case('nivel')
+        <x-niveles.puntos :miembro="$persona" :niveles="$grilla->niveles()" />
+        @break
     @case('sede')
         {{ $persona->sede?->nombre ?? '—' }}
         @break
@@ -26,7 +29,7 @@
         <x-ui.acciones-fila :ver="route('personas.show', $persona)" :editar="route('personas.edit', $persona)" :puede-editar="\App\Support\Permisos::puede('editar', $persona)" :nombre="$persona->nombre_completo">
             @puede('inactivar', $persona)
                 @if($persona->estado !== 'inactivo')
-                    <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a esta persona?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="sm">Inactivar</x-form.confirm>
+                    <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a este miembro?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="sm">Inactivar</x-form.confirm>
                 @endif
             @endpuede
         </x-ui.acciones-fila>

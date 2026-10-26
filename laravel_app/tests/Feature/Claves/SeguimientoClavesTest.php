@@ -21,7 +21,7 @@ class SeguimientoClavesTest extends TestCase
     {
         parent::setUp();
         $this->armarDosSedes();
-        $this->A['liderUser']->forceFill(['celular' => '3105559999'])->save();
+        $this->A['liderUser']->persona->update(['celular' => '3105559999']);
         $this->iniciarSesionComo($this->A['pastor']);
     }
 

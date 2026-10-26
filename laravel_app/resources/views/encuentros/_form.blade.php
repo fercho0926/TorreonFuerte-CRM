@@ -2,6 +2,9 @@
     $encuentro = $encuentro ?? null;
     $seleccionadas = $personasSeleccionadas ?? [];
     $opcionesEstado = collect(\App\Models\Encuentro::ESTADOS)->map(fn ($e) => ['id' => $e, 'texto' => ucfirst($e)])->all();
+    $opcionesNivel = \App\Models\NivelFormacion::query()->ordenados()->get()
+        ->filter(fn ($n) => $n->activo || $n->id === $encuentro?->nivel_id)
+        ->map(fn ($n) => ['id' => $n->id, 'texto' => $n->posicion.' · '.$n->nombre.($n->activo ? '' : ' (desactivado)')])->values()->all();
     $opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo.($p->es_lider ? ' (líder)' : ''), fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null));
 @endphp
 
@@ -9,11 +12,12 @@
     <x-form.input name="nombre" label="Nombre del encuentro" icono="fa-heading" :required="true" :value="$encuentro?->nombre" maxlength="255" />
     <x-form.date name="fecha_realizacion" label="Fecha de realización" :required="true" :value="$encuentro?->fecha_realizacion" col="col-md-3" />
     <x-form.select name="estado" label="Estado" icono="fa-toggle-on" :required="true" :opciones="$opcionesEstado" :value="$encuentro?->estado ?? 'planificado'" :vacio="null" col="col-md-3" />
+    <x-form.select name="nivel_id" label="Nivel del plan" icono="fa-route" :opciones="$opcionesNivel" :value="$encuentro?->nivel_id" vacio="Ninguno (no completa un nivel)" ayuda="Si lo eliges, quienes asistan a este encuentro (realizado) completan ese nivel." />
     <x-form.input name="lugar" label="Lugar" icono="fa-map-marker-alt" :value="$encuentro?->lugar" maxlength="255" />
     <x-form.money name="valor" label="Valor" :required="true" :value="$encuentro?->valor ?? 0" />
     <x-form.textarea name="notas" label="Notas" :value="$encuentro?->notas" ayuda="Opcional: detalles que quieras recordar del encuentro." />
 </x-form.section>
 
-<x-form.section titulo="Participantes" descripcion="Elige a las personas que participan; puedes cambiarlas después." icono="fa-users" id="seccion-participantes">
-    <x-form.multiselect name="personas[]" label="Personas participantes" :opciones="$opcionesPersona" :seleccionados="$seleccionadas" vacio="No hay personas registradas todavía." />
+<x-form.section titulo="Participantes" descripcion="Elige a los miembros que participan; puedes cambiarlos después." icono="fa-users" id="seccion-participantes">
+    <x-form.multiselect name="personas[]" label="Miembros participantes" :opciones="$opcionesPersona" :seleccionados="$seleccionadas" vacio="No hay miembros registrados todavía." />
 </x-form.section>

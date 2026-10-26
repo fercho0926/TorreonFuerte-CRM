@@ -7,7 +7,6 @@ use App\Models\Evento;
 use App\Models\EventoPago;
 use App\Models\Persona;
 use App\Models\Sede;
-use App\Models\SedeCambio;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +24,7 @@ class SedeService
 
     /**
      * Crea la sede y, en la misma transacción, al pastor y (opcionalmente) a la pastora, cada
-     * uno como persona de la sede y como usuario con rol "pastor". Si algo falla no queda nada.
+     * uno como miembro de la sede y como usuario con rol "pastor". Si algo falla no queda nada.
      *
      * @param  array<string, mixed>  $datos  nombre, ciudad, direccion, telefono, email, pastor[...], pastora[...]
      */
@@ -101,7 +100,7 @@ class SedeService
 
     /**
      * Cambia al pastor o a la pastora: crea la cuenta nueva (o designa una cuenta existente de
-     * la misma sede) y la anterior pasa a líder conservando su persona.
+     * la misma sede) y la anterior pasa a líder conservando su miembro.
      *
      * @param  'pastor'|'pastora'  $rol
      * @param  array<string, mixed>  $datos  datos de la cuenta nueva, o ['user_id' => id] de una cuenta de la sede
@@ -123,14 +122,15 @@ class SedeService
 
                     $usuario->update(['role' => 'pastor']);
 
-                    return $usuario->persona ?? $this->vincularPersona($usuario);
+                    // Toda cuenta es de un miembro (spec 016).
+                    return $usuario->persona;
                 }
 
                 return $this->crearCuentaPastoral($sede, $datos);
             });
 
             if ($anteriorPersonaId && $anteriorPersonaId !== $nuevaPersona->id) {
-                // La cuenta anterior pierde el rol de pastor pero conserva su persona y sus datos.
+                // La cuenta anterior pierde el rol de pastor pero conserva su miembro y sus datos.
                 User::withoutGlobalScopes()
                     ->where('sede_id', $sede->id)
                     ->where('persona_id', $anteriorPersonaId)
@@ -143,12 +143,47 @@ class SedeService
             $this->registrar($sede, $rol === 'pastora' ? 'pastora_cambiada' : 'pastor_cambiado',
                 [$campo => $anteriorPersonaId], [$campo => $nuevaPersona->id], $por);
 
+            $this->mantenerCabeza($sede->fresh(), $rol, $nuevaPersona, $anteriorPersonaId, $por);
+
             return $sede;
         });
     }
 
     /**
-     * Resumen por sede para el administrador: personas, líderes, células, eventos próximos y
+     * Tras cambiar al pastor o a la pastora, la sede sigue con una sola cabeza (spec 016, research D10):
+     * el nuevo queda líder y sin líder; si cambió el pastor, quienes dependían del anterior pasan al
+     * nuevo; y el anterior queda como líder bajo el pastor.
+     */
+    private function mantenerCabeza(Sede $sede, string $rol, Persona $nueva, ?int $anteriorId, ?User $por): void
+    {
+        $liderazgo = app(LiderazgoService::class);
+        $nueva = Persona::withoutGlobalScopes()->find($nueva->id);
+
+        $antes = ['es_lider' => $nueva->es_lider, 'lider_id' => $nueva->lider_id];
+        if ($antes !== ['es_lider' => true, 'lider_id' => null]) {
+            $nueva->forceFill(['es_lider' => true, 'lider_id' => null])->save();
+            $liderazgo->registrarCambio($nueva, 'lider', ['lider_id' => $antes['lider_id']], ['lider_id' => null], $por);
+        }
+
+        if (!$anteriorId || $anteriorId === $nueva->id) {
+            return;
+        }
+
+        $anterior = Persona::withoutGlobalScopes()->find($anteriorId);
+        $pastor = $rol === 'pastor' ? $nueva : $sede->pastor;
+
+        if ($rol === 'pastor' && $anterior) {
+            $liderazgo->reasignarDependientes($anterior, $nueva, $por);
+        }
+
+        if ($anterior && $pastor && $anterior->id !== $pastor->id && !$anterior->esPastoral()) {
+            $anterior->forceFill(['es_lider' => true])->save();
+            $liderazgo->cambiarLider($anterior, $pastor, $por);
+        }
+    }
+
+    /**
+     * Resumen por sede para el administrador: miembros, líderes, células, eventos próximos y
      * recaudo (siempre por sede; los montos no se mezclan sin rotular).
      *
      * @return Collection<int, array<string, mixed>> indexada por id de sede
@@ -179,7 +214,7 @@ class SedeService
 
     /**
      * Indica si la sede tiene datos propios de la iglesia más allá de las cuentas del pastor y
-     * la pastora (personas, células, eventos, etc.), lo que impide eliminarla.
+     * la pastora (miembros, células, eventos, etc.), lo que impide eliminarla.
      */
     public function tieneDatos(Sede $sede): bool
     {
@@ -212,6 +247,9 @@ class SedeService
         }
 
         DB::transaction(function () use ($sede) {
+            // La sede deja de existir; su historial y la foto de sus datos se conservan (spec 015, RF-004).
+            app(Historial::class)->registrar($sede, 'eliminada');
+
             $this->contexto->sinFiltro(function () use ($sede) {
                 $personas = array_filter([$sede->pastor_persona_id, $sede->pastora_persona_id]);
                 $sede->update(['pastor_persona_id' => null, 'pastora_persona_id' => null]);
@@ -223,13 +261,14 @@ class SedeService
     }
 
     /**
-     * Crea la persona y el usuario (rol pastor) de una cuenta pastoral dentro de la sede.
+     * Crea el miembro y el usuario (rol pastor) de una cuenta pastoral dentro de la sede.
      *
      * @param  array<string, mixed>  $datos
      */
     private function crearCuentaPastoral(Sede $sede, array $datos): Persona
     {
         return $this->contexto->conSede($sede->id, function () use ($sede, $datos) {
+            // El pastor y la pastora son líderes sin líder: la cabeza de la sede (spec 016).
             $persona = Persona::create([
                 'sede_id' => $sede->id,
                 'nombres' => trim($datos['nombres']),
@@ -237,11 +276,12 @@ class SedeService
                 'celular' => $datos['celular'] ?? null,
                 'email' => $datos['email'],
                 'estado' => 'miembro_activo',
+                'es_lider' => true,
+                'lider_id' => null,
             ]);
 
             User::create([
                 'sede_id' => $sede->id,
-                'name' => $persona->nombre_completo,
                 'email' => $datos['email'],
                 'password' => $datos['password'],
                 'role' => 'pastor',
@@ -252,35 +292,12 @@ class SedeService
         });
     }
 
-    private function vincularPersona(User $usuario): Persona
-    {
-        $partes = preg_split('/\s+/', trim($usuario->name), 2);
-
-        $persona = Persona::create([
-            'sede_id' => $usuario->sede_id,
-            'nombres' => $partes[0],
-            'apellidos' => $partes[1] ?? '-',
-            'email' => $usuario->email,
-            'estado' => 'miembro_activo',
-        ]);
-
-        $usuario->update(['persona_id' => $persona->id]);
-
-        return $persona;
-    }
-
     /**
      * @param  array<string, mixed>|null  $antes
      * @param  array<string, mixed>|null  $despues
      */
     private function registrar(Sede $sede, string $accion, ?array $antes, ?array $despues, ?User $por): void
     {
-        SedeCambio::create([
-            'sede_id' => $sede->id,
-            'user_id' => $por?->id,
-            'accion' => $accion,
-            'antes' => $antes,
-            'despues' => $despues,
-        ]);
+        app(Historial::class)->registrar($sede, $accion, $antes, $despues, $por);
     }
 }

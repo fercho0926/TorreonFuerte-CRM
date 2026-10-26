@@ -14,7 +14,7 @@ use App\Models\User;
 
 /**
  * Arma dos sedes (A y B) con datos de nombres distintivos para detectar fugas entre ellas.
- * Cada sede tiene pastor, líder, persona a cargo, célula, evento con inscripción y
+ * Cada sede tiene pastor, líder, miembro a cargo, célula, evento con inscripción y
  * pago, encuentro y ministerio. Requiere los traits IniciaSesion y ConSedes.
  */
 trait EscenarioDosSedes

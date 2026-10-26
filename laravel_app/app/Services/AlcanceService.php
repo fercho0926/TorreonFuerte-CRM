@@ -8,8 +8,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Define qué personas, líderes, células puede ver un usuario según su rol:
- * admin y pastor ven todo; un líder ve a sus personas y sus células; el rol "usuario" solo
+ * Define qué miembros, líderes, células puede ver un usuario según su rol:
+ * admin y pastor ven todo; un líder ve a sus miembros y sus células; el rol "usuario" solo
  * su propio registro. Devuelve consultas (no listas de IDs) para poder paginar y reutilizarlas
  * en selectores.
  */

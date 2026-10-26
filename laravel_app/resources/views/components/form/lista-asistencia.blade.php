@@ -1,5 +1,5 @@
 {{--
-    Lista de personas con un interruptor y/o campos por fila (asistencia, pagos, integrantes...).
+    Lista de miembros con un interruptor y/o campos por fila (asistencia, pagos, integrantes...).
     Una sola estructura de datos: tabla en computador; en teléfono el CSS convierte cada fila en una
     tarjeta (sin duplicar los controles que se envían).
     Props:
@@ -8,14 +8,14 @@
       name    = nombre del arreglo del interruptor (ej. asistio[])
       marcados, etiqueta, columnas (encabezados de 'extra'), interruptor (false = solo campos)
 --}}
-@props(['filas' => [], 'name' => 'asistio[]', 'marcados' => [], 'etiqueta' => 'Asistió', 'vacio' => 'No hay personas para mostrar.', 'columnas' => [], 'interruptor' => true])
+@props(['filas' => [], 'name' => 'asistio[]', 'marcados' => [], 'etiqueta' => 'Asistió', 'vacio' => 'No hay miembros para mostrar.', 'columnas' => [], 'interruptor' => true])
 @php
     $marcadosTexto = array_map('strval', (array) old(\App\Support\Formulario::clave($name), $marcados));
     $prefijo = \App\Support\Formulario::id($name);
     $encabezadosCampos = collect($filas)->first()['campos'] ?? [];
 @endphp
 <div class="fm-lista" data-lista-asistencia>
-    <p class="fm-lista-total" aria-live="polite"><span data-lista-total>{{ count($filas) }}</span> persona(s)</p>
+    <p class="fm-lista-total" aria-live="polite"><span data-lista-total>{{ count($filas) }}</span> miembro(s)</p>
     @if(count($filas) === 0)
         <p class="text-muted">{{ $vacio }}</p>
     @else
@@ -23,7 +23,7 @@
             <table class="table table-hover fm-lista__tabla tabla-apilable mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">Persona</th>
+                        <th scope="col">Miembro</th>
                         @foreach($columnas as $col)
                             <th scope="col">{{ $col }}</th>
                         @endforeach
@@ -39,7 +39,7 @@
                     @foreach($filas as $fila)
                         @php($idCheck = $prefijo.'-'.$fila['id'])
                         <tr class="fm-lista__fila">
-                            <td data-etiqueta="Persona">
+                            <td data-etiqueta="Miembro">
                                 <span class="fm-persona-card__nombre">{{ $fila['nombre'] }}</span>
                                 @if(!empty($fila['apoyo']))
                                     <span class="fm-persona-card__apoyo d-block">{{ $fila['apoyo'] }}</span>

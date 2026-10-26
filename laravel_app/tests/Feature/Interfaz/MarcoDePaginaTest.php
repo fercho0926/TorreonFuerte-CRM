@@ -43,7 +43,7 @@ class MarcoDePaginaTest extends TestCase
 
         $this->get(route('dashboard'))
             ->assertSee($user->name)
-            ->assertSee('Pastor (ve todo)')
+            ->assertSee('Pastor')
             ->assertSee('Cerrar sesión')
             ->assertSee('Iglesia Alfa');
     }
@@ -67,7 +67,7 @@ class MarcoDePaginaTest extends TestCase
 
         $html = $this->get(route('personas.index'))->getContent();
 
-        $this->assertStringContainsString('Personas', $html);
+        $this->assertStringContainsString('Miembros', $html);
         $this->assertStringNotContainsString('ADMINISTRACIÓN', $html);
         $this->assertStringNotContainsString('Sin líder asignado', $html);
         $this->assertStringNotContainsString('>Usuarios<', $html);

@@ -51,15 +51,18 @@ class PermisosAccionesTest extends TestCase
 
     }
 
-    public function test_la_bitacora_solo_se_muestra_a_admin_y_pastor(): void
+    /** Spec 015 (RF-021): quien ve la ficha ve su histórico; antes era solo para admin y pastor. */
+    public function test_el_historico_lo_ve_quien_puede_ver_la_ficha(): void
     {
         $lider = Persona::factory()->lider()->create();
         $persona = Persona::factory()->create(['lider_id' => $lider->id]);
+        $ajena = Persona::factory()->create();
 
         $this->comoLider($lider);
-        $this->get(route('personas.show', $persona))->assertDontSee('Historial de cambios');
+        $this->get(route('personas.show', [$persona, 'pestana' => 'historico']))->assertOk()->assertSee('Cambios de datos');
+        $this->get(route('personas.show', [$ajena, 'pestana' => 'historico']))->assertNotFound();
 
         $this->comoPastor();
-        $this->get(route('personas.show', $persona))->assertSee('Historial de cambios');
+        $this->get(route('personas.show', [$persona, 'pestana' => 'historico']))->assertOk()->assertSee('Cambios de datos');
     }
 }

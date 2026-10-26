@@ -1,5 +1,5 @@
 /**
- * Formulario público de registro por QR: al salir del celular o de la cédula consulta si la persona ya
+ * Formulario público de registro por QR: al salir del celular o de la cédula consulta si el miembro ya
  * existe y, si es así, completa los campos vacíos. Es solo una mejora: sin JavaScript el formulario
  * tiene un paso 1 (celular o cédula) que hace la misma búsqueda en el servidor.
  * No se guarda nada en el navegador y la respuesta del servidor solo trae nombres, apellidos y fecha de nacimiento.
@@ -28,10 +28,13 @@ export async function consultar(url, valores, token, ventana = window) {
     }
 }
 
-/** Completa solo los campos vacíos con los datos de la persona encontrada. Devuelve cuántos llenó. */
-export function precargar(form, datos) {
+/**
+ * Completa solo los campos vacíos con los datos del miembro encontrada. Devuelve cuántos llenó.
+ * `campos` permite ampliar la lista (el QR de miembros precarga también cédula, correo y ubicación).
+ */
+export function precargar(form, datos, campos = CAMPOS_PRECARGA) {
     let llenos = 0;
-    CAMPOS_PRECARGA.forEach((nombre) => {
+    campos.forEach((nombre) => {
         const campo = form.elements[nombre];
         if (campo && !campo.value && datos[nombre]) {
             campo.value = datos[nombre];
@@ -58,6 +61,7 @@ function mostrarAviso(form, mensaje) {
 
 export function iniciarRegistroQr(form, ventana = window) {
     const url = form.dataset.registroBuscar;
+    const campos = form.dataset.registroCampos ? form.dataset.registroCampos.split(',').map((c) => c.trim()).filter(Boolean) : CAMPOS_PRECARGA;
     const token = form.querySelector('input[name="_token"]')?.value;
     if (!url || !token) return;
 
@@ -69,8 +73,8 @@ export function iniciarRegistroQr(form, ventana = window) {
         const datos = await consultar(url, { celular, numero_documento: documento }, token, ventana);
         if (!datos) return;
 
-        if (datos.estado === 'existente') {
-            const llenos = precargar(form, datos);
+        if (datos.estado === 'existente' || (datos.estado === 'pendiente' && datos.nombres)) {
+            const llenos = precargar(form, datos, campos);
             mostrarAviso(form, llenos > 0 ? 'Encontramos tus datos. Revísalos y confirma.' : '');
         } else if (datos.estado === 'conflicto' || datos.estado === 'pendiente' || datos.estado === 'limite') {
             mostrarAviso(form, datos.mensaje || '');

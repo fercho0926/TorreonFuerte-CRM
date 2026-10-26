@@ -5,13 +5,18 @@
 @section('page-title', 'Detalle del evento')
 
 @section('page-actions')
-    <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-primary">Editar</a>
+    @puedeModulo('eventos', 'escritura')
+        <a href="{{ route('eventos.edit', $evento) }}" class="btn btn-primary">Editar</a>
+    @endpuedeModulo
     <a href="{{ route('eventos.index') }}" class="btn btn-outline-secondary">Volver</a>
 @endsection
 
 @section('content')
+@include('historial._pestanas', ['url' => route('eventos.show', $evento), 'pestana' => $pestana ?? 'datos'])
 
-
+@if(($pestana ?? 'datos') === 'historico')
+    @include('historial._lista', ['historico' => $historico])
+@else
 <div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $evento->nombre }}</h3>
@@ -27,7 +32,7 @@
             <dt class="col-sm-3">Lugar</dt>
             <dd class="col-sm-9">{{ $evento->lugar ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Costo por persona</dt>
+            <dt class="col-sm-3">Costo por miembro</dt>
             <dd class="col-sm-9">${{ number_format($evento->costo, 2) }}</dd>
 
             <dt class="col-sm-3">Estado</dt>
@@ -47,17 +52,19 @@
     </div>
 </div>
 
+@puedeModulo('eventos', 'escritura')
 <x-form.layout :action="route('eventos.personas.store', $evento)" modo="incrustado" guardar="Inscribir" icono="fa-user-plus" :leyenda="false">
-    <x-form.section titulo="Inscribir persona" descripcion="Deja el costo en blanco para usar el costo general del evento." icono="fa-user-plus" id="seccion-inscribir">
-        <x-form.select name="persona_id" label="Persona" icono="fa-user" :required="true" col="col-md-7" buscar vacio="Seleccione una persona..."
+    <x-form.section titulo="Inscribir miembro" descripcion="Deja el costo en blanco para usar el costo general del evento." icono="fa-user-plus" id="seccion-inscribir">
+        <x-form.select name="persona_id" label="Miembro" icono="fa-user" :required="true" col="col-md-7" buscar vacio="Seleccione un miembro..."
             :opciones="\App\Support\Formulario::opciones($personasSinInscribir, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null))" />
         <x-form.money name="costo_individual" label="Costo individual (opcional)" col="col-md-5" ejemplo="Costo general"
             :ayuda="'Costo general del evento: $'.number_format($evento->costo, 2)" />
     </x-form.section>
 </x-form.layout>
+@endpuedeModulo
 
 @php($inscritasPorQr = $evento->registrosQr()->whereNotNull('persona_id')->pluck('persona_id')->all())
-<h3 class="mb-3">Personas inscritas ({{ $evento->inscripciones->count() }})</h3>
+<h3 class="mb-3">Miembros inscritos ({{ $evento->inscripciones->count() }})</h3>
 
 @forelse($evento->inscripciones as $inscripcion)
     <div class="card mb-4">
@@ -74,9 +81,9 @@
                 @endif
             </h3>
             <div class="card-tools">
-                @if($inscripcion->pagos->isEmpty())
-                    <x-form.confirm :action="route('eventos.personas.destroy', [$evento, $inscripcion])" method="DELETE" titulo="¿Quitar a esta persona del evento?"
-                        :mensaje="$inscripcion->persona->nombre_completo.' dejará de estar inscrita en este evento.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
+                @if($inscripcion->pagos->isEmpty() && \App\Support\Permisos::modulo('eventos', 'escritura'))
+                    <x-form.confirm :action="route('eventos.personas.destroy', [$evento, $inscripcion])" method="DELETE" titulo="¿Quitar a este miembro del evento?"
+                        :mensaje="$inscripcion->persona->nombre_completo.' dejará de estar inscrito en este evento.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
                 @endif
             </div>
         </div>
@@ -104,8 +111,10 @@
                                 <td data-etiqueta="Monto">${{ number_format($pago->monto, 2) }}</td>
                                 <td data-etiqueta="Notas">{{ $pago->notas ?? '—' }}</td>
                                 <td data-etiqueta="">
+                                    @puedeModulo('eventos', 'escritura')
                                     <x-form.confirm :action="route('eventos.pagos.destroy', [$evento, $inscripcion, $pago])" method="DELETE" titulo="¿Eliminar este abono?"
                                         :mensaje="'Se borrará el abono de $'.number_format($pago->monto, 2).' registrado el '.$pago->fecha_pago->format('d/m/Y').'.'" boton="Eliminar" :peligro="true" variante="outline-danger">Eliminar</x-form.confirm>
+                                    @endpuedeModulo
                                 </td>
                             </tr>
                         @endforeach
@@ -113,7 +122,7 @@
                 </table>
             @endif
 
-            @if(!$inscripcion->estaPagado())
+            @if(!$inscripcion->estaPagado() && \App\Support\Permisos::modulo('eventos', 'escritura'))
                 <x-form.layout :action="route('eventos.pagos.store', [$evento, $inscripcion])" modo="incrustado" guardar="Registrar abono" icono="fa-plus-circle" boton="success" :leyenda="false" :id="'abono-'.$inscripcion->id">
                     <x-form.section titulo="Registrar abono" icono="fa-money-bill-wave" :id="'seccion-abono-'.$inscripcion->id">
                         <x-form.money name="monto" :id="'fm-monto-'.$inscripcion->id" label="Monto del abono" :required="true" col="col-md-4" />
@@ -125,8 +134,9 @@
         </div>
     </div>
 @empty
-    <div class="alert alert-info">Este evento aún no tiene personas inscritas.</div>
+    <div class="alert alert-info">Este evento aún no tiene miembros inscritos.</div>
 @endforelse
 
 @include('partials.panel-registro-qr', ['destino' => $evento])
+@endif
 @endsection

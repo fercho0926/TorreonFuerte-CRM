@@ -1,0 +1,62 @@
+/* Organigrama (spec 011). Base: árbol vertical para celular; desde 992 px, organigrama horizontal. */
+.organigrama { max-width: 100%; }
+.organigrama-acciones { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.organigrama-acciones[hidden] { display: none; }
+.organigrama-acciones .btn { min-height: 44px; min-width: 44px; }
+
+.organigrama ul { list-style: none; margin: 0; padding: 0; }
+.organigrama-hijos { margin-left: 1.25rem; padding-left: .75rem; border-left: 2px solid var(--bs-border-color, #dee2e6); }
+.organigrama-nodo { margin: .5rem 0; min-width: 0; }
+
+.organigrama-tarjeta {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    min-height: 44px; padding: .5rem .75rem; font-size: 1rem;
+    border: 1px solid var(--bs-border-color, #dee2e6); border-radius: .5rem;
+    background: var(--bs-body-bg, #fff); min-width: 0;
+}
+.organigrama summary.organigrama-tarjeta { cursor: pointer; list-style: none; }
+.organigrama summary.organigrama-tarjeta::-webkit-details-marker { display: none; }
+.organigrama summary.organigrama-tarjeta::before {
+    content: '\f054'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: .75rem;
+    display: inline-flex; align-items: center; justify-content: center; min-width: 1.5rem; transition: transform .15s;
+}
+.organigrama details[open] > summary.organigrama-tarjeta::before { transform: rotate(90deg); }
+.organigrama summary.organigrama-tarjeta:focus-visible { outline: 3px solid #0d6efd; outline-offset: 2px; }
+
+.organigrama-cuerpo { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+.organigrama-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+a.organigrama-nombre, .organigrama-pastor a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.organigrama-rol { color: var(--bs-secondary-color, #6c757d); }
+.organigrama-contador { white-space: nowrap; font-size: .875rem; }
+.organigrama-pastores { display: flex; flex-direction: column; margin-top: .25rem; }
+.organigrama-pastor { display: flex; align-items: center; gap: .35rem; min-width: 0; }
+.organigrama-pastor a, .organigrama-pastor > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.organigrama-aviso { color: #b45309; }
+
+.organigrama-nodo[data-tipo='sede'] > details > summary,
+.organigrama-nodo[data-tipo='sede'] > .organigrama-tarjeta { border-color: #0d6efd; border-width: 2px; }
+.organigrama-nodo[data-tipo='lider'] > details > summary,
+.organigrama-nodo[data-tipo='lider'] > .organigrama-tarjeta { border-left: 4px solid #198754; }
+.organigrama-nodo[data-tipo='sin_lider'] > details > summary,
+.organigrama-nodo[data-tipo='sin_lider'] > .organigrama-tarjeta { border-style: dashed; }
+
+/* Escritorio: líderes en fila bajo la sede con conectores; los miembros siguen en lista vertical. */
+@media (min-width: 992px) {
+    .organigrama { overflow-x: auto; padding-bottom: 1rem; }
+    .organigrama-arbol { display: flex; justify-content: center; min-width: max-content; }
+    .organigrama-nodo[data-tipo='sede'] > details > summary,
+    .organigrama-nodo[data-tipo='sede'] > .organigrama-tarjeta { max-width: 28rem; margin: 0 auto; }
+    .organigrama-nodo[data-tipo='sede'] > details > .organigrama-hijos {
+        display: flex; justify-content: center; align-items: flex-start; gap: 1rem;
+        margin: 1.5rem 0 0; padding: 0; border-left: 0; position: relative;
+    }
+    .organigrama-nodo[data-tipo='sede'] > details > .organigrama-hijos::before {
+        content: ''; position: absolute; top: -1.5rem; left: 50%; height: 1.5rem; border-left: 2px solid var(--bs-border-color, #dee2e6);
+    }
+    .organigrama-nodo[data-tipo='sede'] > details > .organigrama-hijos > .organigrama-nodo {
+        flex: 0 0 15rem; position: relative; margin: 0; padding-top: 1rem; border-top: 2px solid var(--bs-border-color, #dee2e6);
+    }
+    .organigrama-nodo[data-tipo='sede'] > details > .organigrama-hijos > .organigrama-nodo::before {
+        content: ''; position: absolute; top: 0; left: 50%; height: 1rem; border-left: 2px solid var(--bs-border-color, #dee2e6);
+    }
+}

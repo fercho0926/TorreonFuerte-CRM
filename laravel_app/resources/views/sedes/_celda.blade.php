@@ -1,4 +1,4 @@
-{{-- Celda de la grilla de sedes. Variables: $fila (arreglo del resumen: sede, personas, lideres, celulas), $columna. --}}
+{{-- Celda de la grilla de sedes. Variables: $fila (arreglo del resumen: sede, miembros, lideres, celulas), $columna. --}}
 @php($sede = $fila['sede'])
 @switch($columna)
     @case('sede')

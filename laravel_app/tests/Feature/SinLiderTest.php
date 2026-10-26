@@ -41,7 +41,7 @@ class SinLiderTest extends TestCase
         $this->post(route('sin-lider.asignar', $persona), ['lider_id' => $lider->id])->assertRedirect(route('sin-lider.index'));
 
         $this->assertSame($lider->id, $persona->fresh()->lider_id);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'lider']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'lider']);
         $this->get(route('sin-lider.index'))->assertViewHas('pagina', fn ($p) => $p->total() === 0);
     }
 

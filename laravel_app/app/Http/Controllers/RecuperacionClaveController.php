@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 /**
- * «¿Olvidaste tu contraseña?»: la persona pide una nueva clave con su correo. La respuesta es
+ * «¿Olvidaste tu contraseña?»: el miembro pide una nueva clave con su correo. La respuesta es
  * siempre la misma, exista o no la cuenta; si existe, se registra una solicitud para quien
  * administra su sede (el envío por WhatsApp es asistido).
  */

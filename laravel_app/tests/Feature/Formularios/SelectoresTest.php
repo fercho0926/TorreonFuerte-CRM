@@ -67,13 +67,13 @@ class SelectoresTest extends TestCase
     public function test_el_multiselect_marca_los_seleccionados_y_avisa_si_no_hay_opciones(): void
     {
         view()->share('errors', new ViewErrorBag());
-        $con = Blade::render('<x-form.multiselect name="personas[]" label="Personas" :opciones="$o" :seleccionados="[2]" />', ['o' => [['id' => 1, 'texto' => 'Ana', 'apoyo' => 'Doc. 1'], ['id' => 2, 'texto' => 'Beto']]]);
+        $con = Blade::render('<x-form.multiselect name="personas[]" label="Miembros" :opciones="$o" :seleccionados="[2]" />', ['o' => [['id' => 1, 'texto' => 'Ana', 'apoyo' => 'Doc. 1'], ['id' => 2, 'texto' => 'Beto']]]);
         $this->assertMatchesRegularExpression('/<option value="2"[^>]*selected/', $con);
         $this->assertDoesNotMatchRegularExpression('/<option value="1"[^>]*selected/', $con);
         $this->assertStringContainsString('data-multi', $con);
 
-        $sin = Blade::render('<x-form.multiselect name="personas[]" label="Personas" :opciones="[]" vacio="No hay personas." />');
-        $this->assertStringContainsString('No hay personas.', $sin);
+        $sin = Blade::render('<x-form.multiselect name="personas[]" label="Miembros" :opciones="[]" vacio="No hay miembros." />');
+        $this->assertStringContainsString('No hay miembros.', $sin);
         $this->assertStringNotContainsString('<select', $sin);
     }
 }

@@ -6,7 +6,7 @@ use App\Models\Persona;
 use App\Models\User;
 
 /**
- * Búsqueda de personas con autocompletado: respeta el alcance del usuario (sede y rol), pagina de
+ * Búsqueda de miembros con autocompletado: respeta el alcance del usuario (sede y rol), pagina de
  * 20 en 20 y devuelve lo mínimo que necesitan los selectores (texto, apoyo y estado).
  */
 class BuscadorPersonas

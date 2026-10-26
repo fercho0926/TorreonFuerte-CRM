@@ -12,7 +12,7 @@ describe('datos del alta rápida', () => {
 });
 
 describe('respuesta del servidor', () => {
-    it('201: persona creada', () => {
+    it('201: miembro creado', () => {
         expect(interpretarRespuesta(201, { id: 3, texto: 'Ana Pérez' })).toEqual({ tipo: 'ok', persona: { id: 3, texto: 'Ana Pérez' } });
     });
 
@@ -34,7 +34,7 @@ describe('respuesta del servidor', () => {
     });
 });
 
-describe('botón «Crear persona nueva»', () => {
+describe('botón «Crear miembro nuevo»', () => {
     it('se añade una sola vez y solo con data-crear', () => {
         document.body.innerHTML = '<div class="fm-campo"><select id="a" multiple data-crear="/personas/rapida"></select><div class="invalid-feedback"></div></div><div class="fm-campo"><select id="b" multiple></select></div>';
         const $ = () => ({ trigger() {} });
@@ -44,6 +44,6 @@ describe('botón «Crear persona nueva»', () => {
         iniciarAltaRapida(document.getElementById('b'), $);
 
         expect(document.querySelectorAll('button').length).toBe(1);
-        expect(document.querySelector('button').textContent).toContain('Crear persona nueva');
+        expect(document.querySelector('button').textContent).toContain('Crear miembro nuevo');
     });
 });

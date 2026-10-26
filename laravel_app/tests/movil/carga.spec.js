@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 
 const RED_4G_LENTA = { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 };
 const PANTALLAS = [
-    { ruta: '/dashboard', util: '.small-box, .card' },
+    { ruta: '/dashboard', util: '.info-box, .card' },
     { ruta: '/personas', util: 'table.grilla tbody tr' },
     { ruta: '/personas/create', util: 'input[name="nombres"]' },
 ];

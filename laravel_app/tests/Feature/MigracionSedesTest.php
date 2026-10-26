@@ -24,7 +24,10 @@ class MigracionSedesTest extends TestCase
      */
     private function simularBaseAnterior(): void
     {
-        foreach (MigracionSedes::TABLAS as $tabla) {
+        // Antes de la spec 016 la cuenta tenía nombre y celular propios, y podía no tener miembro.
+        (require database_path('migrations/2026_11_01_000004_users_persona_obligatoria.php'))->down();
+
+        foreach (MigracionSedes::tablas() as $tabla) {
             Schema::table($tabla, fn (Blueprint $t) => $t->unsignedBigInteger('sede_id')->nullable()->change());
         }
     }
@@ -46,7 +49,7 @@ class MigracionSedesTest extends TestCase
     private function contarTablas(): array
     {
         $conteo = [];
-        foreach (array_merge(MigracionSedes::TABLAS, ['users']) as $tabla) {
+        foreach (array_merge(MigracionSedes::tablas(), ['users']) as $tabla) {
             $conteo[$tabla] = DB::table($tabla)->count();
         }
 
@@ -66,7 +69,6 @@ class MigracionSedesTest extends TestCase
         $this->insertarLegado('evento_pagos', ['evento_persona_id' => $inscripcion, 'monto' => 5000, 'fecha_pago' => now()->toDateString()]);
         $this->insertarLegado('ministerios', ['nombre' => 'Alabanza', 'estado' => 'activo']);
         $this->insertarLegado('encuentros', ['nombre' => 'Encuentro', 'fecha_realizacion' => now()->toDateString()]);
-        $this->insertarLegado('persona_cambios', ['persona_id' => $otra, 'accion' => 'creada', 'created_at' => now()]);
 
         $this->insertarLegado('users', ['name' => 'Admin', 'email' => 'admin@legado.co', 'password' => 'x', 'role' => 'admin']);
         $this->insertarLegado('users', ['name' => 'Pastor', 'email' => 'pastor@legado.co', 'password' => 'x', 'role' => 'pastor', 'persona_id' => $pastorPersona]);
@@ -88,7 +90,7 @@ class MigracionSedesTest extends TestCase
         $sede = Sede::firstOrFail();
         $this->assertSame('Torreón Fuerte Central', $sede->nombre);
 
-        foreach (MigracionSedes::TABLAS as $tabla) {
+        foreach (MigracionSedes::tablas() as $tabla) {
             $this->assertSame($antes[$tabla], DB::table($tabla)->where('sede_id', $sede->id)->count(), "La tabla {$tabla} no quedó completa en la primera sede");
         }
 

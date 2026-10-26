@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="callout callout-info py-2 px-3 mb-3">
-    <small>Estas personas pidieron una clave nueva desde el inicio de sesión. <strong>Paso 1:</strong> pulsa <strong>Generar clave</strong>. <strong>Paso 2:</strong> en la pantalla siguiente pulsa el botón verde <strong>Enviar por WhatsApp</strong>, que abre el chat con el mensaje listo. <strong>Paso 3:</strong> en WhatsApp pulsa enviar. El sistema no envía el mensaje por sí solo.</small>
+    <small>Estos miembros pidieron una clave nueva desde el inicio de sesión. <strong>Paso 1:</strong> pulsa <strong>Generar clave</strong>. <strong>Paso 2:</strong> en la pantalla siguiente pulsa el botón verde <strong>Enviar por WhatsApp</strong>, que abre el chat con el mensaje listo. <strong>Paso 3:</strong> en WhatsApp pulsa enviar. El sistema no envía el mensaje por sí solo.</small>
 </div>
 
 <x-ui.grilla :grilla="$grilla" :pagina="$pagina" :estado="$estado" :por-pagina="$porPagina" :total="$total" titulo="Solicitudes" icono="fa-key">

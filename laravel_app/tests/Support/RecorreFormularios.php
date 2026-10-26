@@ -25,7 +25,7 @@ trait RecorreFormularios
         return [
             'persona (crear)' => route('personas.create'),
             'persona (editar)' => route('personas.edit', $this->A['persona']),
-            'líder (designar)' => route('lideres.designar', ['q' => 'Persona']),
+            'líder (designar)' => route('lideres.designar', ['q' => 'Miembro']),
             'líder (quitar rol)' => route('lideres.quitar', $this->A['lider']),
             'célula (crear)' => route('celulas.create'),
             'célula (editar)' => route('celulas.edit', $this->A['celula']),
@@ -35,7 +35,8 @@ trait RecorreFormularios
             'evento (editar)' => route('eventos.edit', $this->A['evento']),
             'ministerio (crear)' => route('ministerios.create'),
             'ministerio (editar)' => route('ministerios.edit', $this->A['ministerio']),
-            'usuario (crear)' => route('users.create'),
+            // Paso 2 de «Nuevo usuario» con un celular que no es de nadie (spec 016): datos del miembro y de la cuenta.
+            'usuario (crear)' => route('users.create', ['celular' => '3009990000']),
             'usuario (editar)' => route('users.edit', $this->A['liderUser']),
             'sede (crear)' => route('sedes.create'),
             'sede (editar)' => route('sedes.edit', $this->A['sede']),
@@ -82,7 +83,7 @@ trait RecorreFormularios
             'encuentro (crear)' => ['nombre', 'fecha_realizacion', 'estado', 'personas[]'],
             'evento (crear)' => ['nombre', 'tipo', 'fecha', 'costo', 'estado', 'personas[]'],
             'ministerio (crear)' => ['nombre', 'estado', 'encargado_id', 'personas[]'],
-            'usuario (crear)' => ['name', 'email', 'celular', 'role', 'persona_id'],
+            'usuario (crear)' => ['celular', 'miembro[nombres]', 'miembro[apellidos]', 'email', 'role'],
             'sede (crear)' => ['nombre', 'ciudad', 'direccion', 'telefono', 'email', 'pastor[nombres]', 'pastor[apellidos]', 'pastor[email]', 'pastor[password]', 'pastora[nombres]', 'pastora[apellidos]', 'pastora[email]', 'pastora[password]'],
             'traslado' => ['sede_destino_id'],
         ];

@@ -26,7 +26,7 @@
                     <dd class="col-sm-8">{{ $usuario->email }}</dd>
 
                     <dt class="col-sm-4">Rol</dt>
-                    <dd class="col-sm-8">{{ \App\Models\User::ROLE_LABELS[$usuario->role] ?? $usuario->role }}</dd>
+                    <dd class="col-sm-8">{{ \App\Models\User::etiquetaDeRol($usuario->role) }}</dd>
 
                     <dt class="col-sm-4">WhatsApp</dt>
                     <dd class="col-sm-8"><i class="fab fa-whatsapp text-success me-1" aria-hidden="true"></i>{{ $celularLegible }}

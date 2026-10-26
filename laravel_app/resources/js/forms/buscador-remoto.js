@@ -1,5 +1,5 @@
 /**
- * Autocompletado de personas con búsqueda en el servidor (spec 006). Convierte un <select> con
+ * Autocompletado de miembros con búsqueda en el servidor (spec 006). Convierte un <select> con
  * data-fuente en un Select2 que consulta la URL indicada mientras se escribe: mínimo 2 letras,
  * 250 ms de espera, 20 resultados por página y paginación al desplazarse.
  *

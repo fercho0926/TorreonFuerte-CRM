@@ -9,7 +9,7 @@ use Tests\Support\EscenarioDosSedes;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Historia 3: designar líder con autocompletado de personas activas (FR-005). */
+/** Historia 3: designar líder con autocompletado de miembros activos (FR-005). */
 class DesignarConAutocompletadoTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
@@ -43,7 +43,7 @@ class DesignarConAutocompletadoTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertTrue($persona->fresh()->es_lider);
-        $this->assertSame(1, $persona->cambios()->where('accion', 'rol_lider')->count());
+        $this->assertSame(1, $persona->historial()->where('accion', 'rol_lider')->count());
     }
 
     public function test_una_persona_inactiva_o_que_ya_es_lider_se_rechaza(): void
@@ -51,16 +51,16 @@ class DesignarConAutocompletadoTest extends TestCase
         $inactiva = Persona::factory()->deSede($this->A['sede']->id)->inactiva()->create();
 
         $this->post(route('lideres.designar.store'), ['persona_id' => $inactiva->id])
-            ->assertSessionHasErrors(['persona_id' => 'No se puede designar a una persona inactiva.']);
+            ->assertSessionHasErrors(['persona_id' => 'No se puede designar a un miembro inactiva.']);
         $this->post(route('lideres.designar.store'), ['persona_id' => $this->A['lider']->id])
-            ->assertSessionHasErrors(['persona_id' => 'Esa persona ya es líder.']);
+            ->assertSessionHasErrors(['persona_id' => 'Ese miembro ya es líder.']);
 
         $this->assertFalse($inactiva->fresh()->es_lider);
     }
 
     public function test_sin_elegir_persona_pide_elegirla(): void
     {
-        $this->post(route('lideres.designar.store'), [])->assertSessionHasErrors(['persona_id' => 'Elige a la persona que será líder.']);
+        $this->post(route('lideres.designar.store'), [])->assertSessionHasErrors(['persona_id' => 'Elige al miembro que será líder.']);
     }
 
     public function test_un_pastor_no_designa_a_una_persona_de_otra_sede(): void

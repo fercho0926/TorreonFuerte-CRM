@@ -43,20 +43,26 @@ class UsuariosGrilla extends Grilla
     protected function definirColumnas(): array
     {
         return [
-            Columna::make('nombre', 'Nombre')->ordena('users.name')->filtraTexto('users.name')->valor(fn (User $u) => $u->name)->prioridad(1),
+            // El nombre es el del miembro dueño de la cuenta (spec 016).
+            Columna::make('nombre', 'Nombre')
+                ->ordena(fn (Builder $q, string $dir) => self::ordenarPorMiembro($q, $dir))
+                ->filtraPersona('persona')
+                ->valor(fn (User $u) => $u->name)
+                ->prioridad(1),
             Columna::make('email', 'Email')->ordena('users.email')->filtraTexto('users.email')->valor(fn (User $u) => $u->email)->prioridad(3),
             Columna::make('rol', 'Rol')
                 ->ordena('users.role')
-                ->filtraLista(User::ROLE_LABELS, 'users.role')
-                ->valor(fn (User $u) => User::ROLE_LABELS[$u->role] ?? $u->role)
+                ->filtraLista(\App\Models\Rol::orderBy('nombre')->pluck('nombre', 'clave')->all(), 'users.role')
+                ->valor(fn (User $u) => User::etiquetaDeRol($u->role))
                 ->prioridad(2),
             Columna::sede('users')
                 ->valor(fn (User $u) => $u->getRelationValue('sede')?->nombre ?? 'Todas (administrador)')
                 ->visibleSi(fn (?User $a) => $a && $a->esAdmin()),
-            Columna::make('persona', 'Persona vinculada')
-                ->ordenaPersona('users', 'persona_id')
-                ->filtraPersona('persona')
-                ->valor(fn (User $u) => $u->persona?->nombre_completo)
+            // Cuentas que la unificación dejó con un vínculo dudoso (spec 016): las revisa el administrador.
+            Columna::make('vinculo', 'Vínculo')
+                ->filtraLista(['revisar' => 'Por revisar'], fn (Builder $q, string $valor) => $valor === 'revisar' ? $q->whereNotNull('users.revision_vinculo') : $q)
+                ->valor(fn (User $u) => $u->revision_vinculo ? 'Por revisar' : '')
+                ->visibleSi(fn (?User $a) => $a && $a->esAdmin())
                 ->prioridad(5),
             Columna::make('clave', 'Clave')->valor(fn (User $u) => '')->sinExportar()->prioridad(6),
             Columna::make('registrado', 'Registrado')->ordena('users.created_at')->valor(fn (User $u) => $u->created_at?->format('Y-m-d H:i'))->prioridad(7),
@@ -80,6 +86,22 @@ class UsuariosGrilla extends Grilla
     {
         $like = '%'.str_replace(['%', '_'], '', $q).'%';
 
-        return $consulta->where(fn ($w) => $w->where('users.name', 'like', $like)->orWhere('users.email', 'like', $like));
+        return $consulta->where(fn ($w) => $w->where('users.email', 'like', $like)->orWhereHas('persona', fn ($p) => $p->buscar($q)));
+    }
+
+    /**
+     * Ordena cuentas por el nombre de su miembro (nombres y luego apellidos), con subconsultas que
+     * funcionan igual en SQLite y MySQL (spec 016).
+     */
+    public static function ordenarPorMiembro(Builder|\Illuminate\Database\Eloquent\Relations\Relation $consulta, string $dir = 'asc', string $llave = 'users.persona_id'): Builder|\Illuminate\Database\Eloquent\Relations\Relation
+    {
+        foreach (['nombres', 'apellidos'] as $campo) {
+            $consulta->orderBy(
+                \App\Models\Persona::query()->withoutGlobalScopes()->from('personas as p_nombre')->select('p_nombre.'.$campo)->whereColumn('p_nombre.id', $llave),
+                $dir
+            );
+        }
+
+        return $consulta;
     }
 }

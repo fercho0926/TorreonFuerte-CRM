@@ -22,12 +22,12 @@ class ListaAsistenciaTest extends TestCase
 
         $html = Blade::render('<x-form.lista-asistencia name="asistio[]" :filas="$f" :marcados="[1, 3]" />', ['f' => $filas]);
 
-        $this->assertSame(3, substr_count($html, 'name="asistio[]"'), 'Debe haber exactamente un control por persona (sin duplicar tabla y tarjetas)');
+        $this->assertSame(3, substr_count($html, 'name="asistio[]"'), 'Debe haber exactamente un control por miembro (sin duplicar tabla y tarjetas)');
         $this->assertSame(1, substr_count($html, '<table'));
         $this->assertStringContainsString('fm-lista__tabla', $html);
         $this->assertSame(2, preg_match_all('/value="[13]"[^>]*checked/', $html));
         $this->assertDoesNotMatchRegularExpression('/value="2"[^>]*checked/', $html);
-        $this->assertStringContainsString('data-etiqueta="Persona"', $html);
+        $this->assertStringContainsString('data-etiqueta="Miembro"', $html);
         $this->assertStringContainsString('<span data-lista-total>3</span>', $html);
     }
 

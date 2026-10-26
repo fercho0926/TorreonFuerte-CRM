@@ -18,8 +18,8 @@ class ReenviarClaveTest extends TestCase
     {
         parent::setUp();
         $this->armarDosSedes();
-        $this->A['liderUser']->forceFill(['celular' => '3105559999'])->save();
-        $this->B['liderUser']->forceFill(['celular' => '3205559999'])->save();
+        $this->A['liderUser']->persona->update(['celular' => '3105559999']);
+        $this->B['liderUser']->persona->update(['celular' => '3205559999']);
     }
 
     public function test_el_pastor_reenvia_a_un_usuario_de_su_sede_y_la_anterior_queda_reemplazada(): void
@@ -57,20 +57,22 @@ class ReenviarClaveTest extends TestCase
         $this->comoAdminEnTodas();
 
         $this->post(route('users.clave.store', $this->B['liderUser']))->assertOk()->assertSee('https://wa.me/573205559999?text=', false);
-        $this->post(route('users.clave.store', $this->B['pastor']->forceFill(['celular' => '3001112233'])))->assertOk();
+        $this->post(route('users.clave.store', tap($this->B['pastor'], fn ($u) => $u->persona->update(['celular' => '3001112233']))))->assertOk();
     }
 
-    public function test_sin_celular_se_rechaza_y_se_puede_completar_en_la_edicion(): void
+    public function test_sin_celular_se_rechaza_y_se_completa_en_la_ficha_del_miembro(): void
     {
-        $this->A['liderUser']->forceFill(['celular' => null])->save();
+        $this->A['liderUser']->persona->update(['celular' => null]);
         $hash = $this->A['liderUser']->password;
         $this->iniciarSesionComo($this->A['pastor']);
 
-        $this->post(route('users.clave.store', $this->A['liderUser']))->assertRedirect()->assertSessionHas('error');
+        $this->post(route('users.clave.store', $this->A['liderUser']))
+            ->assertRedirect(route('personas.edit', $this->A['liderUser']->persona_id))
+            ->assertSessionHas('error');
         $this->assertSame($hash, $this->A['liderUser']->fresh()->password);
 
-        $this->put(route('users.update', $this->A['liderUser']), ['name' => $this->A['liderUser']->name, 'email' => $this->A['liderUser']->email, 'celular' => '3004445566', 'role' => 'lider_celula'])
-            ->assertRedirect(route('users.index'));
+        // El celular es del miembro (spec 016): se completa en su ficha y la cuenta lo toma de inmediato.
+        $this->A['liderUser']->persona->update(['celular' => '3004445566']);
         $this->post(route('users.clave.store', $this->A['liderUser']))->assertOk();
     }
 

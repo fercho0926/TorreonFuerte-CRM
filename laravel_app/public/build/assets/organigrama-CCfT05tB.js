@@ -1,0 +1,1 @@
+function e(e=document){e.querySelectorAll(`[data-organigrama]`).forEach(e=>{let t=e.querySelector(`.organigrama-acciones`);t&&(t.hidden=!1),e.addEventListener(`click`,t=>{let n=t.target.closest(`[data-organigrama-accion]`);if(!n)return;let r=n.dataset.organigramaAccion===`expandir`;e.querySelectorAll(`details`).forEach(e=>{e.open=r})})})}export{e as iniciarOrganigrama};

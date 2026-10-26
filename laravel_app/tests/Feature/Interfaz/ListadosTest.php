@@ -29,7 +29,7 @@ class ListadosTest extends TestCase
             $html = $this->get(route($ruta))->assertOk()->getContent();
 
             $this->assertStringContainsString('class="card', $html, $ruta);
-            if ($ruta !== 'sin-lider.index') { // la lista «sin líder» se compone de tarjetas con formulario por persona
+            if ($ruta !== 'sin-lider.index') { // la lista «sin líder» se compone de tarjetas con formulario por miembro
                 $this->assertMatchesRegularExpression('/table-responsive|<table class="table table-hover/', $html, $ruta);
             }
             $this->assertStringNotContainsString('table-bordered', $html, "{$ruta} mezcla estilos de tabla");
@@ -49,7 +49,7 @@ class ListadosTest extends TestCase
 
     public function test_el_boton_de_crear_vive_en_el_encabezado_de_la_pagina(): void
     {
-        foreach (['personas.index' => 'Crear persona', 'celulas.index' => 'Crear célula', 'eventos.index' => 'Crear evento',
+        foreach (['personas.index' => 'Crear miembro', 'celulas.index' => 'Crear célula', 'eventos.index' => 'Crear evento',
             'encuentros.index' => 'Crear encuentro', 'ministerios.index' => 'Crear ministerio', 'users.index' => 'Crear usuario',
             'sedes.index' => 'Nueva sede'] as $ruta => $texto) {
             $html = $this->get(route($ruta))->getContent();
@@ -63,7 +63,7 @@ class ListadosTest extends TestCase
     {
         $this->get(route('personas.index', ['q' => 'zzzNadaCoincide']))
             ->assertOk()
-            ->assertSee('No se encontraron personas.')
+            ->assertSee('No se encontraron miembros.')
             ->assertSee('fa-address-card', false);
     }
 

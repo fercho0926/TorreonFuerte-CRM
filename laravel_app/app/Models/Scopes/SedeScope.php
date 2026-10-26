@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Scope;
  *  - admin en "Todas las sedes" y consola → sin filtro.
  *
  * Usos permitidos de `withoutGlobalScopes()` / `withoutGlobalScope(SedeScope::class)`:
- * SedesController, SedeService, TrasladoService, las relaciones de Sede y SedeCambio, el
+ * SedesController, SedeService, TrasladoService, las relaciones de Sede, el
  * inicio de sesión y la carga del usuario autenticado (AuthController y Controller), y las pruebas. Cualquier otro uso es un riesgo
  * de fuga entre sedes y debe revisarse.
  */

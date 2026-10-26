@@ -4,7 +4,7 @@ namespace Tests\Feature\Sedes;
 
 use App\Models\Persona;
 use App\Models\Sede;
-use App\Models\SedeCambio;
+use App\Models\CambioHistorial;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\ConSedes;
@@ -43,7 +43,7 @@ class AltaSedeAtomicaTest extends TestCase
             $this->assertSame($sede->id, Persona::withoutGlobalScopes()->find($usuario->persona_id)->sede_id);
         }
 
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $sede->id, 'accion' => 'creada', 'user_id' => $admin->id]);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $sede->id, 'accion' => 'creada', 'user_id' => $admin->id]);
     }
 
     public function test_el_alta_solo_con_pastor_funciona(): void
@@ -72,7 +72,7 @@ class AltaSedeAtomicaTest extends TestCase
         $this->assertSame($sedes, Sede::count());
         $this->assertSame($personas, Persona::withoutGlobalScopes()->count());
         $this->assertSame($usuarios, User::withoutGlobalScopes()->count());
-        $this->assertSame(0, SedeCambio::count());
+        $this->assertSame(0, CambioHistorial::where('sujeto_tipo', 'sede')->count());
     }
 
     public function test_una_falla_a_mitad_del_alta_no_deja_nada_a_medias(): void
@@ -109,8 +109,9 @@ class AltaSedeAtomicaTest extends TestCase
     public function test_el_pastor_es_obligatorio(): void
     {
         $this->comoAdminEnTodas();
+        $antes = Sede::count(); // la sede del miembro del administrador (spec 016)
 
         $this->post(route('sedes.store'), ['nombre' => 'Sin pastor', 'ciudad' => 'Torreón'])->assertSessionHasErrors(['pastor']);
-        $this->assertSame(0, Sede::count());
+        $this->assertSame($antes, Sede::count());
     }
 }

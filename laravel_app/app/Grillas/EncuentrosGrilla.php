@@ -3,6 +3,7 @@
 namespace App\Grillas;
 
 use App\Models\Encuentro;
+use App\Models\NivelFormacion;
 use App\Models\User;
 use App\Support\Estados;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,17 @@ class EncuentrosGrilla extends Grilla
         return [
             Columna::make('nombre', 'Nombre')->ordena('encuentros.nombre')->filtraTexto('encuentros.nombre')->valor(fn (Encuentro $e) => $e->nombre)->prioridad(1),
             Columna::make('fecha', 'Fecha')->ordena('encuentros.fecha_realizacion')->filtraTexto('encuentros.fecha_realizacion')->valor(fn (Encuentro $e) => $e->fecha_realizacion?->format('Y-m-d'))->prioridad(2),
+            Columna::make('nivel', 'Nivel')
+                ->ordena(fn (Builder $q, string $dir) => $q->orderBy(
+                    NivelFormacion::query()->select('niveles_formacion.posicion')->whereColumn('niveles_formacion.id', 'encuentros.nivel_id'),
+                    $dir
+                ))
+                ->filtraLista(
+                    NivelFormacion::query()->ordenados()->pluck('nombre', 'id')->mapWithKeys(fn ($n, $id) => [(string) $id => $n])->all(),
+                    'encuentros.nivel_id'
+                )
+                ->valor(fn (Encuentro $e) => $e->nivel?->nombre ?? '')
+                ->prioridad(3),
             Columna::make('lugar', 'Lugar')->ordena('encuentros.lugar')->filtraTexto('encuentros.lugar')->valor(fn (Encuentro $e) => $e->lugar)->prioridad(5),
             Columna::make('valor', 'Valor')->ordena('encuentros.valor')->valor(fn (Encuentro $e) => number_format((float) $e->valor, 2, '.', ''))->prioridad(6),
             Columna::make('estado', 'Estado')
@@ -46,6 +58,6 @@ class EncuentrosGrilla extends Grilla
 
     protected function base(?User $usuario, array $estado): Builder|Collection
     {
-        return Encuentro::query()->with('sede')->withCount('personas');
+        return Encuentro::query()->with(['sede', 'nivel'])->withCount('personas');
     }
 }

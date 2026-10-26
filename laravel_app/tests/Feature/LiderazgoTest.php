@@ -15,6 +15,8 @@ class LiderazgoTest extends TestCase
     public function test_designar_lider_a_una_persona_existente_no_duplica_el_registro(): void
     {
         $this->comoAdmin();
+        // Todo líder queda bajo el pastor de la sede: la sede debe tenerlo (spec 016).
+        Persona::factory()->pastorDe(\App\Models\Sede::findOrFail(\Database\Factories\SedeFactory::idPorDefecto()))->create();
         $persona = Persona::factory()->create(['nombres' => 'Rosa']);
 
         $this->post(route('lideres.designar.store'), ['persona_id' => $persona->id])
@@ -35,7 +37,7 @@ class LiderazgoTest extends TestCase
         $this->delete(route('lideres.destroy', $lider))
             ->assertStatus(422)
             ->assertSee('1 célula(s)', false)
-            ->assertSee('2 persona(s)', false);
+            ->assertSee('2 miembro(s)', false);
 
         $this->assertTrue($lider->fresh()->es_lider);
     }
@@ -67,7 +69,7 @@ class LiderazgoTest extends TestCase
         $this->assertFalse($lider->fresh()->es_lider);
         $this->assertSame($nuevo->id, $persona->fresh()->lider_id);
         $this->assertSame($nuevo->id, $celula->fresh()->lider_id);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $lider->id, 'accion' => 'rol_lider']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $lider->id, 'accion' => 'rol_lider']);
     }
 
     public function test_el_detalle_del_lider_muestra_personas_celulas_y_resumen(): void

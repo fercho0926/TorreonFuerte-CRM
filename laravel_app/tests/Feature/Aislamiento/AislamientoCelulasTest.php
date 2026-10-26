@@ -53,7 +53,7 @@ class AislamientoCelulasTest extends TestCase
         $this->post(route('celulas.miembros.store', $this->B['celula']), ['persona_id' => $this->B['persona']->id])->assertNotFound();
         $this->post(route('celulas.reuniones.store', $this->B['celula']), ['fecha' => now()->toDateString()])->assertNotFound();
 
-        // Una persona de otra sede no entra a una célula propia.
+        // Un miembro de otra sede no entra a una célula propia.
         $this->post(route('celulas.miembros.store', $this->A['celula']), ['personas' => [$this->B['persona']->id]])->assertSessionHasErrors('personas.0');
         $this->assertFalse($this->A['celula']->miembros()->whereKey($this->B['persona']->id)->exists());
     }
@@ -67,7 +67,7 @@ class AislamientoCelulasTest extends TestCase
         $reunion = CelulaReunion::withoutGlobalScopes()->where('celula_id', $this->A['celula']->id)->first();
         $this->assertSame($this->A['sede']->id, $reunion->sede_id);
 
-        // Asistencia con una persona ajena: se rechaza.
+        // Asistencia con un miembro ajena: se rechaza.
         $this->post(route('celulas.reuniones.store', $this->A['celula']), [
             'fecha' => now()->toDateString(), 'asistio' => [$this->B['persona']->id],
         ])->assertSessionHasErrors('asistio.0');

@@ -24,6 +24,12 @@ abstract class Grilla
     /** Prefijo de rutas: se esperan `{id}.index`, `{id}.datos` y `{id}.exportar`. */
     abstract public function id(): string;
 
+    /** Nombre base del archivo CSV exportado (por defecto, el id de la grilla). */
+    public function archivo(): string
+    {
+        return $this->id();
+    }
+
     /** @return array<int, Columna> */
     abstract protected function definirColumnas(): array;
 

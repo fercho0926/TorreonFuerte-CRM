@@ -34,9 +34,9 @@ class SelectoresEscalaTest extends TestCase
         $respuesta = $this->get(route('eventos.create'))->assertOk();
         $segundos = microtime(true) - $inicio;
 
-        // 1.000 personas sembradas + la persona del pastor que inicia sesión.
-        $this->assertSame(1001, substr_count($respuesta->getContent(), 'data-apoyo="Doc. '), 'Debe ofrecer todas las personas de la sede');
-        $this->assertLessThan(300 * 1024, strlen($respuesta->getContent()), 'El HTML con 1.000 personas debe pesar menos de 300 KB');
+        // 1.000 miembros sembrados + el miembro del pastor que inicia sesión.
+        $this->assertSame(1001, substr_count($respuesta->getContent(), 'data-apoyo="Doc. '), 'Debe ofrecer todos los miembros de la sede');
+        $this->assertLessThan(300 * 1024, strlen($respuesta->getContent()), 'El HTML con 1.000 miembros debe pesar menos de 300 KB');
         $this->assertLessThan(2.0, $segundos);
     }
 

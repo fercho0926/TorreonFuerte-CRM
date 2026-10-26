@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Persona;
+use App\Models\Sede;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Persona>
+ * @extends Factory<Miembro>
  */
 class PersonaFactory extends Factory
 {
@@ -31,7 +32,7 @@ class PersonaFactory extends Factory
         return $this->state(fn () => ['estado' => 'visitante', 'tipo_documento' => null, 'numero_documento' => null]);
     }
 
-    /** Persona que asiste a una célula y aún no es parte de la iglesia. */
+    /** Miembro que asiste a una célula y aún no es parte de la iglesia. */
     public function enCelula(): static
     {
         return $this->state(fn () => ['estado' => 'celula', 'tipo_documento' => null, 'numero_documento' => null]);
@@ -43,7 +44,7 @@ class PersonaFactory extends Factory
     }
 
     /**
-     * Persona con rol de líder.
+     * Miembro con rol de líder.
      */
     public function lider(): static
     {
@@ -53,5 +54,12 @@ class PersonaFactory extends Factory
     public function deSede(int $sedeId): static
     {
         return $this->state(fn () => ['sede_id' => $sedeId]);
+    }
+
+    /** Pastor de la sede: líder, sin líder (es la cabeza) y registrado en `sedes.pastor_persona_id`. */
+    public function pastorDe(Sede $sede): static
+    {
+        return $this->state(fn () => ['sede_id' => $sede->id, 'es_lider' => true, 'lider_id' => null])
+            ->afterCreating(fn (Persona $persona) => $sede->forceFill(['pastor_persona_id' => $persona->id])->save());
     }
 }

@@ -1,7 +1,7 @@
 /**
  * Respaldo de lo escrito cuando un envío no llega al servidor (spec 008, RF-009).
  *
- * Se guarda en `sessionStorage` (solo la pestaña actual, se borra al cerrarla) lo que la persona escribió,
+ * Se guarda en `sessionStorage` (solo la pestaña actual, se borra al cerrarla) lo que el miembro escribió,
  * excluyendo contraseñas, tokens y archivos. Solo se restaura si se intentó enviar y se vuelve a la misma
  * pantalla con el formulario vacío (por ejemplo, tras cortarse la conexión). Si el envío tuvo éxito, el
  * respaldo se borra al abrir cualquier otra pantalla. Todo es opcional: sin almacenamiento, el formulario

@@ -9,7 +9,7 @@
         @endunless
         @break
     @case('rol')
-        {{ \App\Models\User::ROLE_LABELS[$solicitud->user->role] ?? $solicitud->user->role }}
+        {{ \App\Models\User::etiquetaDeRol($solicitud->user->role) }}
         @break
     @case('sede')
         {{ $solicitud->getRelationValue('sede')?->nombre ?? '—' }}

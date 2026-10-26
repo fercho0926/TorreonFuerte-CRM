@@ -12,8 +12,11 @@
 @endsection
 
 @section('content')
+@include('historial._pestanas', ['url' => route('celulas.show', $celula), 'pestana' => $pestana ?? 'datos'])
 
-
+@if(($pestana ?? 'datos') === 'historico')
+    @include('historial._lista', ['historico' => $historico])
+@else
 <div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $celula->nombre }}</h3>
@@ -46,8 +49,8 @@
 
 @if($puedeAdministrar)
     <x-form.layout :action="route('celulas.miembros.store', $celula)" modo="incrustado" guardar="Agregar integrantes" icono="fa-user-plus" :leyenda="false">
-        <x-form.section titulo="Agregar integrantes" descripcion="Escribe para buscar por nombre, apellido, documento o celular. Si la persona aún no existe, créala desde aquí: quedará «En célula»." icono="fa-user-plus" id="seccion-agregar">
-            <x-form.multiselect name="personas[]" label="Personas" icono="fa-users" :required="true" :opciones="[]" :seleccionados="[]"
+        <x-form.section titulo="Agregar integrantes" descripcion="Escribe para buscar por nombre, apellido, documento o celular. Si el miembro aún no existe, créalo desde aquí: quedará «En célula»." icono="fa-user-plus" id="seccion-agregar">
+            <x-form.multiselect name="personas[]" label="Miembros" icono="fa-users" :required="true" :opciones="[]" :seleccionados="[]"
                 :fuente="route('personas.buscar')" :filtros="['activas' => 1, 'excluir' => $celula->miembros->pluck('id')->implode(',')]" :crear="route('personas.rapida')" />
         </x-form.section>
     </x-form.layout>
@@ -79,7 +82,7 @@
                         <td data-etiqueta="Estado"><x-ui.estado :valor="$miembro->estado" :etiqueta="$miembro->estado_etiqueta" /></td>
                         @if($puedeAdministrar)
                             <td data-etiqueta="Acciones">
-                                <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a esta persona de la célula?"
+                                <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a este miembro de la célula?"
                                     :mensaje="$miembro->nombre_completo.' dejará de pertenecer a esta célula; su historial se conserva.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
                             </td>
                         @endif
@@ -150,4 +153,5 @@
 </div>
 
 @include('partials.panel-registro-qr', ['destino' => $celula])
+@endif
 @endsection

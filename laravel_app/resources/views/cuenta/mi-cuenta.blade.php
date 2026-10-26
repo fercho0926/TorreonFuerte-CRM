@@ -18,7 +18,7 @@
                     <dd class="col-sm-8">{{ $usuario->email }}</dd>
 
                     <dt class="col-sm-4">Rol</dt>
-                    <dd class="col-sm-8">{{ \App\Models\User::ROLE_LABELS[$usuario->role] ?? $usuario->role }}</dd>
+                    <dd class="col-sm-8">{{ \App\Models\User::etiquetaDeRol($usuario->role) }}</dd>
 
                     <dt class="col-sm-4">Sede</dt>
                     <dd class="col-sm-8">{{ $usuario->sede?->nombre ?? 'Todas las sedes' }}</dd>

@@ -1,6 +1,6 @@
 /**
- * «Crear persona nueva» dentro de un multiselect de personas (por ejemplo, los integrantes de una
- * célula). Abre un diálogo con los datos mínimos, crea la persona en el servidor
+ * «Crear miembro nuevo» dentro de un multiselect de miembros (por ejemplo, los integrantes de una
+ * célula). Abre un diálogo con los datos mínimos, crea el miembro en el servidor
  * (POST data-crear) y la deja seleccionada. Si el servidor avisa de un posible duplicado, pide
  * confirmar antes de crearla.
  */
@@ -27,9 +27,9 @@ export function interpretarRespuesta(estado, cuerpo) {
         return { tipo: 'errores', mensajes };
     }
     if (estado === 401) return { tipo: 'error', mensaje: 'Tu sesión terminó; vuelve a iniciar sesión.' };
-    if (estado === 403) return { tipo: 'error', mensaje: 'No tienes permiso para crear personas.' };
+    if (estado === 403) return { tipo: 'error', mensaje: 'No tienes permiso para crear miembros.' };
 
-    return { tipo: 'error', mensaje: 'No se pudo crear la persona. Inténtalo de nuevo.' };
+    return { tipo: 'error', mensaje: 'No se pudo crear el miembro. Inténtalo de nuevo.' };
 }
 
 async function enviar(url, token, datos) {
@@ -77,7 +77,7 @@ export async function abrirAltaRapida(select, $) {
 
     for (;;) {
         const resultado = await (await swal()).fire({
-            title: 'Crear persona nueva',
+            title: 'Crear miembro nuevo',
             html: HTML_DIALOGO,
             showCancelButton: true,
             confirmButtonText: 'Crear y añadir',
@@ -116,7 +116,7 @@ export async function abrirAltaRapida(select, $) {
             const decision = await (await swal()).fire({
                 icon: 'warning',
                 title: 'Posible duplicado',
-                text: `Ya existe «${respuesta.duplicado.nombre ?? 'una persona'}» con los mismos datos. ¿Crear otra de todos modos?`,
+                text: `Ya existe «${respuesta.duplicado.nombre ?? 'un miembro'}» con los mismos datos. ¿Crear otra de todos modos?`,
                 showCancelButton: true,
                 confirmButtonText: 'Sí, crear otra',
                 cancelButtonText: 'Volver',
@@ -129,7 +129,7 @@ export async function abrirAltaRapida(select, $) {
     }
 }
 
-/** Añade el botón «Crear persona nueva» a los multiselect con data-crear. */
+/** Añade el botón «Crear miembro nuevo» a los multiselect con data-crear. */
 export function iniciarAltaRapida(select, $) {
     if (!select.dataset.crear || select.dataset.altaRapida) return;
     select.dataset.altaRapida = '1';
@@ -137,7 +137,7 @@ export function iniciarAltaRapida(select, $) {
     const boton = document.createElement('button');
     boton.type = 'button';
     boton.className = 'btn btn-outline-primary btn-sm mt-2';
-    boton.innerHTML = '<i class="fas fa-user-plus me-1" aria-hidden="true"></i>Crear persona nueva';
+    boton.innerHTML = '<i class="fas fa-user-plus me-1" aria-hidden="true"></i>Crear miembro nuevo';
     boton.addEventListener('click', () => abrirAltaRapida(select, $));
 
     const campo = select.closest('.fm-campo');

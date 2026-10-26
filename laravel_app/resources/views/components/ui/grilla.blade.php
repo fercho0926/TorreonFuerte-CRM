@@ -48,7 +48,7 @@
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 grilla" data-grilla="{{ $id }}"
                data-url="{{ route($id.'.datos') }}"
-               data-exportar="{{ route($id.'.exportar') }}"
+               @if($exportable) data-exportar="{{ route($id.'.exportar') }}" @endif
                data-total="{{ $total }}"
                data-filtradas="{{ $pagina->total() }}"
                data-por-pagina="{{ $porPagina }}"

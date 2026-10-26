@@ -34,7 +34,7 @@ class ConfirmacionesTest extends TestCase
         $paginas = [
             route('personas.show', $this->A['persona']) => ['¿Inactivar', '¿Eliminar'],
             route('personas.index') => ['¿Inactivar'],
-            route('celulas.show', $this->A['celula']) => ['¿Quitar a esta persona de la célula?'],
+            route('celulas.show', $this->A['celula']) => ['¿Quitar a este miembro de la célula?'],
             route('celulas.index') => ['¿Eliminar esta célula?'],
             route('eventos.index') => ['¿Eliminar este evento?'],
             route('eventos.show', $this->A['evento']) => ['¿Eliminar este abono?'],
@@ -75,8 +75,8 @@ class ConfirmacionesTest extends TestCase
         $this->delete(route('personas.destroy', $this->A['persona']))->assertForbidden();
 
         $this->comoAdminEnSede($this->A['sede']);
-        // Con historial, la eliminación sigue respondiendo 422.
-        $this->delete(route('personas.destroy', $this->A['lider']))->assertStatus(422);
-        $this->assertNotNull(Persona::withoutGlobalScopes()->find($this->A['lider']->id));
+        // Con historial, la eliminación sigue respondiendo 422 (el miembro no tiene cuenta: spec 016).
+        $this->delete(route('personas.destroy', $this->A['persona']))->assertStatus(422);
+        $this->assertNotNull(Persona::withoutGlobalScopes()->find($this->A['persona']->id));
     }
 }

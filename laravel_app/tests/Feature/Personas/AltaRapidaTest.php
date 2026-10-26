@@ -9,7 +9,7 @@ use Tests\Support\EscenarioDosSedes;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Alta rápida de personas desde la célula (FR-009). */
+/** Alta rápida de miembros desde la célula (FR-009). */
 class AltaRapidaTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
@@ -38,7 +38,7 @@ class AltaRapidaTest extends TestCase
         $this->assertSame('celula', $persona->estado);
         $this->assertSame($this->A['sede']->id, $persona->sede_id);
         $this->assertNull($persona->numero_documento);
-        $this->assertSame(1, $persona->cambios()->where('accion', 'creada')->count());
+        $this->assertSame(1, $persona->historial()->where('accion', 'creada')->count());
     }
 
     public function test_acepta_solo_correo_y_rechaza_sin_ningun_medio_de_contacto(): void

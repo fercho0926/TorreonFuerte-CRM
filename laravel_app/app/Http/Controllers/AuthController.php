@@ -103,13 +103,17 @@ class AuthController extends Controller
         $contexto = app(\App\Services\SedeContext::class);
         $global = $esAdmin && $contexto->estaEnTodas();
 
-        $userCount = User::count();
+        $alcance = app(\App\Services\AlcanceService::class);
+        $lee = fn (string $modulo) => $actor->nivelEn($modulo) >= \App\Support\Niveles::LECTURA;
+
+        // Cada total del tablero depende del permiso del módulo al que pertenece y se calcula dentro del alcance del rol.
+        $userCount = $lee(\App\Support\Modulos::USUARIOS) ? User::count() : 0;
         // El total de sesiones abiertas mezcla todas las sedes: solo se muestra al administrador.
         $activeSessions = $esAdmin ? DB::table('sessions')->count() : null;
-        $personaCount = Persona::count();
-        $liderCount = Persona::lideres()->count();
+        $personaCount = $alcance->personasVisibles($actor)->count();
+        $liderCount = $alcance->lideresVisibles($actor)->count();
 
-        $eventos = Evento::with('inscripciones.pagos')->get();
+        $eventos = $lee(\App\Support\Modulos::EVENTOS) ? Evento::with('inscripciones.pagos')->get() : collect();
         $eventoCount = $eventos->count();
         $totalEsperadoEventos = $eventos->sum(fn (Evento $evento) => $evento->totalEsperado());
         $totalRecaudadoEventos = $eventos->sum(fn (Evento $evento) => $evento->totalRecaudado());
@@ -121,12 +125,21 @@ class AuthController extends Controller
             ->take(5);
 
         // Bloques informativos del tablero: solo datos existentes y dentro del ámbito del usuario.
-        $alcance = app(\App\Services\AlcanceService::class);
-        $personasNuevas = $alcance->personasVisibles($actor)->orderByDesc('created_at')->orderByDesc('id')->limit(5)->get();
+        $personasNuevas = $lee(\App\Support\Modulos::MIEMBROS)
+            ? $alcance->personasVisibles($actor)->orderByDesc('created_at')->orderByDesc('id')->limit(5)->get()
+            : collect();
         $puedeVerSinLider = \App\Support\Permisos::puede('verSinLider');
         $sinLider = $puedeVerSinLider ? $alcance->personasVisibles($actor)->sinLider() : null;
 
+        // Gráficas y metas del tablero (diseño «Dashboard v2» de AdminLTE).
+        $tablero = app(\App\Services\TableroService::class);
+        $leeMiembros = $lee(\App\Support\Modulos::MIEMBROS);
+        $porEstado = $leeMiembros ? $tablero->porEstado($actor) : [];
+
         return view('dashboard', [
+            'mensual' => $leeMiembros ? $tablero->mensual($actor, $lee(\App\Support\Modulos::EVENTOS)) : null,
+            'porEstado' => $porEstado,
+            'celulaCount' => $lee(\App\Support\Modulos::CELULAS) ? $alcance->celulasVisibles($actor)->count() : null,
             'personasNuevas' => $personasNuevas,
             'personasSinLider' => $sinLider ? (clone $sinLider)->orderByDesc('created_at')->limit(5)->get() : null,
             'sinLiderTotal' => $sinLider ? (clone $sinLider)->count() : 0,
@@ -140,6 +153,7 @@ class AuthController extends Controller
             'totalRecaudadoEventos' => $totalRecaudadoEventos,
             'proximosEventos' => $proximosEventos,
             // Resumen por sede y totales globales rotulados (solo admin en "Todas las sedes").
+            'resumenNiveles' => $lee(\App\Support\Modulos::NIVELES) ? app(\App\Services\NivelesService::class)->resumen($actor) : null,
             'resumenSedes' => $global ? app(\App\Services\SedeService::class)->resumen() : null,
         ]);
     }

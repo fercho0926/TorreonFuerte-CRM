@@ -15,7 +15,7 @@ class Formulario
         return 'fm-'.trim(preg_replace('/[^A-Za-z0-9_-]+/', '-', $name), '-');
     }
 
-    /** Clave de notación con puntos para errores y old(): pastor[nombres] → pastor.nombres, personas[] → personas. */
+    /** Clave de notación con puntos para errores y old(): pastor[nombres] → pastor.nombres, personas[] → miembros. */
     public static function clave(string $name): string
     {
         return Str::of($name)->replace('[]', '')->replace(['[', ']'], ['.', ''])->trim('.')->toString();

@@ -53,7 +53,7 @@ class MigracionSedes
             $resultado['sede_creada'] = true;
         }
 
-        foreach (self::TABLAS as $tabla) {
+        foreach (self::tablas() as $tabla) {
             $resultado['asignados'][$tabla] = DB::table($tabla)->whereNull('sede_id')->update(['sede_id' => $sede->id]);
         }
 
@@ -62,7 +62,7 @@ class MigracionSedes
             ->where('role', '!=', 'admin')
             ->update(['sede_id' => $sede->id]);
 
-        // El primer pastor con persona vinculada queda como pastor de la sede.
+        // El primer pastor con miembro vinculado queda como pastor de la sede.
         if (!$sede->pastor_persona_id) {
             $personaId = DB::table('users')
                 ->where('role', 'pastor')
@@ -89,11 +89,22 @@ class MigracionSedes
      *
      * @return array<string, int>
      */
+    /**
+     * Las tablas de la lista que existen. `persona_cambios` se integró al historial único y se eliminó (spec 015);
+     * sigue en la lista para las bases que se migran en orden desde la versión de una sola iglesia.
+     *
+     * @return array<int, string>
+     */
+    public static function tablas(): array
+    {
+        return array_values(array_filter(self::TABLAS, fn ($tabla) => \Illuminate\Support\Facades\Schema::hasTable($tabla)));
+    }
+
     public static function contarSinSede(): array
     {
         $conteo = [];
 
-        foreach (self::TABLAS as $tabla) {
+        foreach (self::tablas() as $tabla) {
             $conteo[$tabla] = DB::table($tabla)->whereNull('sede_id')->count();
         }
 

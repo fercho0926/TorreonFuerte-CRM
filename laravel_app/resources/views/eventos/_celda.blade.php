@@ -26,6 +26,6 @@
         {{ $evento->getRelationValue('sede')?->nombre ?? '—' }}
         @break
     @case('acciones')
-        <x-ui.acciones-fila :ver="route('eventos.show', $evento)" :editar="route('eventos.edit', $evento)" :eliminar="route('eventos.destroy', $evento)" eliminar-titulo="¿Eliminar este evento?" eliminar-mensaje="Se perderá el historial de inscritos y abonos." :nombre="$evento->nombre" />
+        <x-ui.acciones-fila :puede-editar="\App\Support\Permisos::modulo('eventos', 'escritura')" :puede-eliminar="\App\Support\Permisos::modulo('eventos', 'escritura')" :ver="route('eventos.show', $evento)" :editar="route('eventos.edit', $evento)" :eliminar="route('eventos.destroy', $evento)" eliminar-titulo="¿Eliminar este evento?" eliminar-mensaje="Se perderá el historial de inscritos y abonos." :nombre="$evento->nombre" />
         @break
 @endswitch

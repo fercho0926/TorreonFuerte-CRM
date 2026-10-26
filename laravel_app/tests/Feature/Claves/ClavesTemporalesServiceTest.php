@@ -29,7 +29,7 @@ class ClavesTemporalesServiceTest extends TestCase
         $sede = $this->crearSede(['nombre' => 'Cocorná']);
         $this->pastor = $this->crearUsuario('pastor', null, $sede->id);
         $this->objetivo = $this->crearUsuario('lider_celula', null, $sede->id);
-        $this->objetivo->forceFill(['celular' => '310 555 9999'])->save();
+        $this->objetivo->persona->update(['celular' => '310 555 9999']);
     }
 
     public function test_la_clave_tiene_formato_legible_y_alfabeto_sin_caracteres_ambiguos(): void
@@ -83,7 +83,7 @@ class ClavesTemporalesServiceTest extends TestCase
 
     public function test_sin_celular_se_rechaza_y_no_cambia_la_contrasena(): void
     {
-        $this->objetivo->forceFill(['celular' => null])->save();
+        $this->objetivo->persona->update(['celular' => null]);
         $hashAntes = $this->objetivo->fresh()->password;
 
         try {

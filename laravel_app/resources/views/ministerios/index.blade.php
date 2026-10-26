@@ -5,7 +5,9 @@
 @section('page-title', 'Ministerios')
 
 @section('page-actions')
+    @puedeModulo('ministerios', 'escritura')
     <a href="{{ route('ministerios.create') }}" class="btn btn-primary">Crear ministerio</a>
+    @endpuedeModulo
 @endsection
 
 @section('content')

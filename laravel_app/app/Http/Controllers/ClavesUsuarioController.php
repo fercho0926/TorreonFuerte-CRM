@@ -35,7 +35,10 @@ class ClavesUsuarioController extends Controller
         $this->autorizar('gestionarClaves', $registro->user);
 
         if ($registro->estado === RegistroClave::PENDIENTE_ENVIO) {
-            $registro->update(['estado' => RegistroClave::ENVIADA, 'enviada_en' => now()]);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($registro) {
+                $registro->update(['estado' => RegistroClave::ENVIADA, 'enviada_en' => now()]);
+                app(\App\Services\Historial::class)->registrar($registro->user, 'clave_enviada');
+            });
         }
 
         return redirect()->route('users.index')->with('success', 'Clave marcada como enviada.');

@@ -60,7 +60,7 @@ class IntegrantesTest extends TestCase
         $this->assertContains($entra->id, $ids);
         $this->assertNotContains($sale->id, $ids);
         $this->assertSame('2026-01-15', substr((string) $celula->miembros()->whereKey($queda->id)->first()->pivot->fecha_ingreso, 0, 10));
-        $this->assertNotNull(Persona::find($sale->id), 'quitar de la célula no borra a la persona');
+        $this->assertNotNull(Persona::find($sale->id), 'quitar de la célula no borra al miembro');
     }
 
     public function test_sin_la_seccion_de_integrantes_no_se_borra_a_nadie(): void

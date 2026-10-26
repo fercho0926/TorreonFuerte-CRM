@@ -62,7 +62,7 @@ class SinRedTest extends TestCase
         $this->armarDosSedes();
         $this->comoAdminEnSede($this->A['sede']);
 
-        $this->get(route('dashboard'))->assertOk()->assertDontSee('Personas por red')->assertDontSee('Redes');
+        $this->get(route('dashboard'))->assertOk()->assertDontSee('Miembros por red')->assertDontSee('Redes');
         $this->get(route('personas.create'))->assertOk()->assertDontSee('name="red_id"', false)->assertDontSee('Redes');
         $this->get(route('lideres.designar'))->assertOk()->assertDontSee('name="red_id"', false);
         $this->get(route('lideres.index'))->assertOk()->assertDontSee('red_id', false);

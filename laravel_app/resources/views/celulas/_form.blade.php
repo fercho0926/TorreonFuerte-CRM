@@ -24,9 +24,9 @@
     <x-form.input name="lugar_reunion" label="Lugar de reunión" icono="fa-map-pin" :value="$celula?->lugar_reunion" col="col-md-4" maxlength="255" />
 </x-form.section>
 
-<x-form.section titulo="Integrantes" descripcion="Personas que asisten a esta célula. Escribe para buscar por nombre, apellido, documento o celular; si aún no existe, créala desde aquí." icono="fa-users" id="seccion-integrantes">
+<x-form.section titulo="Integrantes" descripcion="Miembros que asisten a esta célula. Escribe para buscar por nombre, apellido, documento o celular; si aún no existe, créalo desde aquí." icono="fa-users" id="seccion-integrantes">
     <input type="hidden" name="integrantes_presente" value="1">
     <x-form.multiselect name="integrantes[]" label="Integrantes" :opciones="$opcionesIntegrantes" :seleccionados="$integrantes->pluck('id')->all()" icono="fa-users"
         :fuente="route('personas.buscar')" :filtros="['activas' => 1]" :crear="route('personas.rapida')"
-        ayuda="Las personas «En célula» aún no son parte de la iglesia, pero así se les da seguimiento." />
+        ayuda="Los miembros «En célula» aún no son parte de la iglesia, pero así se les da seguimiento." />
 </x-form.section>

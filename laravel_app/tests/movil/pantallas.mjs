@@ -14,13 +14,21 @@ export const CON_SESION = [
     'personas', 'personas/create', `personas/${P}`, `personas/${P}/edit`, `personas/${P}/trasladar`,
     'lideres', 'lideres/designar', `lideres/${LIDER}`, `lideres/${LIDER}/quitar`,
     'celulas', 'celulas/create', 'celulas/1', 'celulas/1/edit',
+    'niveles', 'niveles/create', 'niveles/1/edit', 'niveles/miembros?nivel=1',
     'encuentros', 'encuentros/create', 'encuentros/1', 'encuentros/1/edit',
     'eventos', 'eventos/create', 'eventos/1', 'eventos/1/edit',
     'ministerios', 'ministerios/create', 'ministerios/1', 'ministerios/1/edit',
     'sedes', 'sedes/create', 'sedes/1', 'sedes/1/edit', 'sedes/1/pastores',
-    'sin-lider',
+    'sin-lider', 'sedes/1?pestana=organigrama', 'sedes/1?pestana=registro', 'roles', 'roles/create', 'roles/pastor',
     'users', 'users/create', 'users/1/edit',
+    // Spec 016: paso 2 de «Nuevo usuario» con un miembro sembrado sin cuenta y con un celular nuevo.
+    'users/create?celular=3100000002&sede_id=1', 'users/create?celular=3990000000&sede_id=1',
     'solicitudes-clave',
+    // Spec 015: pestaña «Histórico» de las fichas y «Control de cambios».
+    `personas/${P}?pestana=historico`, `lideres/${LIDER}?pestana=historico`, 'celulas/1?pestana=historico',
+    'eventos/1?pestana=historico', 'encuentros/1?pestana=historico', 'ministerios/1?pestana=historico',
+    'sedes/1?pestana=historico', 'roles/pastor?pestana=historico', 'users/1/edit?pestana=historico',
+    'niveles/1/edit?pestana=historico', 'control-cambios',
     'mi-cuenta', 'cambiar-clave',
 ];
 
@@ -28,6 +36,9 @@ export const CON_SESION = [
 export const TOKEN_REGISTRO = 'RegistroMovilRegistroMovil000000';
 
 /** Pantallas públicas (sin sesión). */
-export const SIN_SESION = ['', 'olvide-clave', `registro/${TOKEN_REGISTRO}`];
+/** Token fijo del QR de miembros de la sede 1 (lo asigna servidor.mjs; 32 caracteres como los reales). */
+export const TOKEN_SEDE = 'RegistroSedeRegistroSede00000000';
+
+export const SIN_SESION = ['', 'olvide-clave', `registro/${TOKEN_REGISTRO}`, `registro-sede/${TOKEN_SEDE}`];
 
 export const ANCHOS = [320, 360, 390, 430];

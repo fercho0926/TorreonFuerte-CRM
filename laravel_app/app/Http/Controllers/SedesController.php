@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Grillas\Grilla;
 use App\Grillas\SedesGrilla;
+use App\Grillas\UsuariosGrilla;
+use App\Http\Controllers\Concerns\PestanaHistorico;
 use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Http\Requests\SedeRequest;
 use App\Models\Sede;
 use App\Models\User;
+use App\Services\OrganigramaService;
 use App\Services\SedeContext;
 use App\Services\SedeService;
 use Illuminate\Http\Request;
@@ -19,9 +22,9 @@ use Illuminate\Validation\ValidationException;
  */
 class SedesController extends Controller
 {
-    use ServicioGrilla;
+    use PestanaHistorico, ServicioGrilla;
 
-    public function __construct(private SedeService $sedes, private SedeContext $contexto)
+    public function __construct(private SedeService $sedes, private SedeContext $contexto, private OrganigramaService $organigrama)
     {
     }
 
@@ -65,7 +68,7 @@ class SedesController extends Controller
         return redirect()->route('sedes.show', $sede)->with('success', 'Sede creada correctamente con su pastor'.($sede->pastora_persona_id ? ' y su pastora.' : '.'));
     }
 
-    public function show(Sede $sede)
+    public function show(Request $request, Sede $sede)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
@@ -73,14 +76,22 @@ class SedesController extends Controller
 
         $this->autorizar('ver', $sede);
 
-        $sede->load(['pastor', 'pastora', 'cambios.usuario']);
+        $sede->load(['pastor', 'pastora']);
 
-        return view('sedes.show', [
+        $pestana = $this->pestanaActiva($request, ['organigrama', 'registro']);
+
+        $respuesta = response()->view('sedes.show', [
             'sede' => $sede,
+            'pestana' => $pestana,
+            'historico' => $pestana === 'historico' ? $this->historicoDeRegistro($request, $sede, route('sedes.show', $sede)) : null,
             'resumen' => $this->sedes->resumen()->get($sede->id),
-            'usuarios' => User::withoutGlobalScopes()->where('sede_id', $sede->id)->orderBy('name')->get(),
+            'usuarios' => $pestana === 'datos' ? UsuariosGrilla::ordenarPorMiembro(User::withoutGlobalScopes()->where('sede_id', $sede->id))->get() : collect(),
             'sedeActivaId' => $this->contexto->sedeId(),
+            'organigrama' => $pestana === 'organigrama' ? $this->organigrama->construir($sede, $this->usuarioActual()) : null,
         ]);
+
+        // El organigrama y el registro por QR listan personas: no se guardan en el dispositivo.
+        return $pestana !== 'datos' ? $respuesta->header('Cache-Control', 'no-store, private') : $respuesta;
     }
 
     public function edit(Sede $sede)
@@ -117,7 +128,7 @@ class SedesController extends Controller
 
         return view('sedes.pastores', [
             'sede' => $sede->load(['pastor', 'pastora']),
-            'cuentas' => User::withoutGlobalScopes()->where('sede_id', $sede->id)->orderBy('name')->get(),
+            'cuentas' => UsuariosGrilla::ordenarPorMiembro(User::withoutGlobalScopes()->where('sede_id', $sede->id))->get(),
         ]);
     }
 

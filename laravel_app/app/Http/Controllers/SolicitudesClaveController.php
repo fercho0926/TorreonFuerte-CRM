@@ -55,7 +55,7 @@ class SolicitudesClaveController extends Controller
 
         // Si no hubo clave (la cuenta no tiene celular) la solicitud sigue pendiente.
         if (!$respuesta instanceof \Illuminate\Http\RedirectResponse) {
-            $solicitud->update(['estado' => SolicitudClave::ATENDIDA, 'atendida_por' => $actor->id, 'atendida_en' => now()]);
+            app(\App\Services\Historial::class)->accion('atendida', fn () => $solicitud->update(['estado' => SolicitudClave::ATENDIDA, 'atendida_por' => $actor->id, 'atendida_en' => now()]));
         }
 
         return $respuesta;
@@ -70,7 +70,7 @@ class SolicitudesClaveController extends Controller
         $this->autorizar('gestionarClaves', $solicitud->user);
 
         if ($solicitud->estado === SolicitudClave::PENDIENTE) {
-            $solicitud->update(['estado' => SolicitudClave::DESCARTADA, 'atendida_por' => $this->usuarioActual()->id, 'atendida_en' => now()]);
+            app(\App\Services\Historial::class)->accion('descartada', fn () => $solicitud->update(['estado' => SolicitudClave::DESCARTADA, 'atendida_por' => $this->usuarioActual()->id, 'atendida_en' => now()]));
         }
 
         return redirect()->route('solicitudes-clave.index')->with('success', 'Solicitud descartada.');

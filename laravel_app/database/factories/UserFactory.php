@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Persona;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -26,13 +28,50 @@ class UserFactory extends Factory
     {
         return [
             'sede_id' => fn (array $atributos) => ($atributos['role'] ?? 'user') === 'admin' ? null : SedeFactory::idPorDefecto(),
-            'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'celular' => '3'.fake()->numerify('#########'),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Toda cuenta es de un miembro (spec 016): si no se indica `persona_id`, se crea el miembro en la
+     * sede de la cuenta (el del administrador, en la sede por defecto). `name` y `celular`, si se pasan,
+     * van al miembro.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (User $usuario) {
+            $atributos = $usuario->getAttributes();
+            $usuario->setRawAttributes(Arr::except($atributos, ['name', 'celular', '_miembro']));
+
+            if ($usuario->persona_id) {
+                return;
+            }
+
+            $datos = $atributos['_miembro'] ?? [];
+
+            if (!empty($atributos['name'])) {
+                $partes = preg_split('/\s+/', trim($atributos['name']), 2);
+                $datos += ['nombres' => $partes[0], 'apellidos' => $partes[1] ?? '-'];
+            }
+
+            if (array_key_exists('celular', $atributos)) {
+                $datos += ['celular' => $atributos['celular']];
+            }
+
+            $persona = Persona::factory()->create($datos + ['sede_id' => $usuario->sede_id ?? SedeFactory::idPorDefecto()]);
+
+            $usuario->persona_id = $persona->id;
+            $usuario->setRelation('persona', $persona);
+        });
+    }
+
+    /** Cuenta cuyo miembro tiene estos datos (`nombres`, `apellidos`, `celular`, …). */
+    public function conMiembro(array $datos): static
+    {
+        return $this->state(fn () => ['_miembro' => $datos]);
     }
 
     /** Cuenta con una clave temporal vigente: debe elegir su contraseña al entrar. */

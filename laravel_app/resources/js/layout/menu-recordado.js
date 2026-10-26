@@ -1,5 +1,5 @@
 /**
- * Recuerda si la persona plegó el menú lateral. Solo aplica en pantallas grandes: en móvil el menú
+ * Recuerda si el miembro plegó el menú lateral. Solo aplica en pantallas grandes: en móvil el menú
  * siempre empieza cerrado. Todo es opcional: si el navegador bloquea el almacenamiento, el menú
  * funciona igual, solo que sin recordar la elección.
  */

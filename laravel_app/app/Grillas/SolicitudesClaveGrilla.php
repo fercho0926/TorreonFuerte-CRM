@@ -58,11 +58,16 @@ class SolicitudesClaveGrilla extends Grilla
     {
         return [
             Columna::make('cuenta', 'Cuenta')
-                ->ordena(fn (Builder $q, string $dir) => $q->orderBy(User::withoutGlobalScopes()->select('users.name')->whereColumn('users.id', 'solicitudes_clave.user_id'), $dir))
+                // El nombre de la cuenta es el de su miembro (spec 016).
+                ->ordena(fn (Builder $q, string $dir) => $q->orderBy(
+                    User::withoutGlobalScopes()->join('personas', 'personas.id', '=', 'users.persona_id')
+                        ->select('personas.nombres')->whereColumn('users.id', 'solicitudes_clave.user_id'),
+                    $dir
+                ))
                 ->valor(fn (SolicitudClave $s) => $s->user->name.' <'.$s->user->email.'>')
                 ->prioridad(1),
             Columna::make('rol', 'Rol')
-                ->valor(fn (SolicitudClave $s) => User::ROLE_LABELS[$s->user->role] ?? $s->user->role)
+                ->valor(fn (SolicitudClave $s) => User::etiquetaDeRol($s->user->role))
                 ->prioridad(4),
             Columna::sede('solicitudes_clave'),
             Columna::make('pedida', 'Pedida')
@@ -95,6 +100,6 @@ class SolicitudesClaveGrilla extends Grilla
     {
         $like = '%'.str_replace(['%', '_'], '', $q).'%';
 
-        return $consulta->whereHas('user', fn ($u) => $u->where('users.name', 'like', $like)->orWhere('users.email', 'like', $like));
+        return $consulta->whereHas('user', fn ($u) => $u->where('users.email', 'like', $like)->orWhereHas('persona', fn ($p) => $p->buscar($q)));
     }
 }

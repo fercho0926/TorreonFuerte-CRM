@@ -7,6 +7,9 @@
     @case('fecha')
         {{ $encuentro->fecha_realizacion->format('Y-m-d') }}
         @break
+    @case('nivel')
+        @if($encuentro->nivel)<x-ui.insignia color="primary">{{ $encuentro->nivel->posicion }} · {{ $encuentro->nivel->nombre }}</x-ui.insignia>@else<span class="text-muted">—</span>@endif
+        @break
     @case('lugar')
         {{ $encuentro->lugar ?? '—' }}
         @break
@@ -23,6 +26,6 @@
         {{ $encuentro->getRelationValue('sede')?->nombre ?? '—' }}
         @break
     @case('acciones')
-        <x-ui.acciones-fila :ver="route('encuentros.show', $encuentro)" :editar="route('encuentros.edit', $encuentro)" :eliminar="route('encuentros.destroy', $encuentro)" eliminar-titulo="¿Eliminar este encuentro?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$encuentro->nombre" />
+        <x-ui.acciones-fila :puede-editar="\App\Support\Permisos::modulo('encuentros', 'escritura')" :puede-eliminar="\App\Support\Permisos::modulo('encuentros', 'escritura')" :ver="route('encuentros.show', $encuentro)" :editar="route('encuentros.edit', $encuentro)" :eliminar="route('encuentros.destroy', $encuentro)" eliminar-titulo="¿Eliminar este encuentro?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$encuentro->nombre" />
         @break
 @endswitch

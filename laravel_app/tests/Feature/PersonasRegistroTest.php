@@ -25,7 +25,7 @@ class PersonasRegistroTest extends TestCase
         $persona = Persona::where('nombres', 'Vera')->firstOrFail();
         $this->assertSame('visitante', $persona->estado);
         $this->assertNull($persona->numero_documento);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'creada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'creada']);
     }
 
     public function test_exige_al_menos_un_medio_de_contacto(): void
@@ -43,12 +43,14 @@ class PersonasRegistroTest extends TestCase
 
         $datos = ['nombres' => 'ana', 'apellidos' => 'pérez', 'celular' => '3105550000', 'estado' => 'visitante'];
 
+        $antes = Persona::count(); // incluye el miembro dueño de la cuenta del administrador (spec 016)
+
         $this->post(route('personas.store'), $datos)
             ->assertSessionHas('duplicado', fn ($d) => $d['id'] === $existente->id);
-        $this->assertSame(1, Persona::count());
+        $this->assertSame($antes, Persona::count());
 
         $this->post(route('personas.store'), $datos + ['confirmar_duplicado' => 1])->assertSessionHasNoErrors();
-        $this->assertSame(2, Persona::count());
+        $this->assertSame($antes + 1, Persona::count());
     }
 
     public function test_varios_visitantes_sin_documento_pueden_coexistir(): void

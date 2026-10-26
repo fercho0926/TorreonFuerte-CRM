@@ -12,7 +12,7 @@
 
 @if($duplicado)
     <div class="alert alert-warning" role="alert">
-        <strong>Posible duplicado:</strong> ya existe una persona con el mismo nombre y celular:
+        <strong>Posible duplicado:</strong> ya existe un miembro con el mismo nombre y celular:
         @if($duplicado['puedeVer'])
             <a href="{{ route('personas.show', $duplicado['id']) }}" target="_blank" rel="noopener">{{ $duplicado['nombre'] }}</a>.
         @else
@@ -20,7 +20,7 @@
         @endif
         <div class="form-check mt-2">
             <input type="checkbox" class="form-check-input" id="confirmar_duplicado" name="confirmar_duplicado" value="1">
-            <label class="form-check-label" for="confirmar_duplicado">Es otra persona, guardar de todos modos</label>
+            <label class="form-check-label" for="confirmar_duplicado">Es otro miembro, guardar de todos modos</label>
         </div>
     </div>
 @endif
@@ -36,20 +36,20 @@
         ayuda="«En célula»: asiste a una célula y aún no es parte de la iglesia." />
 </x-form.section>
 
-<x-form.section titulo="Ubicación" descripcion="Dónde vive la persona." icono="fa-map-marker-alt" id="seccion-ubicacion">
+<x-form.section titulo="Ubicación" descripcion="Dónde vive el miembro." icono="fa-map-marker-alt" id="seccion-ubicacion">
     <x-form.input name="direccion" label="Dirección" icono="fa-home" :value="$persona?->direccion" col="col-12" maxlength="255" />
     <x-form.input name="barrio" label="Barrio" icono="fa-map" :value="$persona?->barrio" maxlength="255" />
     <x-form.input name="ciudad" label="Ciudad" icono="fa-city" :value="$persona?->ciudad" maxlength="255" />
 </x-form.section>
 
-<x-form.section titulo="Liderazgo" descripcion="Quién cuida de esta persona y si ella misma es líder." icono="fa-user-tie" id="seccion-liderazgo">
+<x-form.section titulo="Liderazgo" descripcion="Quién cuida de este miembro y si él mismo es líder." icono="fa-user-tie" id="seccion-liderazgo">
     <div class="col-12">@include('partials.ayuda-terminos')</div>
 
     <x-form.select name="lider_id" label="Líder directo" icono="fa-user-tie" :opciones="$opcionesLider" :value="$persona?->lider_id" vacio="Sin líder asignado" col="col-12" buscar
-        ayuda="Es el líder que cuida de esta persona. Si cambia, la persona sale de las células de su líder anterior." />
+        ayuda="Es el líder que cuida de este miembro. Si cambia, el miembro sale de las células de su líder anterior." />
 
     @if($puedeDesignarLider)
-        <x-form.switch name="es_lider" label="Esta persona es líder" :marcado="$esLider" icono="fa-star" />
+        <x-form.switch name="es_lider" label="Este miembro es líder" :marcado="$esLider" icono="fa-star" />
     @elseif($persona?->es_lider)
         <div class="col-12"><p><x-ui.estado valor="lider" /></p></div>
     @endif

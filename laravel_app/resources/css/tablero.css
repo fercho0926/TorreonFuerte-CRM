@@ -1,0 +1,56 @@
+/* Tablero estilo «Dashboard v2» de AdminLTE 4. */
+
+/* Reserva el alto de la gráfica para que la página no salte al dibujarla. */
+.grafica-tablero { min-height: 240px; }
+
+/* Separadores del pie del resumen: en teléfono las columnas van de a dos. */
+@media (min-width: 768px) {
+    .border-md-end { border-right: var(--bs-border-width) solid var(--bs-border-color); }
+}
+
+/* «Miembros nuevos» como la cuadrícula «Latest Members» de AdminLTE, con iniciales en vez de foto. */
+.lista-miembros {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: .75rem;
+}
+.lista-miembros-enlace {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .25rem;
+    min-height: 44px;
+    padding: .5rem;
+    border-radius: var(--bs-border-radius);
+    text-align: center;
+    text-decoration: none;
+    color: var(--bs-body-color);
+}
+.lista-miembros-enlace:hover,
+.lista-miembros-enlace:focus-visible { background: var(--bs-tertiary-bg); }
+.lista-miembros-avatar {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.lista-miembros-avatar--chico { width: 36px; height: 36px; font-size: .85rem; }
+.lista-miembros-nombre {
+    max-width: 100%;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.lista-miembros-fecha { font-size: .8rem; color: var(--bs-secondary-color); }
+
+/* Las info-boxes enlazadas: el enlace cubre la caja pero conserva el aspecto del texto. */
+.info-box .stretched-link { text-decoration: none; }
+.info-box:has(.stretched-link):hover { box-shadow: var(--bs-box-shadow) !important; }

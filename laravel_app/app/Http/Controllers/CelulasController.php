@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Grillas\Grilla;
 use App\Grillas\CelulasGrilla;
+use App\Http\Controllers\Concerns\PestanaHistorico;
 use App\Http\Controllers\Concerns\ServicioGrilla;
+use App\Services\Historial;
 use App\Services\SedeContext;
 use App\Models\Celula;
 use App\Models\CelulaReunion;
@@ -16,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 class CelulasController extends Controller
 {
-    use ServicioGrilla;
+    use PestanaHistorico, ServicioGrilla;
 
     protected function grilla(): Grilla
     {
@@ -30,7 +32,7 @@ class CelulasController extends Controller
         }
 
         return view('celulas.index', $this->datosDeLaGrilla($request) + [
-            'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal(),
+            'puedeGestionarEstructura' => $this->puedeGestionarEstructura(),
         ]);
     }
 
@@ -71,7 +73,7 @@ class CelulasController extends Controller
         return redirect()->route('celulas.index')->with('success', 'Célula creada correctamente.');
     }
 
-    public function show(Celula $celula)
+    public function show(Request $request, Celula $celula)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
@@ -81,6 +83,16 @@ class CelulasController extends Controller
             return $redirect;
         }
 
+        if ($this->pestanaActiva($request) === 'historico') {
+            return view('celulas.show', [
+                'celula' => $celula,
+                'pestana' => 'historico',
+                'historico' => $this->historicoDeRegistro($request, $celula, route('celulas.show', $celula)),
+                'puedeAdministrar' => $this->puedeAdministrarCelula($celula),
+                'puedeGestionarEstructura' => $this->puedeGestionarEstructura(),
+            ]);
+        }
+
         $celula->load(['lider', 'coLider', 'miembros' => function ($query) {
             $query->orderBy('apellidos')->orderBy('nombres');
         }, 'reuniones.asistentes']);
@@ -88,7 +100,7 @@ class CelulasController extends Controller
         return view('celulas.show', [
             'celula' => $celula,
             'puedeAdministrar' => $this->puedeAdministrarCelula($celula),
-            'puedeGestionarEstructura' => $this->usuarioActual()?->tieneAccesoTotal(),
+            'puedeGestionarEstructura' => $this->puedeGestionarEstructura(),
         ]);
     }
 
@@ -167,7 +179,7 @@ class CelulasController extends Controller
         $data = $request->validate([
             'personas' => ['required', 'array', 'min:1'],
             'personas.*' => ['integer', app(SedeContext::class)->existe('personas')],
-        ], ['personas.required' => 'Elige al menos una persona.', 'personas.min' => 'Elige al menos una persona.']);
+        ], ['personas.required' => 'Elige al menos un miembro.', 'personas.min' => 'Elige al menos un miembro.']);
 
         // Ser integrante de una célula no depende del líder directo y no lo cambia (spec 006).
         $anteriores = $celula->miembros()->pluck('personas.id')->all();
@@ -177,14 +189,14 @@ class CelulasController extends Controller
             : [];
 
         if (count($permitidas) !== count($nuevas)) {
-            throw ValidationException::withMessages(['personas' => 'Algunas personas no se pueden añadir: están inactivas o fuera de tu alcance.']);
+            throw ValidationException::withMessages(['personas' => 'Algunos miembros no se pueden añadir: están inactivas o fuera de tu alcance.']);
         }
 
         $this->sincronizarIntegrantes($celula, array_values(array_unique(array_merge($anteriores, array_map('intval', $data['personas'])))));
 
         $agregadas = count(array_diff($data['personas'], $anteriores));
 
-        return redirect()->route('celulas.show', $celula)->with('success', $agregadas === 1 ? 'Persona agregada a la célula.' : "{$agregadas} personas agregadas a la célula.");
+        return redirect()->route('celulas.show', $celula)->with('success', $agregadas === 1 ? 'Miembro agregado a la célula.' : "{$agregadas} miembros agregados a la célula.");
     }
 
     public function quitarMiembro(Celula $celula, Persona $persona)
@@ -197,10 +209,14 @@ class CelulasController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // La persona conserva su líder directo; solo deja de pertenecer a esta célula.
-        $celula->miembros()->detach($persona->id);
+        // El miembro conserva su líder directo; solo deja de pertenecer a esta célula.
+        DB::transaction(function () use ($celula, $persona) {
+            if ($celula->miembros()->detach($persona->id)) {
+                app(Historial::class)->sincronizacion($celula, ['detached' => [$persona->id]], 'miembros_actualizados', 'ingreso_celula', 'salida_celula');
+            }
+        });
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Persona retirada de la célula.');
+        return redirect()->route('celulas.show', $celula)->with('success', 'Miembro retirado de la célula.');
     }
 
     public function registrarReunion(Request $request, Celula $celula)
@@ -221,19 +237,37 @@ class CelulasController extends Controller
             'asistio.*' => ['integer', app(SedeContext::class)->existe('personas')],
         ]);
 
-        $reunion = CelulaReunion::create([
-            'celula_id' => $celula->id,
-            'fecha' => $data['fecha'],
-            'tema' => $data['tema'] ?? null,
-            'notas' => $data['notas'] ?? null,
-        ]);
+        DB::transaction(function () use ($celula, $data) {
+            $reunion = CelulaReunion::create([
+                'celula_id' => $celula->id,
+                'fecha' => $data['fecha'],
+                'tema' => $data['tema'] ?? null,
+                'notas' => $data['notas'] ?? null,
+            ]);
 
-        $asistieron = $data['asistio'] ?? [];
-        $asistencia = $celula->miembros->mapWithKeys(fn (Persona $persona) => [
-            $persona->id => ['asistio' => in_array($persona->id, $asistieron)],
-        ]);
+            $asistieron = $data['asistio'] ?? [];
+            $asistencia = $celula->miembros->mapWithKeys(fn (Persona $persona) => [
+                $persona->id => ['asistio' => in_array($persona->id, $asistieron)],
+            ]);
 
-        $reunion->asistentes()->sync($asistencia->all());
+            $reunion->asistentes()->sync($asistencia->all());
+
+            // La reunión queda en la célula (con quién asistió) y la asistencia en el histórico de cada miembro.
+            $historial = app(Historial::class);
+            $lote = (string) \Illuminate\Support\Str::uuid();
+            $presentes = $celula->miembros->filter(fn (Persona $persona) => in_array($persona->id, $asistieron));
+            $fecha = ['fecha_evento' => \Illuminate\Support\Carbon::parse($data['fecha'])->toDateString()];
+            $historial->registrar($celula, 'reunion_registrada', null, null, null, $fecha + [
+                'cambios' => array_values(array_filter([
+                    !empty($data['tema']) ? ['campo' => 'tema', 'etiqueta' => 'Tema', 'antes' => '', 'despues' => $data['tema'], 'largo' => false, 'secreto' => false, 'modulo_sensible' => null, 'solo' => true] : null,
+                ])),
+                'agregados' => $presentes->map(fn ($p) => ['id' => $p->id, 'nombre' => $p->nombre_completo])->values()->all(),
+                'etiquetas' => ['Asistieron', 'No asistieron'],
+            ], null, $lote);
+            foreach ($presentes as $persona) {
+                $historial->registrar($persona, 'asistio_reunion', null, null, null, $fecha, $celula, $lote);
+            }
+        });
 
         return redirect()->route('celulas.show', $celula)->with('success', 'Reunión registrada correctamente.');
     }
@@ -250,7 +284,13 @@ class CelulasController extends Controller
 
         abort_unless($reunion->celula_id === $celula->id, 404);
 
-        $reunion->delete();
+        DB::transaction(function () use ($celula, $reunion) {
+            app(Historial::class)->registrar($celula, 'reunion_eliminada', null, null, null, [
+                'fecha_evento' => $reunion->fecha?->toDateString(),
+                'datos' => array_filter(['Tema' => $reunion->tema, 'Notas' => $reunion->notas]),
+            ]);
+            $reunion->delete();
+        });
 
         return redirect()->route('celulas.show', $celula)->with('success', 'Reunión eliminada.');
     }
@@ -268,7 +308,7 @@ class CelulasController extends Controller
     {
         $user = $this->usuarioActual();
 
-        if (!$user) {
+        if (!$user || $user->nivelEn(\App\Support\Modulos::CELULAS) < \App\Support\Niveles::ESCRITURA) {
             return false;
         }
 
@@ -292,7 +332,7 @@ class CelulasController extends Controller
     }
 
     /**
-     * Personas que se muestran ya seleccionadas en el formulario: lo enviado antes (si hubo un
+     * Miembros que se muestran ya seleccionadas en el formulario: lo enviado antes (si hubo un
      * error de validación) o los integrantes actuales de la célula.
      */
     private function integrantesParaFormulario(?Celula $celula, Request $request)
@@ -322,14 +362,14 @@ class CelulasController extends Controller
         $ids = array_values(array_unique(array_map('intval', (array) $request->input('integrantes', []))));
         $actuales = $celula ? $celula->miembros()->pluck('personas.id')->all() : [];
 
-        // Las personas nuevas deben estar activas y dentro del alcance de quien guarda.
+        // Los miembros nuevas deben estar activas y dentro del alcance de quien guarda.
         $nuevas = array_diff($ids, $actuales);
         $permitidas = $nuevas
             ? $this->alcance()->personasVisibles($this->usuarioActual())->activas()->whereIn('personas.id', $nuevas)->pluck('personas.id')->all()
             : [];
 
         if (count($permitidas) !== count($nuevas)) {
-            throw ValidationException::withMessages(['integrantes' => 'Algunas personas no se pueden añadir: están inactivas o fuera de tu alcance.']);
+            throw ValidationException::withMessages(['integrantes' => 'Algunos miembros no se pueden añadir: están inactivas o fuera de tu alcance.']);
         }
 
         return $ids;
@@ -354,6 +394,9 @@ class CelulasController extends Controller
         if ($retiradas) {
             $celula->miembros()->detach($retiradas);
         }
+
+        // Quién entró y quién salió: resumen en la célula y una entrada en cada miembro (spec 015).
+        app(Historial::class)->sincronizacion($celula, ['attached' => array_values($nuevas), 'detached' => array_values($retiradas)], 'miembros_actualizados', 'ingreso_celula', 'salida_celula');
     }
 
     private function validateData(Request $request, ?Celula $celula = null): array

@@ -9,7 +9,7 @@ use Tests\Support\EscenarioDosSedes;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Grilla de personas: datos JSON (DataTables, modo servidor) y exportación a CSV. */
+/** Grilla de miembros: datos JSON (DataTables, modo servidor) y exportación a CSV. */
 class GrillaDatosTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
@@ -35,7 +35,7 @@ class GrillaDatosTest extends TestCase
         $this->assertSame(7, $json['draw']);
         $this->assertSame($json['recordsTotal'], $json['recordsFiltered']);
         $this->assertStringContainsString('Ana Zuluaga', implode('', array_merge(...$json['data'])));
-        $this->assertCount(5, $json['data'][0], 'nombre, estado, celular, líder, acciones');
+        $this->assertCount(6, $json['data'][0], 'nombre, estado, celular, líder, nivel, acciones');
     }
 
     public function test_filtra_por_columna_y_cuenta_los_filtrados(): void

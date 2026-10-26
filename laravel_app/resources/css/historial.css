@@ -1,0 +1,62 @@
+/*
+ * Historial de cambios (spec 015): pestaña «Histórico» y grilla «Control de cambios».
+ * Pensado primero para celular: cada entrada es una tarjeta apilada; «antes → después» se parte en líneas; la acción
+ * se lee por su icono y su texto, nunca solo por el color; los controles tocables miden al menos 44 px.
+ */
+
+.historial-pestanas .nav-link { min-height: 44px; display: inline-flex; align-items: center; gap: .35rem; }
+
+.historial-filtros > summary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    list-style: none;
+    cursor: pointer;
+}
+.historial-filtros > summary::-webkit-details-marker { display: none; }
+
+.historial-lista { display: flex; flex-direction: column; gap: .75rem; }
+
+.historial-entrada {
+    border: 1px solid var(--bs-border-color);
+    border-left: 4px solid var(--bs-primary);
+    border-radius: .5rem;
+    padding: .65rem .85rem;
+    background: var(--bs-body-bg);
+    overflow-wrap: anywhere;
+}
+
+.historial-entrada-cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .25rem .75rem;
+    margin-bottom: .35rem;
+}
+
+.historial-accion { font-weight: 600; }
+.historial-fecha, .historial-actor, .historial-relacionado { color: var(--bs-secondary-color); font-size: .9rem; }
+
+.historial-cambios { list-style: none; margin: .35rem 0 0; padding: 0; }
+.historial-cambios li { padding: .15rem 0; }
+.historial-campo { font-weight: 600; margin-right: .25rem; }
+.historial-antes { text-decoration: line-through; color: var(--bs-secondary-color); }
+.historial-despues { font-weight: 500; }
+
+.historial-largo > summary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--bs-link-color);
+}
+
+.historial-secciones .historial-seccion { scroll-margin-top: 4rem; }
+
+/* En teléfono, «antes» y «después» van uno debajo del otro para que nada se salga de la pantalla. */
+@media (max-width: 575.98px) {
+    .historial-cambios li > .historial-antes,
+    .historial-cambios li > .historial-despues { display: block; }
+    .historial-cambios li > [aria-label="cambió a"] { display: none; }
+    .historial-cambios li > .historial-despues::before { content: '→ '; }
+}

@@ -27,7 +27,7 @@ class DesactivarSedeTest extends TestCase
         $this->post(route('sedes.desactivar', $this->B['sede']))->assertRedirect();
 
         $this->assertFalse($this->B['sede']->fresh()->activa);
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $this->B['sede']->id, 'accion' => 'desactivada', 'user_id' => $admin->id]);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $this->B['sede']->id, 'accion' => 'desactivada', 'user_id' => $admin->id]);
 
         $this->flushSession();
         $this->post(route('login.post'), ['email' => $this->B['pastor']->email, 'password' => 'password'])->assertSessionHasErrors('email');
@@ -68,7 +68,7 @@ class DesactivarSedeTest extends TestCase
 
         $this->post(route('sedes.reactivar', $this->B['sede']))->assertRedirect();
         $this->assertTrue($this->B['sede']->fresh()->activa);
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $this->B['sede']->id, 'accion' => 'reactivada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $this->B['sede']->id, 'accion' => 'reactivada']);
 
         $this->flushSession();
         $this->post(route('login.post'), ['email' => $this->B['pastor']->email, 'password' => 'password'])->assertRedirect(route('dashboard'));
@@ -106,7 +106,7 @@ class DesactivarSedeTest extends TestCase
         $this->put(route('sedes.update', $this->A['sede']), ['nombre' => 'Iglesia Alfa Renovada', 'ciudad' => 'Gómez Palacio'])->assertSessionHasNoErrors();
 
         $this->assertSame('Gómez Palacio', $this->A['sede']->fresh()->ciudad);
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $this->A['sede']->id, 'accion' => 'editada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $this->A['sede']->id, 'accion' => 'editada']);
 
         $this->put(route('sedes.update', $this->A['sede']), ['nombre' => 'Iglesia Beta', 'ciudad' => 'X'])->assertSessionHasErrors('nombre');
     }
@@ -114,7 +114,7 @@ class DesactivarSedeTest extends TestCase
     public function test_la_bitacora_de_la_sede_solo_la_ve_el_admin(): void
     {
         $this->comoAdminEnTodas();
-        $this->get(route('sedes.show', $this->A['sede']))->assertOk()->assertSee('Historial de la sede');
+        $this->get(route('sedes.show', [$this->A['sede'], 'pestana' => 'historico']))->assertOk()->assertSee('Histórico');
 
         $this->iniciarSesionComo($this->A['pastor']);
         $this->get(route('sedes.show', $this->A['sede']))->assertForbidden();

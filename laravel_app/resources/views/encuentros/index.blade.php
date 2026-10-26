@@ -5,7 +5,9 @@
 @section('page-title', 'Encuentros')
 
 @section('page-actions')
+    @puedeModulo('encuentros', 'escritura')
     <a href="{{ route('encuentros.create') }}" class="btn btn-primary">Crear encuentro</a>
+    @endpuedeModulo
 @endsection
 
 @section('content')

@@ -1,12 +1,15 @@
 /*
- * Identidad propia sobre AdminLTE: marca de agua con el nombre de la sede (abajo, sin inclinación)
+ * Identidad propia sobre AdminLTE: marca de agua con el nombre de la sede (abajo, sin inclinación,
+ * superpuesta al contenido pero translúcida y sin capturar clics)
  * y recorte con puntos suspensivos de nombres de sede largos en la barra y el menú.
  */
 
 .marca-agua-sede {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    /* Por encima del contenido (z-index 1) para que se vea aunque una tarjeta llene la pantalla;
+       por debajo de la barra superior, el menú lateral, desplegables y modales. Los clics la atraviesan. */
+    z-index: 2;
     pointer-events: none;
     display: flex;
     align-items: flex-end;

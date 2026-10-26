@@ -8,7 +8,7 @@
 <div class="callout callout-info">
     <strong>{{ $sede->nombre }}</strong><br>
     Pastor actual: {{ $sede->pastor?->nombre_completo ?? '—' }} · Pastora actual: {{ $sede->pastora?->nombre_completo ?? '—' }}<br>
-    <small>La cuenta anterior pasa a líder y conserva su registro como persona.</small>
+    <small>La cuenta anterior pasa a líder y conserva su registro como miembro.</small>
 </div>
 
 <x-form.layout :action="route('sedes.pastores.update', $sede)" method="PUT" guardar="Guardar cambio" icono="fa-save" :cancelar="route('sedes.show', $sede)">

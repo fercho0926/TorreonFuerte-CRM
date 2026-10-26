@@ -1,4 +1,4 @@
-{{-- Celda de la grilla «sin líder». Variables: $fila (Persona), $columna, $grilla. --}}
+{{-- Celda de la grilla «sin líder». Variables: $fila (Miembro), $columna, $grilla. --}}
 @php($persona = $fila)
 @switch($columna)
     @case('nombre')
@@ -12,8 +12,10 @@
         @include('partials.acciones-contacto', ['persona' => $persona])
         @break
     @case('asignar')
+    @puedeModulo('sin_lider', 'escritura')
         <x-form.layout :action="route('sin-lider.asignar', $persona)" modo="linea" guardar="Asignar" boton="success" icono="fa-user-check" :leyenda="false" :id="'asignar-'.$persona->id">
             <x-form.select name="lider_id" :id="'fm-lider-'.$persona->id" label="Líder" :ocultarEtiqueta="true" icono="fa-user-tie" :required="true" vacio="Elegir líder..." col="col-12" buscar :opciones="$grilla->opcionesLider()" />
         </x-form.layout>
+    @endpuedeModulo
         @break
 @endswitch

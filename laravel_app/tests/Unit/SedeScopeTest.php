@@ -109,6 +109,10 @@ class SedeScopeTest extends TestCase
         $contexto = app(SedeContext::class);
 
         $this->assertSame(['EnB'], $contexto->conSede($this->b->id, fn () => $this->nombres()));
-        $this->assertCount(2, $contexto->sinFiltro(fn () => $this->nombres()));
+        // Sin filtro aparecen las dos sedes, más el miembro dueño de la cuenta del administrador (spec 016).
+        $todos = $contexto->sinFiltro(fn () => $this->nombres());
+        $this->assertContains('EnA', $todos);
+        $this->assertContains('EnB', $todos);
+        $this->assertCount(3, $todos);
     }
 }

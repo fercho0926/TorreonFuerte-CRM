@@ -16,7 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 class ResuelveSede
 {
     /** Rutas (por nombre) que pueden escribir aunque no haya sede activa. */
-    private const EXENTAS = ['login.post', 'logout', 'sede-activa.update', 'sedes.*', 'users.*', 'users.clave.*', 'claves.*', 'solicitudes-clave.*', 'recuperacion.*', 'registro.*', 'cambiar-clave.*', 'cuenta.*'];
+    private const EXENTAS = ['login.post', 'logout', 'sede-activa.update', 'sedes.*', 'roles.*', 'users.*', 'users.clave.*', 'claves.*', 'solicitudes-clave.*', 'recuperacion.*', 'registro.*', 'cambiar-clave.*', 'cuenta.*',
+        // El plan de niveles es común a todas las sedes (spec 014): se edita sin sede activa. Los avances de los miembros no.
+        'niveles.store', 'niveles.update', 'niveles.subir', 'niveles.bajar', 'niveles.desactivar', 'niveles.reactivar', 'niveles.destroy'];
 
     public function __construct(private SedeContext $contexto)
     {

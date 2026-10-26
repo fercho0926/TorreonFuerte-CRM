@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Gate;
  */
 class Permisos
 {
+    /** ¿El rol del usuario llega al nivel indicado («lectura» o «escritura») en el módulo? */
+    public static function modulo(string $modulo, string $nivel = 'lectura'): bool
+    {
+        $user = Controller::usuarioDeLaPeticion();
+
+        return $user && $user->nivelEn($modulo) >= \App\Support\Niveles::aNumero($nivel);
+    }
+
     public static function puede(string $habilidad, mixed $argumento = Persona::class): bool
     {
         $user = Controller::usuarioDeLaPeticion();

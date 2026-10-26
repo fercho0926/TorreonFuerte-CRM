@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 /**
- * La propia persona elige su contraseña: obligatoria tras una clave temporal («Elige tu
+ * El propio miembro elige su contraseña: obligatoria tras una clave temporal («Elige tu
  * contraseña») y voluntaria desde «Mi cuenta».
  */
 class CuentaController extends Controller
@@ -117,11 +117,12 @@ class CuentaController extends Controller
     {
         $eraTemporal = $user->debe_cambiar_clave;
 
-        $user->forceFill([
+        // En el historial queda «Clave cambiada», nunca la contraseña (spec 015, RF-007).
+        app(\App\Services\Historial::class)->accion('clave_cambiada', fn () => $user->forceFill([
             'password' => $contrasena,
             'debe_cambiar_clave' => false,
             'clave_vence_en' => null,
-        ])->save();
+        ])->save());
 
         if ($eraTemporal) {
             RegistroClave::withoutGlobalScopes()

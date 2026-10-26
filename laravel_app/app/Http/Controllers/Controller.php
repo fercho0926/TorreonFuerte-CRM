@@ -47,11 +47,22 @@ abstract class Controller
             return redirect()->route('login');
         }
 
-        if (!$user->tieneAccesoTotal()) {
+        if (!$this->puedeGestionarEstructura()) {
             return redirect()->route('dashboard');
         }
 
         return null;
+    }
+
+    /**
+     * Crear, editar y eliminar células (estructura) exige escritura en Células y alcance de toda la sede; agregar
+     * miembros y registrar reuniones basta con escritura dentro del alcance del rol.
+     */
+    protected function puedeGestionarEstructura(): bool
+    {
+        $user = $this->usuarioActual();
+
+        return $user !== null && $user->tieneAccesoTotal() && $user->nivelEn(\App\Support\Modulos::CELULAS) >= \App\Support\Niveles::ESCRITURA;
     }
 
     /**
@@ -79,6 +90,23 @@ abstract class Controller
         $atributos->set('usuario_actual_id', $userId);
 
         return $user;
+    }
+
+    /**
+     * Ids de los miembros que el rol del usuario puede ver, o nulo si ve toda la sede (sin filtrar). Se usa para
+     * listar solo esos miembros dentro de módulos sin dueño (eventos, encuentros, ministerios).
+     *
+     * @return array<int, int>|null
+     */
+    protected function idsDePersonasVisibles(): ?array
+    {
+        $user = $this->usuarioActual();
+
+        if (!$user || $user->tieneAccesoTotal()) {
+            return null;
+        }
+
+        return $this->alcance()->personasVisibles($user)->pluck('personas.id')->all();
     }
 
     protected function alcance(): AlcanceService

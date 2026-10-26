@@ -8,7 +8,7 @@ use App\Services\AlcanceService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-/** Listado de líderes: nombre, personas a cargo, células lideradas, celular, sede y acciones. */
+/** Listado de líderes: nombre, miembros a cargo, células lideradas, celular, sede y acciones. */
 class LideresGrilla extends Grilla
 {
     public function __construct(private AlcanceService $alcance)
@@ -38,7 +38,7 @@ class LideresGrilla extends Grilla
                 ->filtraTexto(fn (Builder $q, string $valor) => $q->buscar($valor))
                 ->valor(fn (Persona $p) => $p->nombre_completo)
                 ->prioridad(1),
-            Columna::make('personas', 'Personas')->ordena('miembros_count')->valor(fn (Persona $p) => $p->miembros_count)->prioridad(3),
+            Columna::make('personas', 'Miembros')->ordena('miembros_count')->valor(fn (Persona $p) => $p->miembros_count)->prioridad(3),
             Columna::make('celulas', 'Células')->ordena('celulas_lideradas_count')->valor(fn (Persona $p) => $p->celulas_lideradas_count)->prioridad(4),
             Columna::make('celular', 'Celular')
                 ->ordena('personas.celular')

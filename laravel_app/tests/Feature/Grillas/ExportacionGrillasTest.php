@@ -29,9 +29,17 @@ class ExportacionGrillasTest extends TestCase
         $csv = $this->get(route('personas.exportar', ['apellidos' => 'x', 'nombre' => 'Masiva', 'orden' => 'nombre', 'dir' => 'desc']))->assertOk()->streamedContent();
         $lineas = array_filter(explode("\n", trim($csv)));
 
-        $this->assertCount(61, $lineas, 'cabecera + 60 personas, más de una página de 25');
+        $this->assertCount(61, $lineas, 'cabecera + 60 miembros, más de una página de 25');
         $this->assertStringNotContainsString('<a ', $csv);
         $this->assertStringNotContainsString('<span', $csv);
+    }
+
+    public function test_el_archivo_exportado_de_miembros_se_llama_miembros(): void
+    {
+        $respuesta = $this->get(route('personas.exportar'))->assertOk();
+
+        $this->assertMatchesRegularExpression('/filename=.?miembros-\d{8}-\d{6}\.csv/', $respuesta->headers->get('content-disposition'));
+        $this->assertStringContainsString('Nombre', $respuesta->streamedContent());
     }
 
     public function test_el_filtro_por_columna_se_aplica_a_la_exportacion(): void

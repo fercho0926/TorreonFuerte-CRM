@@ -26,13 +26,13 @@ class ListaRegistradosTest extends RegistroQrTestCase
         $this->get(route($ruta, $this->A[$destino]))
             ->assertOk()
             ->assertSee('Registrados por QR')
-            ->assertSee('Nueva persona')
+            ->assertSee('Nuevo miembro')
             ->assertSee('Ya existía')
             ->assertSee(now()->format('Y-m-d'))
             ->assertSee(route('personas.show', $nueva), false)
             ->assertSee(route('personas.show', $existente), false);
 
-        // La persona creada por el QR aparece en Personas de la sede del destino.
+        // El miembro creada por el QR aparece en Miembros de la sede del destino.
         $this->get(route('personas.index'))->assertOk();
         $this->assertSame($this->A['sede']->id, $nueva->sede_id);
     }

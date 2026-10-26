@@ -17,6 +17,6 @@
         {{ $ministerio->getRelationValue('sede')?->nombre ?? '—' }}
         @break
     @case('acciones')
-        <x-ui.acciones-fila :ver="route('ministerios.show', $ministerio)" :editar="route('ministerios.edit', $ministerio)" :eliminar="route('ministerios.destroy', $ministerio)" eliminar-titulo="¿Eliminar este ministerio?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$ministerio->nombre" />
+        <x-ui.acciones-fila :puede-editar="\App\Support\Permisos::modulo('ministerios', 'escritura')" :puede-eliminar="\App\Support\Permisos::modulo('ministerios', 'escritura')" :ver="route('ministerios.show', $ministerio)" :editar="route('ministerios.edit', $ministerio)" :eliminar="route('ministerios.destroy', $ministerio)" eliminar-titulo="¿Eliminar este ministerio?" eliminar-mensaje="Esta acción no se puede deshacer." :nombre="$ministerio->nombre" />
         @break
 @endswitch

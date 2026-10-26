@@ -51,8 +51,10 @@ class TrasladoPersonaTest extends TestCase
         $this->assertSame(0, $nueva->celulas()->withoutGlobalScopes()->count());
         $this->assertSame(0, $nueva->ministerios()->withoutGlobalScopes()->count());
 
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'inactivada', 'sede_id' => $this->A['sede']->id]);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $nueva->id, 'accion' => 'creada', 'sede_id' => $this->B['sede']->id]);
+        // Spec 015: el traslado queda en la sección «Sede» de ambos registros, unidos por trasladada_desde_persona_id.
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'trasladada', 'categoria' => 'sede', 'sede_id' => $this->A['sede']->id]);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $nueva->id, 'accion' => 'llego_por_traslado', 'categoria' => 'sede', 'sede_id' => $this->B['sede']->id]);
+        $this->assertSame($persona->id, (int) $nueva->trasladada_desde_persona_id);
     }
 
     public function test_la_persona_trasladada_aparece_sin_lider_en_la_sede_destino_y_no_se_muestra_el_historial_de_origen(): void
@@ -72,7 +74,7 @@ class TrasladoPersonaTest extends TestCase
         $this->comoAdminEnSede($this->A['sede']);
 
         $this->post(route('traslados.store', $this->A['lider']), ['sede_destino_id' => $this->B['sede']->id])
-            ->assertStatus(422)->assertSee('1 persona(s)')->assertSee('1 célula(s)')->assertSee('1 ministerio(s)');
+            ->assertStatus(422)->assertSee('1 miembro(s)')->assertSee('1 célula(s)')->assertSee('1 ministerio(s)');
 
         $this->assertSame($this->A['sede']->id, $this->A['lider']->fresh()->sede_id);
         $this->assertNull($this->A['lider']->fresh()->trasladada_a_sede_id);

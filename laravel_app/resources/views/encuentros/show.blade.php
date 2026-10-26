@@ -5,13 +5,18 @@
 @section('page-title', 'Detalle del encuentro')
 
 @section('page-actions')
-    <a href="{{ route('encuentros.edit', $encuentro) }}" class="btn btn-primary">Editar</a>
+    @puedeModulo('encuentros', 'escritura')
+        <a href="{{ route('encuentros.edit', $encuentro) }}" class="btn btn-primary">Editar</a>
+    @endpuedeModulo
     <a href="{{ route('encuentros.index') }}" class="btn btn-outline-secondary">Volver</a>
 @endsection
 
 @section('content')
+@include('historial._pestanas', ['url' => route('encuentros.show', $encuentro), 'pestana' => $pestana ?? 'datos'])
 
-
+@if(($pestana ?? 'datos') === 'historico')
+    @include('historial._lista', ['historico' => $historico])
+@else
 <div class="card card-primary card-outline mb-4">
     <div class="card-header">
         <h3 class="card-title">{{ $encuentro->nombre }}</h3>
@@ -23,6 +28,9 @@
 
             <dt class="col-sm-3">Lugar</dt>
             <dd class="col-sm-9">{{ $encuentro->lugar ?? '—' }}</dd>
+
+            <dt class="col-sm-3">Nivel del plan</dt>
+            <dd class="col-sm-9">{{ $encuentro->nivel ? $encuentro->nivel->posicion.' · '.$encuentro->nivel->nombre : '—' }}</dd>
 
             <dt class="col-sm-3">Valor</dt>
             <dd class="col-sm-9">${{ number_format($encuentro->valor, 2) }}</dd>
@@ -41,10 +49,10 @@
     </div>
 </div>
 
-<x-form.layout :action="route('encuentros.asistencia', $encuentro)" method="PUT" modo="incrustado" guardar="Guardar asistencia y pagos" icono="fa-save" :deshabilitar="$encuentro->personas->isEmpty()" :leyenda="false">
-    <x-form.section :titulo="'Personas participantes ('.$encuentro->personas->count().')'" descripcion="Marca quién asistió y cuánto pagó cada persona." icono="fa-users" id="seccion-asistencia">
+<x-form.layout :action="route('encuentros.asistencia', $encuentro)" method="PUT" modo="incrustado" guardar="Guardar asistencia y pagos" icono="fa-save" :deshabilitar="$encuentro->personas->isEmpty() || !\App\Support\Permisos::modulo('encuentros', 'escritura')" :leyenda="false">
+    <x-form.section :titulo="'Miembros participantes ('.$encuentro->personas->count().')'" descripcion="Marca quién asistió y cuánto pagó cada miembro." icono="fa-users" id="seccion-asistencia">
         <div class="col-12">
-            <x-form.lista-asistencia name="asistio[]" etiqueta="Asistió" vacio="Este encuentro aún no tiene personas asignadas."
+            <x-form.lista-asistencia name="asistio[]" etiqueta="Asistió" vacio="Este encuentro aún no tiene miembros asignados."
                 :columnas="['Documento', 'Celular']"
                 :filas="$encuentro->personas->map(fn ($p) => [
                     'id' => $p->id,
@@ -61,4 +69,5 @@
 </x-form.layout>
 
 @include('partials.panel-registro-qr', ['destino' => $encuentro])
+@endif
 @endsection

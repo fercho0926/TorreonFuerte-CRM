@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CambioHistorial;
 use App\Models\Celula;
 use App\Models\Encuentro;
 use App\Models\Evento;
@@ -16,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * Autoinscripción por QR. El formulario es público (sin usuario), así que el destino se resuelve por
  * su token sin filtro de sede y todo lo demás corre dentro de la sede del destino (`conSede`): solo
- * se ven y se crean personas de esa sede. Una persona que solo existe en otra sede nunca se lee ni
+ * se ven y se crean miembros de esa sede. Un miembro que solo existe en otra sede nunca se lee ni
  * se modifica; queda un `RegistroQr` con lo que ella escribió.
  */
 class RegistroPorQr
@@ -53,16 +54,26 @@ class RegistroPorQr
     }
 
     /**
-     * Busca a la persona por cédula y por celular dentro de la sede del destino.
+     * Busca al miembro por cédula y por celular dentro de la sede del destino.
      *
      * @return array{estado: string, persona: ?Persona, mensaje: ?string}
      */
     public function buscar(Model $destino, ?string $celular, ?string $documento): array
     {
+        return $this->buscarEnSede($destino->sede_id, $celular, $documento);
+    }
+
+    /**
+     * Misma búsqueda por sede (para el QR de miembros, cuyo destino es la propia sede).
+     *
+     * @return array{estado: string, persona: ?Persona, mensaje: ?string}
+     */
+    public function buscarEnSede(int $sedeId, ?string $celular, ?string $documento): array
+    {
         $celular = $this->normalizarCelular($celular);
         $documento = $documento !== null && trim($documento) !== '' ? trim($documento) : null;
 
-        return $this->contexto->conSede($destino->sede_id, function () use ($destino, $celular, $documento) {
+        return $this->contexto->conSede($sedeId, function () use ($sedeId, $celular, $documento) {
             $porDocumento = $documento
                 ? Persona::withTrashed()->where('numero_documento', $documento)->get()
                 : collect();
@@ -78,16 +89,16 @@ class RegistroPorQr
             if ($candidatas->count() > 1) {
                 return $this->resultado(self::CONFLICTO, null, $porCelular->count() > 1 && $porDocumento->isEmpty()
                     ? 'Ese celular está en más de una ficha; contacta al administrador.'
-                    : 'La cédula y el celular pertenecen a personas distintas; contacta al administrador.');
+                    : 'La cédula y el celular pertenecen a miembros distintos; contacta al administrador.');
             }
 
             if ($candidatas->count() === 1) {
                 /** @var Persona $persona */
                 $persona = $candidatas->first();
 
-                // La cédula escrita no coincide con la que ya tiene la persona del celular.
+                // La cédula escrita no coincide con la que ya tiene el miembro del celular.
                 if ($documento && $persona->numero_documento && $persona->numero_documento !== $documento) {
-                    return $this->resultado(self::CONFLICTO, null, 'La cédula y el celular pertenecen a personas distintas; contacta al administrador.');
+                    return $this->resultado(self::CONFLICTO, null, 'La cédula y el celular pertenecen a miembros distintos; contacta al administrador.');
                 }
 
                 if ($persona->trashed() || $persona->estado === 'inactivo') {
@@ -97,12 +108,12 @@ class RegistroPorQr
                 return $this->resultado(self::EXISTENTE, $persona);
             }
 
-            return $this->resultado($this->existeEnOtraSede($destino->sede_id, $celular, $documento) ? self::OTRA_SEDE : self::NUEVA);
+            return $this->resultado($this->existeEnOtraSede($sedeId, $celular, $documento) ? self::OTRA_SEDE : self::NUEVA);
         });
     }
 
     /**
-     * Registra a la persona. Devuelve el resultado guardado (nueva, existente, pendiente o de_otra_sede).
+     * Registra al miembro. Devuelve el resultado guardado (nueva, existente, pendiente o de_otra_sede).
      *
      * @param  array{celular: string, nombres: string, apellidos: string, fecha_nacimiento: string, tipo_documento?: ?string, numero_documento?: ?string}  $datos
      *
@@ -120,7 +131,10 @@ class RegistroPorQr
             throw ValidationException::withMessages(['celular' => $busqueda['mensaje']]);
         }
 
-        return $this->contexto->conSede($destino->sede_id, function () use ($destino, $datos, $busqueda) {
+        // Lo hace quien se registra desde el QR público: el historial lo muestra así (spec 015).
+        $actor = 'Registro público por QR · '.app(Historial::class)->nombreDe($destino);
+
+        return $this->contexto->conSede($destino->sede_id, fn () => app(Historial::class)->comoActor(CambioHistorial::ACTOR_QR, $actor, function () use ($destino, $datos, $busqueda) {
             return DB::transaction(function () use ($destino, $datos, $busqueda) {
                 if ($this->yaRegistrado($destino, $datos['celular'], $busqueda['persona'])) {
                     throw ValidationException::withMessages(['celular' => 'Ya estás registrado en esta actividad.']);
@@ -141,6 +155,7 @@ class RegistroPorQr
                         'numero_documento' => $datos['numero_documento'],
                         'estado' => $destino instanceof Celula ? 'celula' : 'visitante',
                     ]);
+                    app(Historial::class)->registrar($persona, 'creada_qr_actividad', null, ['estado' => $persona->estado], null, [], $destino);
                     $this->inscribir($destino, $persona);
                 } elseif ($resultado === self::EXISTENTE) {
                     $nota = $this->notaDeCorreccion($persona, $datos);
@@ -166,7 +181,7 @@ class RegistroPorQr
 
                 return $resultado;
             });
-        });
+        }));
     }
 
     /** Solo dígitos y sin el indicativo de Colombia (+57) cuando viene con él. */
@@ -183,7 +198,7 @@ class RegistroPorQr
         return ['estado' => $estado, 'persona' => $persona, 'mensaje' => $mensaje];
     }
 
-    /** Solo existencia: no lee ningún dato de la persona de otra sede. */
+    /** Solo existencia: no lee ningún dato del miembro de otra sede. */
     private function existeEnOtraSede(int $sedeId, ?string $celular, ?string $documento): bool
     {
         return $this->contexto->sinFiltro(function () use ($sedeId, $celular, $documento) {
@@ -224,17 +239,22 @@ class RegistroPorQr
         if ($destino instanceof Evento) {
             EventoPersona::create(['sede_id' => $destino->sede_id, 'evento_id' => $destino->id, 'persona_id' => $persona->id]);
         } elseif ($destino instanceof Encuentro) {
-            $destino->personas()->syncWithoutDetaching([$persona->id]);
+            $resultado = $destino->personas()->syncWithoutDetaching([$persona->id]);
+            app(Historial::class)->sincronizacion($destino, $resultado, 'inscritos_actualizados', 'inscrito_encuentro', 'quitado_encuentro', [
+                'fecha_evento' => $destino->fecha_realizacion?->toDateString(),
+            ]);
         } elseif ($destino instanceof Celula) {
-            $destino->miembros()->syncWithoutDetaching([$persona->id => ['fecha_ingreso' => now()->toDateString()]]);
+            $resultado = $destino->miembros()->syncWithoutDetaching([$persona->id => ['fecha_ingreso' => now()->toDateString()]]);
+            app(Historial::class)->sincronizacion($destino, $resultado, 'miembros_actualizados', 'ingreso_celula', 'salida_celula');
 
             if ($persona->estado === 'visitante') {
+                app(Historial::class)->registrar($persona, 'estado', ['estado' => 'visitante'], ['estado' => 'celula']);
                 $persona->update(['estado' => 'celula']);
             }
         }
     }
 
-    /** Diferencias entre lo escrito y la ficha: se guardan como nota, la persona no se modifica. */
+    /** Diferencias entre lo escrito y la ficha: se guardan como nota, el miembro no se modifica. */
     private function notaDeCorreccion(Persona $persona, array $datos): ?string
     {
         $diferencias = [];

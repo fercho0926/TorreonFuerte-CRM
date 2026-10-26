@@ -78,6 +78,12 @@
 .fm-switch { display: flex; align-items: center; min-height: var(--fm-alto-control); }
 .fm-switch .form-check-label { font-weight: 600; cursor: pointer; padding-top: .1rem; }
 
+/* ---------- Opciones como tarjetas (x-form.radio) ---------- */
+
+.fm-radio { border: 0; padding: 0; margin: 0; min-width: 0; }
+.fm-radio__opcion { min-height: 44px; font-size: 1rem; cursor: pointer; }
+.fm-radio__opcion .form-check-input { width: 1.25rem; height: 1.25rem; }
+
 /* ---------- Dependientes (mostrar/ocultar con transición) ---------- */
 
 [data-visible-si] { transition: opacity .2s ease; }

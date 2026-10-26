@@ -34,11 +34,11 @@ class PastoresSedeTest extends TestCase
         $this->assertSame($this->A['sede']->id, $nuevo->sede_id);
         $this->assertSame($nuevo->persona_id, $this->A['sede']->fresh()->pastor_persona_id);
 
-        // La cuenta anterior pasa a líder y conserva su registro como persona.
+        // La cuenta anterior pasa a líder y conserva su registro como miembro.
         $this->assertSame('lider_celula', $anterior->fresh()->role);
         $this->assertNotNull(Persona::withoutGlobalScopes()->find($this->A['pastorPersona']->id));
 
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $this->A['sede']->id, 'accion' => 'pastor_cambiado']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $this->A['sede']->id, 'accion' => 'pastor_cambiado']);
     }
 
     public function test_designar_una_cuenta_existente_de_la_misma_sede_como_pastora(): void
@@ -48,7 +48,7 @@ class PastoresSedeTest extends TestCase
 
         $this->assertSame('pastor', $this->A['liderUser']->fresh()->role);
         $this->assertSame($this->A['lider']->id, $this->A['sede']->fresh()->pastora_persona_id);
-        $this->assertDatabaseHas('sede_cambios', ['sede_id' => $this->A['sede']->id, 'accion' => 'pastora_cambiada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'sede', 'sujeto_id' => $this->A['sede']->id, 'accion' => 'pastora_cambiada']);
     }
 
     public function test_no_se_puede_designar_una_cuenta_de_otra_sede(): void

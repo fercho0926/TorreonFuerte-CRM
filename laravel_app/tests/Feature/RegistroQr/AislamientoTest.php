@@ -43,7 +43,7 @@ class AislamientoTest extends RegistroQrTestCase
             'celular' => '320 111 2222', 'nombres' => 'Escrito', 'apellidos' => 'PorElla',
         ]))->assertRedirect(route('registro.listo', $token));
 
-        $this->assertSame($antes, Persona::withoutGlobalScopes()->count(), 'No se crea persona en la sede A');
+        $this->assertSame($antes, Persona::withoutGlobalScopes()->count(), 'No se crea miembro en la sede A');
         $this->assertSame('PersonaBeta', $ajena->fresh()->nombres);
         $this->assertSame($this->B['sede']->id, $ajena->fresh()->sede_id);
         $this->assertSame(0, $this->A['evento']->inscripciones()->withoutGlobalScopes()->where('persona_id', $ajena->id)->count());

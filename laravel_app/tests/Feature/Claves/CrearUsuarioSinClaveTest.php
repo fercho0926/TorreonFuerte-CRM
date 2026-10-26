@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Claves;
 
-use App\Models\Persona;
 use App\Models\RegistroClave;
 use App\Models\User;
 use App\Services\ClavesTemporales;
@@ -14,7 +13,10 @@ use Tests\Support\EscenarioDosSedes;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Historia 1: crear un usuario sin asignarle contraseña (FR-001 a FR-003, FR-014, FR-015). */
+/**
+ * Historia 1: crear un usuario sin asignarle contraseña (FR-001 a FR-003, FR-014, FR-015).
+ * Desde la spec 016 la cuenta es de un miembro: aquí se registra el miembro junto con la cuenta.
+ */
 class CrearUsuarioSinClaveTest extends TestCase
 {
     use ConSedes, EscenarioDosSedes, IniciaSesion, RefreshDatabase;
@@ -28,13 +30,18 @@ class CrearUsuarioSinClaveTest extends TestCase
 
     private function datos(array $extra = []): array
     {
-        return $extra + ['name' => 'Rosa Gómez', 'email' => 'rosa@iglesia.co', 'celular' => '310 555 9999', 'role' => 'lider_celula'];
+        return $extra + [
+            'celular' => '310 555 9999', 'email' => 'rosa@iglesia.co', 'role' => 'lider_celula',
+            'miembro' => ['nombres' => 'Rosa', 'apellidos' => 'Gómez'],
+        ];
     }
 
     public function test_el_formulario_no_pide_contrasena_y_si_celular(): void
     {
-        $html = $this->get(route('users.create'))->assertOk()->getContent();
+        $paso1 = $this->get(route('users.create'))->assertOk()->getContent();
+        $this->assertStringContainsString('name="celular"', $paso1);
 
+        $html = $this->get(route('users.create', ['celular' => '3105559999']))->assertOk()->getContent();
         $this->assertStringNotContainsString('name="password"', $html);
         $this->assertStringNotContainsString('password_confirmation', $html);
         $this->assertStringContainsString('name="celular"', $html);
@@ -103,17 +110,10 @@ class CrearUsuarioSinClaveTest extends TestCase
             $this->post(route('users.store'), $this->datos(['celular' => $celular]))->assertSessionHasErrors('celular');
         }
 
+        $this->get(route('users.create', ['celular' => '12345']))->assertRedirect()->assertSessionHasErrors('celular');
+
         $this->assertSame(0, User::withoutGlobalScopes()->where('email', 'rosa@iglesia.co')->count());
         $this->assertSame(0, RegistroClave::withoutGlobalScopes()->count());
-    }
-
-    public function test_sin_celular_se_usa_el_de_la_persona_vinculada(): void
-    {
-        $persona = Persona::factory()->deSede($this->A['sede']->id)->create(['celular' => '3201112233']);
-
-        $this->post(route('users.store'), $this->datos(['celular' => '', 'persona_id' => $persona->id]))->assertOk()->assertSee('320 111 2233');
-
-        $this->assertSame('3201112233', User::withoutGlobalScopes()->where('email', 'rosa@iglesia.co')->value('celular'));
     }
 
     public function test_enviar_una_contrasena_ya_no_tiene_efecto(): void
@@ -124,20 +124,22 @@ class CrearUsuarioSinClaveTest extends TestCase
         $this->assertFalse(Hash::check('secreto123', $usuario->password));
     }
 
-    public function test_la_edicion_no_cambia_contrasenas_pero_permite_completar_el_celular(): void
+    public function test_la_edicion_no_cambia_contrasenas_ni_los_datos_del_miembro(): void
     {
         $lider = $this->A['liderUser'];
         $hash = $lider->password;
+        $celular = $lider->persona->celular;
 
         $html = $this->get(route('users.edit', $lider))->assertOk()->getContent();
         $this->assertStringNotContainsString('name="password"', $html);
 
-        $this->put(route('users.update', $lider), $this->datos(['email' => $lider->email, 'password' => 'otra-clave-123', 'celular' => '3004445566']))
+        $this->put(route('users.update', $lider), ['email' => $lider->email, 'role' => 'lider_celula', 'password' => 'otra-clave-123', 'celular' => '3004445566', 'name' => 'Otro'])
             ->assertRedirect(route('users.index'));
 
         $lider->refresh();
         $this->assertSame($hash, $lider->password);
-        $this->assertSame('3004445566', $lider->celular);
+        $this->assertSame($celular, $lider->celular, 'el celular solo se cambia en la ficha del miembro');
+        $this->assertSame('LiderAlfa Guia', $lider->name);
     }
 
     public function test_el_administrador_elige_la_sede_y_crea_admins_sin_sede(): void
@@ -147,7 +149,10 @@ class CrearUsuarioSinClaveTest extends TestCase
         $this->post(route('users.store'), $this->datos(['email' => 'enb@iglesia.co', 'sede_id' => $this->B['sede']->id]))->assertOk();
         $this->assertSame($this->B['sede']->id, User::withoutGlobalScopes()->where('email', 'enb@iglesia.co')->value('sede_id'));
 
-        $this->post(route('users.store'), $this->datos(['email' => 'adm@iglesia.co', 'role' => 'admin']))->assertOk()->assertSee('Enviar por WhatsApp');
+        $this->post(route('users.store'), $this->datos([
+            'email' => 'adm@iglesia.co', 'role' => 'admin', 'celular' => '310 555 8888', 'sede_id' => $this->A['sede']->id,
+            'miembro' => ['nombres' => 'Ada', 'apellidos' => 'Admin'],
+        ]))->assertOk()->assertSee('Enviar por WhatsApp');
         $this->assertNull(User::withoutGlobalScopes()->where('email', 'adm@iglesia.co')->value('sede_id'));
     }
 

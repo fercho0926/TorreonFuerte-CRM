@@ -25,7 +25,7 @@ class MatrizRutasTest extends TestCase
      * Rutas que no manejan datos de una sede. Las `registro.*` son públicas por diseño (el token del QR
      * es la llave) y su aislamiento se prueba en tests/Feature/RegistroQr.
      */
-    private const IGNORADAS = ['login', 'login.post', 'logout', 'up', 'storage.local', 'registro.show', 'registro.buscar', 'registro.store', 'registro.listo'];
+    private const IGNORADAS = ['login', 'login.post', 'logout', 'up', 'storage.local', 'registro.show', 'registro.buscar', 'registro.store', 'registro.listo', 'registro-sede.show', 'registro-sede.buscar', 'registro-sede.store', 'registro-sede.listo'];
 
     protected function setUp(): void
     {
@@ -49,7 +49,10 @@ class MatrizRutasTest extends TestCase
             'user_id' => $this->B['liderUser']->id, 'sede_id' => $this->B['sede']->id, 'ultima_solicitud_en' => now(),
         ]);
 
+        $avance = \App\Models\AvanceNivel::factory()->de($this->B['persona'], \App\Models\NivelFormacion::orderBy('posicion')->first())->create();
+
         return [
+            'avance' => $avance->id,
             'persona' => $this->B['persona']->id,
             'lider' => $this->B['lider']->id,
             'celula' => $this->B['celula']->id,
@@ -63,6 +66,8 @@ class MatrizRutasTest extends TestCase
             'registro' => $registro->id,
             'solicitud' => $solicitud->id,
             'sede' => $this->B['sede']->id,
+            // roles.*: los roles son globales y solo del administrador (un pastor recibe 403).
+            'rol' => 'pastor',
             // registro-qr.*: el tipo y el id de un evento de la sede B.
             'tipo' => 'evento',
             'id' => $this->B['evento']->id,
@@ -91,7 +96,8 @@ class MatrizRutasTest extends TestCase
         foreach ($this->rutasDeLaApp() as $ruta) {
             $parametros = $ruta->parameterNames();
 
-            if (!$parametros) {
+            // El plan de niveles es único para toda la iglesia (spec 014): no pertenece a ninguna sede.
+            if (!$parametros || in_array('nivel', $parametros, true)) {
                 continue;
             }
 

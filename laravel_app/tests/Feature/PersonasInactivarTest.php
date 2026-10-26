@@ -24,8 +24,8 @@ class PersonasInactivarTest extends TestCase
         $this->post(route('personas.reactivar', $persona))->assertRedirect();
         $this->assertSame('nuevo_creyente', $persona->fresh()->estado);
         $this->assertNull($persona->fresh()->inactivado_en);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'inactivada']);
-        $this->assertDatabaseHas('persona_cambios', ['persona_id' => $persona->id, 'accion' => 'reactivada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'inactivada']);
+        $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'reactivada']);
     }
 
     public function test_eliminar_con_historial_responde_422_y_sin_historial_solo_admin(): void

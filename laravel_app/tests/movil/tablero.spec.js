@@ -12,7 +12,7 @@ test('los accesos rápidos salen antes que los totales y el resumen por sede se 
     const accesos = page.locator('.d-lg-none .card', { hasText: 'Accesos rápidos' });
     await expect(accesos).toBeVisible();
     const cajaAccesos = await accesos.boundingBox();
-    const cajaTotales = await page.locator('.small-box').first().boundingBox();
+    const cajaTotales = await page.locator('.info-box').first().boundingBox();
     expect(cajaAccesos.y).toBeLessThan(cajaTotales.y);
 
     // Solo se ve un bloque de accesos rápidos (el de escritorio queda oculto).
@@ -20,7 +20,7 @@ test('los accesos rápidos salen antes que los totales y el resumen por sede se 
 
     const fila = page.locator('table.tabla-apilable tbody tr').first();
     expect(await fila.evaluate((e) => getComputedStyle(e).display)).not.toBe('table-row');
-    await expect(fila.locator('td[data-etiqueta="Personas"]')).toBeVisible();
+    await expect(fila.locator('td[data-etiqueta="Miembros"]')).toBeVisible();
 });
 
 for (const ruta of ['personas/1', 'lideres/3', 'celulas/1', 'eventos/1', 'sedes/1']) {
@@ -36,7 +36,7 @@ for (const ruta of ['personas/1', 'lideres/3', 'celulas/1', 'eventos/1', 'sedes/
     });
 }
 
-test('en la ficha de la persona «Llamar» y «WhatsApp» están arriba y a la vista', async ({ page }) => {
+test('en la ficha del miembro «Llamar» y «WhatsApp» están arriba y a la vista', async ({ page }) => {
     await page.goto('/personas/3'); // el líder de ejemplo tiene celular
 
     const llamar = page.locator('a[title="Llamar"]').first();

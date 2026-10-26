@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\IniciaSesion;
 use Tests\TestCase;
 
-/** Estado «En célula» (FR-006): personas que asisten a una célula y aún no son parte de la iglesia. */
+/** Estado «En célula» (FR-006): miembros que asisten a una célula y aún no son parte de la iglesia. */
 class EstadoEnCelulaTest extends TestCase
 {
     use IniciaSesion, RefreshDatabase;
@@ -38,7 +38,7 @@ class EstadoEnCelulaTest extends TestCase
 
         $sinLider = Persona::sinLider()->pluck('id');
         $this->assertTrue($sinLider->contains($visitante->id));
-        $this->assertFalse($sinLider->contains($enCelula->id), 'una persona «En célula» no se asigna a un líder por defecto');
+        $this->assertFalse($sinLider->contains($enCelula->id), 'un miembro «En célula» no se asigna a un líder por defecto');
         $this->get(route('sin-lider.index'))->assertOk()->assertDontSee($enCelula->nombre_completo);
     }
 

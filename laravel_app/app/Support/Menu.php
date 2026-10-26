@@ -82,13 +82,22 @@ class Menu
     /** @param  array<string, mixed>  $opcion */
     private static function permitida(?User $user, array $opcion): bool
     {
+        if (!$user) {
+            return false;
+        }
+
+        // El módulo de la opción exige al menos lectura (spec 013).
+        if (!empty($opcion['modulo']) && $user->nivelEn($opcion['modulo']) < \App\Support\Niveles::LECTURA) {
+            return false;
+        }
+
         if (empty($opcion['permiso'])) {
-            return (bool) $user;
+            return true;
         }
 
         [$habilidad, $clase] = $opcion['permiso'] + [1 => null];
 
-        return $user && Gate::forUser($user)->allows($habilidad, $clase);
+        return Gate::forUser($user)->allows($habilidad, $clase);
     }
 
     /** @param  array<string, mixed>  $opcion */

@@ -31,7 +31,8 @@ class ContratoGrillaTest extends TestCase
     {
         return collect([
             PersonasGrilla::class, LideresGrilla::class, CelulasGrilla::class, EncuentrosGrilla::class, EventosGrilla::class,
-            MinisteriosGrilla::class, SedesGrilla::class, SinLiderGrilla::class, UsuariosGrilla::class, SolicitudesClaveGrilla::class,
+            MinisteriosGrilla::class, \App\Grillas\NivelesMiembrosGrilla::class, SedesGrilla::class, SinLiderGrilla::class, UsuariosGrilla::class, SolicitudesClaveGrilla::class,
+            \App\Grillas\CambiosGrilla::class,
         ])->mapWithKeys(fn ($clase) => [class_basename($clase) => [$clase]])->all();
     }
 
@@ -91,6 +92,15 @@ class ContratoGrillaTest extends TestCase
     public function test_exportar_entrega_un_csv_con_bom_si_el_usuario_puede(string $clase): void
     {
         $grilla = app($clase);
+
+        // Excepción declarada al principio III (spec 015): sin botón y sin ruta de exportación.
+        if (in_array($grilla->id(), GuardaGrillaEstandarTest::SIN_EXPORTACION, true)) {
+            $this->assertFalse(\Route::has($grilla->id().'.exportar'));
+            $this->get(route($grilla->id().'.index'))->assertOk()->assertDontSee('data-grilla-exportar', false)->assertDontSee('Exportar CSV');
+            $this->get('/'.$grilla->id().'/exportar')->assertNotFound();
+
+            return;
+        }
 
         $respuesta = $this->get(route($grilla->id().'.exportar'))->assertOk();
 

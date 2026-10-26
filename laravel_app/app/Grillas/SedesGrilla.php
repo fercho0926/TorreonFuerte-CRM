@@ -43,7 +43,7 @@ class SedesGrilla extends Grilla
             Columna::make('ciudad', 'Ciudad')->ordena()->filtraTexto()->valor(fn (array $f) => $sede($f)->ciudad)->prioridad(4),
             Columna::make('pastor', 'Pastor')->ordena()->filtraTexto()->valor(fn (array $f) => $sede($f)->pastor?->nombre_completo)->prioridad(5),
             Columna::make('pastora', 'Pastora')->ordena()->filtraTexto()->valor(fn (array $f) => $sede($f)->pastora?->nombre_completo)->prioridad(6),
-            Columna::make('personas', 'Personas')->ordena()->valor(fn (array $f) => $f['personas'])->prioridad(3),
+            Columna::make('personas', 'Miembros')->ordena()->valor(fn (array $f) => $f['personas'])->prioridad(3),
             Columna::make('lideres', 'Líderes')->ordena()->valor(fn (array $f) => $f['lideres'])->prioridad(7),
             Columna::make('celulas', 'Células')->ordena()->valor(fn (array $f) => $f['celulas'])->prioridad(8),
             Columna::make('estado', 'Estado')

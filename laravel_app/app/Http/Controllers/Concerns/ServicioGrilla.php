@@ -64,7 +64,7 @@ trait ServicioGrilla
 
         abort_unless($grilla->puedeExportar($usuario), 403, self::MENSAJE_SIN_PERMISO);
 
-        return $grilla->exportar($usuario, $grilla->estado($request, $usuario), $grilla->id());
+        return $grilla->exportar($usuario, $grilla->estado($request, $usuario), $grilla->archivo());
     }
 
     /** Variables para `<x-ui.grilla>` en la página del listado. */

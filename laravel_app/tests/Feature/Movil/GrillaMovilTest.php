@@ -63,6 +63,6 @@ class GrillaMovilTest extends TestCase
         $json = $this->getJson(route('personas.datos', ['length' => 10]))->assertOk()->json();
 
         $this->assertNotEmpty($json['data']);
-        $this->assertCount(5, $json['data'][0], 'nombre, estado, celular, líder, acciones');
+        $this->assertCount(6, $json['data'][0], 'nombre, estado, celular, líder, nivel, acciones');
     }
 }

@@ -27,11 +27,11 @@ class TableroTest extends TestCase
 
         $html = $this->get(route('dashboard'))->assertOk()->getContent();
 
-        $this->assertStringContainsString('small-box', $html);
-        foreach (['Próximos eventos', 'Personas sin líder', 'Personas nuevas', 'Accesos rápidos'] as $bloque) {
+        $this->assertStringContainsString('info-box', $html);
+        foreach (['Próximos eventos', 'Miembros sin líder', 'Miembros nuevos', 'Accesos rápidos'] as $bloque) {
             $this->assertStringContainsString($bloque, $html);
         }
-        $this->assertStringContainsString(route('personas.index'), $html, 'la caja de personas enlaza al listado');
+        $this->assertStringContainsString(route('personas.index'), $html, 'la caja de miembros enlaza al listado');
     }
 
     public function test_las_cifras_de_las_cajas_coinciden_con_los_datos(): void
@@ -62,7 +62,7 @@ class TableroTest extends TestCase
         $respuesta = $this->get(route('dashboard'))->assertOk();
 
         $respuesta->assertViewHas('personasSinLider', null);
-        $respuesta->assertDontSee('Personas sin líder');
+        $respuesta->assertDontSee('Miembros sin líder');
         $respuesta->assertViewHas('personasNuevas', fn ($c) => $c->every(fn ($p) => $p->sede_id === $this->A['sede']->id));
     }
 

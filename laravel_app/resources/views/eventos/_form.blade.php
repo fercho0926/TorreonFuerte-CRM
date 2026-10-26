@@ -13,14 +13,14 @@
     <x-form.textarea name="descripcion" label="Descripción" :value="$evento?->descripcion" ayuda="Opcional: detalles del evento." />
 </x-form.section>
 
-<x-form.section titulo="Costo" descripcion="Cuánto cuesta por persona." icono="fa-dollar-sign" id="seccion-costo">
-    <x-form.money name="costo" label="Costo por persona" :required="true" :value="$evento?->costo ?? 0"
-        ayuda="Se puede ajustar por persona o pagar en varios abonos desde el detalle del evento." />
+<x-form.section titulo="Costo" descripcion="Cuánto cuesta por miembro." icono="fa-dollar-sign" id="seccion-costo">
+    <x-form.money name="costo" label="Costo por miembro" :required="true" :value="$evento?->costo ?? 0"
+        ayuda="Se puede ajustar por miembro o pagar en varios abonos desde el detalle del evento." />
 </x-form.section>
 
 @if(isset($personas))
     @php($opcionesPersona = \App\Support\Formulario::opciones($personas, fn ($p) => $p->nombre_completo, fn ($p) => $p->numero_documento ? 'Doc. '.$p->numero_documento : ($p->celular ? 'Cel. '.$p->celular : null)))
-    <x-form.section titulo="Inscritos" descripcion="Personas a inscribir ahora; podrás inscribir más desde el detalle del evento." icono="fa-user-plus" id="seccion-inscritos">
-        <x-form.multiselect name="personas[]" label="Personas a inscribir" :opciones="$opcionesPersona" vacio="No hay personas registradas todavía." />
+    <x-form.section titulo="Inscritos" descripcion="Miembros a inscribir ahora; podrás inscribir más desde el detalle del evento." icono="fa-user-plus" id="seccion-inscritos">
+        <x-form.multiselect name="personas[]" label="Miembros a inscribir" :opciones="$opcionesPersona" vacio="No hay miembros registrados todavía." />
     </x-form.section>
 @endif

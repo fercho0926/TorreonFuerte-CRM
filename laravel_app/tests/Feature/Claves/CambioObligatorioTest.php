@@ -30,7 +30,7 @@ class CambioObligatorioTest extends TestCase
         $sede = $this->crearSede(['nombre' => 'Cocorná']);
         $this->pastor = $this->crearUsuario('pastor', null, $sede->id);
         $this->persona = $this->crearUsuario('lider_celula', null, $sede->id);
-        $this->persona->forceFill(['celular' => '3105559999'])->save();
+        $this->persona->persona->update(['celular' => '3105559999']);
 
         $generada = app(ClavesTemporales::class)->generar($this->persona, RegistroClave::MOTIVO_ALTA, $this->pastor);
         $this->clave = $generada['clave'];

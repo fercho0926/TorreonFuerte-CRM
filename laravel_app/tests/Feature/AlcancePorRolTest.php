@@ -105,12 +105,14 @@ class AlcancePorRolTest extends TestCase
         $this->get(route('personas.index'))->assertViewHas('pagina', fn ($p) => $p->total() === 1 && $p->first()->is($this->personaA));
     }
 
-    public function test_un_usuario_sin_persona_vinculada_ve_un_mensaje_claro(): void
+    public function test_toda_cuenta_de_lider_es_de_un_miembro_y_ve_su_rama(): void
     {
+        // Spec 016: ya no existen cuentas sin miembro; la cuenta nueva ve al menos su propio miembro.
         $this->escenario();
-        $this->iniciarSesionComo($this->crearUsuario('lider_celula'));
+        $usuario = $this->iniciarSesionComo($this->crearUsuario('lider_celula'));
 
-        $this->get(route('personas.index'))->assertSee('Tu cuenta aún no está asociada a una persona');
+        $this->assertNotNull($usuario->persona_id);
+        $this->get(route('personas.index'))->assertOk()->assertDontSee('Tu cuenta aún no está asociada a un miembro');
     }
 
     public function test_las_celulas_visibles_siguen_el_mismo_ambito(): void

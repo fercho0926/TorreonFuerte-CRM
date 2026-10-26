@@ -2,15 +2,20 @@
 
 namespace App\Grillas;
 
+use App\Models\NivelFormacion;
 use App\Models\Persona;
 use App\Models\User;
 use App\Services\AlcanceService;
+use App\Services\CaminoService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
-/** Listado de personas: nombre, estado, celular, líder, sede (solo en «Todas las sedes») y acciones. */
+/** Listado de miembros: nombre, estado, celular, líder, sede (solo en «Todas las sedes») y acciones. */
 class PersonasGrilla extends Grilla
 {
+    private ?Collection $niveles = null;
+
     public function __construct(private AlcanceService $alcance)
     {
     }
@@ -18,6 +23,11 @@ class PersonasGrilla extends Grilla
     public function id(): string
     {
         return 'personas';
+    }
+
+    public function archivo(): string
+    {
+        return 'miembros';
     }
 
     public function extras(): array
@@ -37,7 +47,7 @@ class PersonasGrilla extends Grilla
 
     public function vacio(): array
     {
-        return ['mensaje' => 'No se encontraron personas.', 'icono' => 'fa-address-card'];
+        return ['mensaje' => 'No se encontraron miembros.', 'icono' => 'fa-address-card'];
     }
 
     protected function definirColumnas(): array
@@ -64,9 +74,28 @@ class PersonasGrilla extends Grilla
                 ->filtraPersona('lider')
                 ->valor(fn (Persona $p) => $p->lider?->nombre_completo)
                 ->prioridad(4),
+            Columna::make('nivel', 'Nivel')
+                ->ordena(fn (Builder $q, string $dir) => $q->orderBy(
+                    DB::table('avances_nivel as a')->join('niveles_formacion as n', 'n.id', '=', 'a.nivel_id')
+                        ->where('n.activo', true)->whereColumn('a.persona_id', 'personas.id')->selectRaw('coalesce(max(n.posicion), 0)'),
+                    $dir
+                ))
+                ->filtraLista(
+                    $this->niveles()->mapWithKeys(fn (NivelFormacion $n) => [(string) $n->id => $n->nombre])->all() + ['sin' => 'Sin iniciar'],
+                    fn (Builder $q, string $valor) => $valor === 'sin' ? $q->sinNivel() : $q->enNivel((int) $valor)
+                )
+                ->valor(fn (Persona $p) => app(CaminoService::class)->camino($p, $this->niveles(), false)['actual']?->nombre ?? 'Sin iniciar')
+                ->visibleSi(fn (?User $u) => $u && $u->nivelEn('niveles') >= 1)
+                ->prioridad(3),
             Columna::sede('personas'),
             Columna::acciones(),
         ];
+    }
+
+    /** Niveles activos del plan, en orden (se consultan una vez por petición). */
+    public function niveles(): Collection
+    {
+        return $this->niveles ??= NivelFormacion::query()->activos()->ordenados()->get();
     }
 
     public function ordenInicial(): array
@@ -80,6 +109,7 @@ class PersonasGrilla extends Grilla
 
         return $this->alcance->personasVisibles($usuario)
             ->with(['lider', 'sede'])
+            ->when($usuario?->nivelEn('niveles') >= 1, fn ($q) => $q->with('avances'))
             ->when(!$incluirInactivos, fn ($q) => $q->activas())
             ->when(filled($estado['lider_id'] ?? null), fn ($q) => $q->where('personas.lider_id', $estado['lider_id']));
     }

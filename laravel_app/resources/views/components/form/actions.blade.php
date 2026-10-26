@@ -1,7 +1,8 @@
-@props(['guardar' => 'Guardar', 'cancelar' => null, 'modo' => 'completo', 'boton' => 'primary', 'metodo' => 'POST', 'icono' => null, 'deshabilitar' => false])
+@props(['guardar' => 'Guardar', 'cancelar' => null, 'modo' => 'completo', 'boton' => 'primary', 'metodo' => 'POST', 'icono' => null, 'deshabilitar' => false, 'global' => false])
 @php
-    // En "Todas las sedes" el administrador solo consulta: los formularios que escriben no se pueden enviar.
-    $esEscritura = $metodo !== 'GET';
+    // En "Todas las sedes" el administrador solo consulta: los formularios que escriben no se pueden enviar,
+    // salvo los de datos globales (que no pertenecen a una sede, como los roles).
+    $esEscritura = $metodo !== 'GET' && !$global;
 @endphp
 <div class="fm-acciones" data-acciones>
     @if($esEscritura)

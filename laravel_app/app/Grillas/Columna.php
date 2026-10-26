@@ -88,7 +88,7 @@ class Columna
         return $this;
     }
 
-    /** Ordena por el apellido de una persona relacionada por `$tabla.$llave` (por ejemplo `celulas.lider_id`). */
+    /** Ordena por el apellido de un miembro relacionada por `$tabla.$llave` (por ejemplo `celulas.lider_id`). */
     public function ordenaPersona(string $tabla, string $llave): static
     {
         return $this->ordena(fn (Builder $q, string $dir) => $q->orderBy(
@@ -97,7 +97,7 @@ class Columna
         ));
     }
 
-    /** Filtro de texto por nombre o documento de una persona relacionada (`whereHas` sobre la relación). */
+    /** Filtro de texto por nombre o documento de un miembro relacionada (`whereHas` sobre la relación). */
     public function filtraPersona(string $relacion): static
     {
         return $this->filtraTexto(fn (Builder $q, string $valor) => $q->whereHas($relacion, fn ($p) => $p->buscar($valor)));

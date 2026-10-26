@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Grillas\Grilla;
 use App\Grillas\PersonasGrilla;
+use App\Http\Controllers\Concerns\PestanaHistorico;
 use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Http\Requests\PersonaRequest;
 use App\Models\Persona;
@@ -13,10 +14,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class PersonasController extends Controller
 {
-    use ServicioGrilla;
+    use PestanaHistorico, ServicioGrilla;
 
     public function __construct(private LiderazgoService $liderazgo)
     {
@@ -96,7 +98,7 @@ class PersonasController extends Controller
 
         $user = $this->usuarioActual();
 
-        // Un líder que registra personas las deja a su cargo; si no, quedarían fuera de su ámbito.
+        // Un líder que registra miembros los deja a su cargo; si no, quedarían fuera de su ámbito.
         if ($user->isLiderCelula() && $user->persona_id) {
             $data['lider_id'] = $user->persona_id;
         }
@@ -111,13 +113,23 @@ class PersonasController extends Controller
         return response()->json(BuscadorPersonas::formato($persona), 201);
     }
 
-    public function show(Persona $persona)
+    public function show(Request $request, Persona $persona)
     {
         if ($redirect = $this->ensureLoggedIn()) {
             return $redirect;
         }
 
         $this->persona($persona);
+
+        // Quien ve la ficha ve su histórico (spec 015, RF-021).
+        $pestana = $this->pestanaActiva($request);
+        if ($pestana === 'historico') {
+            return view('personas.show', [
+                'persona' => $persona->load('lider')->loadCount(['celulas', 'celulasLideradas', 'celulasCoLideradas', 'encuentros', 'inscripcionesEventos']),
+                'pestana' => $pestana,
+                'historico' => $this->historicoDePersona($request, $persona, route('personas.show', $persona)),
+            ]);
+        }
 
         $persona->load([
             'lider',
@@ -132,11 +144,7 @@ class PersonasController extends Controller
             'ministeriosLiderados',
         ]);
 
-        if ($this->puede('verBitacora')) {
-            $persona->load('cambios.usuario');
-        }
-
-        return view('personas.show', ['persona' => $persona]);
+        return view('personas.show', ['persona' => $persona, 'pestana' => $pestana]);
     }
 
     public function create(Request $request)
@@ -163,14 +171,19 @@ class PersonasController extends Controller
         $user = $this->usuarioActual();
         $data = $this->datosGuardables($request->validated(), null);
 
-        // Un líder que registra personas las deja a su cargo; si no, quedarían fuera de su ámbito.
+        // Un líder que registra miembros los deja a su cargo; si no, quedarían fuera de su ámbito.
         if (empty($data['lider_id']) && $user->isLiderCelula() && $user->persona_id) {
             $data['lider_id'] = $user->persona_id;
         }
 
-        $lider = $this->resolverLider($data['lider_id'] ?? null);
-        if ($lider) {
-            $this->liderazgo->validarLider(new Persona(), $lider);
+        if (!empty($data['es_lider'])) {
+            // Todo líder nuevo queda bajo el pastor de la sede (spec 016); sin pastor no hay líderes.
+            $data['lider_id'] = $this->liderazgo->pastorDeSede(app(\App\Services\SedeContext::class)->sedeParaCrear())->id;
+        } else {
+            $lider = $this->resolverLider($data['lider_id'] ?? null);
+            if ($lider) {
+                $this->liderazgo->validarLider(new Persona(), $lider);
+            }
         }
 
         if ($respuesta = $this->avisarDuplicado($request, $data, null)) {
@@ -184,7 +197,7 @@ class PersonasController extends Controller
             return $persona;
         });
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Persona creada correctamente.');
+        return redirect()->route('personas.show', $persona)->with('success', 'Miembro creado correctamente.');
     }
 
     public function edit(Persona $persona)
@@ -211,15 +224,33 @@ class PersonasController extends Controller
 
         if ($persona->es_lider && array_key_exists('es_lider', $data) && !$data['es_lider']) {
             return redirect()->route('lideres.quitar', $persona)
-                ->with('error', 'Para quitar el rol de líder primero decide qué pasará con sus personas y células.');
+                ->with('error', 'Para quitar el rol de líder primero decide qué pasará con sus miembros y células.');
         }
 
         $nuevoLiderId = $data['lider_id'] ?? null;
         unset($data['lider_id']);
-        $cambiaLider = (int) $nuevoLiderId !== (int) $persona->lider_id;
+        $seraLider = (bool) ($data['es_lider'] ?? $persona->es_lider);
+        $pastoral = $persona->esPastoral();
 
-        $nuevoLider = $cambiaLider ? $this->resolverLider($nuevoLiderId) : null;
-        if ($nuevoLider) {
+        // El pastor es la cabeza: no tiene líder. Quien pasa a ser líder queda bajo el pastor; un líder
+        // nunca queda sin líder (spec 016).
+        if ($pastoral && $nuevoLiderId) {
+            throw ValidationException::withMessages(['lider_id' => LiderazgoService::PASTOR_SIN_LIDER]);
+        }
+
+        if ($seraLider && !$pastoral && !$persona->es_lider) {
+            $nuevoLider = $this->liderazgo->liderPorDefecto($persona);
+            $cambiaLider = $nuevoLider->id !== $persona->lider_id;
+        } else {
+            if ($seraLider && !$pastoral && !$nuevoLiderId) {
+                throw ValidationException::withMessages(['lider_id' => LiderazgoService::LIDER_OBLIGATORIO]);
+            }
+
+            $cambiaLider = (int) $nuevoLiderId !== (int) $persona->lider_id;
+            $nuevoLider = $cambiaLider ? $this->resolverLider($nuevoLiderId) : null;
+        }
+
+        if ($nuevoLider && $cambiaLider) {
             $this->liderazgo->validarLider($persona, $nuevoLider);
         }
 
@@ -256,7 +287,7 @@ class PersonasController extends Controller
             return $cambiaLider ? $this->liderazgo->cambiarLider($persona, $nuevoLider, $user) : [];
         });
 
-        $mensaje = 'Persona actualizada correctamente.';
+        $mensaje = 'Miembro actualizado correctamente.';
         if ($retiradas) {
             $mensaje .= ' Se retiró de la(s) célula(s): '.implode(', ', $retiradas).'; elige una célula de su nuevo líder si corresponde.';
         }
@@ -276,7 +307,7 @@ class PersonasController extends Controller
             $this->liderazgo->inactivar($persona, $this->usuarioActual());
         }
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Persona inactivada. Su historial se conserva.');
+        return redirect()->route('personas.show', $persona)->with('success', 'Miembro inactivado. Su historial se conserva.');
     }
 
     public function reactivar(Persona $persona)
@@ -291,7 +322,7 @@ class PersonasController extends Controller
             $this->liderazgo->reactivar($persona, $this->usuarioActual());
         }
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Persona reactivada.');
+        return redirect()->route('personas.show', $persona)->with('success', 'Miembro reactivado.');
     }
 
     public function destroy(Persona $persona)
@@ -306,17 +337,17 @@ class PersonasController extends Controller
         abort_if(
             $persona->tieneHistorial(),
             422,
-            'Esta persona tiene historial (encuentros, eventos, células, ministerios o personas a cargo) y no se puede eliminar. Inactívala en su lugar.'
+            'Este miembro tiene historial (encuentros, eventos, células, ministerios o miembros a cargo) y no se puede eliminar. Inactívalo en su lugar.'
         );
 
         $this->liderazgo->registrarCambio($persona, 'eliminada', ['estado' => $persona->estado], null, $this->usuarioActual());
         $persona->delete();
 
-        return redirect()->route('personas.index')->with('success', 'Persona eliminada correctamente.');
+        return redirect()->route('personas.index')->with('success', 'Miembro eliminado correctamente.');
     }
 
     /**
-     * Resuelve la persona y comprueba su ámbito (404 si está fuera) y la habilidad pedida (403).
+     * Resuelve el miembro y comprueba su ámbito (404 si está fuera) y la habilidad pedida (403).
      */
     private function persona(Persona $persona, string $habilidad = 'ver'): Persona
     {
@@ -390,7 +421,7 @@ class PersonasController extends Controller
         ]);
     }
 
-    /** Persona con el mismo nombre, apellidos y celular (posible duplicado). */
+    /** Miembro con el mismo nombre, apellidos y celular (posible duplicado). */
     private function buscarDuplicada(array $data, ?Persona $actual): ?Persona
     {
         if (empty($data['celular'])) {

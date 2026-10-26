@@ -15,12 +15,15 @@
 @endsection
 
 @section('content')
+@include('historial._pestanas', ['url' => route('lideres.show', $lider), 'pestana' => $pestana ?? 'datos'])
 
-
+@if(($pestana ?? 'datos') === 'historico')
+    @include('historial._secciones', ['historico' => $historico])
+@else
 <div class="row">
     <div class="col-sm-4">
         <div class="info-box"><span class="info-box-icon text-bg-info"><i class="fas fa-users"></i></span>
-            <div class="info-box-content"><span class="info-box-text">Personas</span><span class="info-box-number">{{ $miembros->count() }}</span></div></div>
+            <div class="info-box-content"><span class="info-box-text">Miembros</span><span class="info-box-number">{{ $miembros->count() }}</span></div></div>
     </div>
     <div class="col-sm-4">
         <div class="info-box"><span class="info-box-icon text-bg-secondary"><i class="fas fa-people-arrows"></i></span>
@@ -82,12 +85,12 @@
 
 <div class="card card-primary card-outline mb-4" id="personas-a-cargo">
     <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-users me-1" aria-hidden="true"></i>Personas a su cargo <small class="text-muted ms-2">{{ $miembros->count() }}</small></h3>
+        <h3 class="card-title"><i class="fas fa-users me-1" aria-hidden="true"></i>Miembros a su cargo <small class="text-muted ms-2">{{ $miembros->count() }}</small></h3>
     </div>
     @if($miembros->isEmpty())
         <div class="card-body"><x-ui.vacio mensaje="Aún no lidera a nadie." icono="fa-user-friends" /></div>
     @else
-        {{-- Grilla compacta con altura máxima: no alarga la página aunque tenga muchas personas. --}}
+        {{-- Grilla compacta con altura máxima: no alarga la página aunque tenga muchos miembros. --}}
         <div class="card-body table-responsive p-0" style="max-height: 20rem; overflow-y: auto;">
             <table class="tabla-apilable table table-sm table-hover align-middle mb-0">
                 <thead class="sticky-top bg-body">
@@ -112,4 +115,5 @@
         </div>
     @endif
 </div>
+@endif
 @endsection

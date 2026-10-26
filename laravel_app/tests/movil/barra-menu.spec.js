@@ -32,7 +32,7 @@ test('el menú se cierra al tocar fuera', async ({ page }) => {
 test('el menú se cierra al elegir una opción', async ({ page }) => {
     await abrirMenu(page);
 
-    await page.locator('.app-sidebar .nav-link', { hasText: 'Personas' }).click();
+    await page.locator('.app-sidebar .nav-link', { hasText: 'Miembros' }).click();
     await page.waitForURL('**/personas');
     await expect(page.locator('body')).not.toHaveClass(/sidebar-open/);
 });

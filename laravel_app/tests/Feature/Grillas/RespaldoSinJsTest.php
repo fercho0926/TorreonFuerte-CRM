@@ -16,7 +16,7 @@ class RespaldoSinJsTest extends TestCase
 
     public static function listados(): array
     {
-        return array_map(fn ($m) => [$m], ['personas', 'lideres', 'celulas', 'encuentros', 'eventos', 'ministerios', 'sedes', 'sin-lider', 'users', 'solicitudes-clave']);
+        return array_map(fn ($m) => [$m], ['personas', 'lideres', 'celulas', 'encuentros', 'eventos', 'ministerios', 'sedes', 'sin-lider', 'users', 'solicitudes-clave', 'control-cambios']);
     }
 
     protected function setUp(): void

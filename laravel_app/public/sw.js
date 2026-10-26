@@ -7,7 +7,7 @@
  *   - Todo lo demás (JSON de grillas, CSV, búsquedas, formularios, cualquier otra respuesta) va solo a la red
  *     y jamás se escribe en la caché del dispositivo.
  */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `crm-interfaz-${VERSION}`;
 const BASE = new URL('./', self.registration.scope).pathname; // funciona también si la aplicación vive en una subcarpeta
 const OFFLINE = `${BASE}offline.html`;
