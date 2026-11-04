@@ -4,6 +4,7 @@ deployment:
     - export DEPLOYPATH=/home/torreonf/crm.torreonfuerte.org.co/laravel_app
     - /bin/cp -R laravel_app/* $DEPLOYPATH
     - cd $DEPLOYPATH && php artisan migrate --force
+    - cd $DEPLOYPATH && php artisan db:seed --force
     - cd $DEPLOYPATH && php artisan config:cache
     - cd $DEPLOYPATH && php artisan route:cache
     - cd $DEPLOYPATH && php artisan view:cache
