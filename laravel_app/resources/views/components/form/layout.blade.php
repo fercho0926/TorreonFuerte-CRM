@@ -26,12 +26,18 @@
     @endif
 
     @if($conErrores)
+        @php($mensajesVistos = [])
         <div class="alert alert-danger fm-resumen" role="alert" data-resumen-servidor>
             <strong>Revisa los campos marcados:</strong>
             <ul>
                 @foreach($errors->keys() as $campoConError)
+                    @php($mensaje = $errors->first($campoConError))
+                    {{-- Dos campos relacionados (p. ej. «celular o correo») pueden fallar la misma regla con el
+                         mismo texto; se muestra una sola vez, enlazando al primer campo al que aplica. --}}
+                    @continue(in_array($mensaje, $mensajesVistos, true))
+                    @php($mensajesVistos[] = $mensaje)
                     @php($ancla = \App\Support\Formulario::id(preg_replace('/\.(\w+)/', '[$1]', $campoConError)))
-                    <li><a href="#{{ $ancla }}" data-ir-a-campo>{{ $errors->first($campoConError) }}</a></li>
+                    <li><a href="#{{ $ancla }}" data-ir-a-campo>{{ $mensaje }}</a></li>
                 @endforeach
             </ul>
         </div>

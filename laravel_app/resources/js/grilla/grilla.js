@@ -12,6 +12,10 @@ import { columnasSecundarias, contarFiltrosActivos, leerOrden, opcionesOrden } f
 export const ESPAÑOL = {
     emptyTable: 'No se encontraron resultados.',
     zeroRecords: 'No se encontraron resultados.',
+    // Texto que se ve en el cuerpo de la tabla antes de que llegue la primera respuesta del servidor
+    // (distinto de `processing`, que es el aviso superpuesto; y de `emptyTable`/`zeroRecords`, que solo
+    // aplican una vez confirmado que no hay filas). Sin esto, DataTables usa su "Loading..." en inglés.
+    loadingRecords: 'Cargando…',
     info: 'Mostrando _START_ a _END_ de _TOTAL_',
     infoEmpty: 'Sin resultados',
     infoFiltered: '(de _MAX_ en total)',

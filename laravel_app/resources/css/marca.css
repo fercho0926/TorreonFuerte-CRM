@@ -22,9 +22,11 @@
     text-transform: uppercase;
     white-space: nowrap;
     font-weight: 800;
-    font-size: clamp(2rem, 8vw, 7rem);
+    /* Más chica y más tenue que antes: a tamaño completo competía con la legibilidad de filas largas
+       en tablas con varias columnas (nombre, celular, líder, nivel, sede). */
+    font-size: clamp(1.5rem, 5vw, 4.5rem);
     letter-spacing: .05em;
-    color: rgba(0, 0, 0, .05);
+    color: rgba(0, 0, 0, .035);
     user-select: none;
 }
 

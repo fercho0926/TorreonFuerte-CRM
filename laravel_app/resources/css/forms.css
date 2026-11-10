@@ -204,3 +204,11 @@
 .fm-form[data-modo='linea'] { display: block; }
 .fm-form[data-modo='linea'], .fm-form[data-modo='filtro'] { margin-bottom: .5rem; }
 .fm-form[data-modo='linea'] .fm-campo .form-control, .fm-form[data-modo='linea'] .btn { min-height: 2.25rem; }
+
+/*
+ * Notificaciones emergentes (avisos.js, SweetAlert2 con position: 'top-end'): sin este ajuste,
+ * el contenedor se ancla a la esquina superior derecha del viewport y se superpone con el navbar
+ * fijo del panel (el selector de sede y el menú de usuario viven ahí). AdminLTE 4 no expone una
+ * variable CSS con el alto del navbar, así que se usa un valor fijo que lo cubre con margen.
+ */
+body.swal2-toast-shown .swal2-container.swal2-top-end { top: 4.5rem !important; }

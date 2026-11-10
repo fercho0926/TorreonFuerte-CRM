@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\RedirigeAlFormularioPublico;
 use App\Models\Persona;
 use App\Services\RegistroMiembrosQr;
 use App\Support\Celular;
@@ -14,9 +15,16 @@ use Illuminate\Validation\Rule;
  */
 class RegistroMiembroQrRequest extends FormRequest
 {
+    use RedirigeAlFormularioPublico;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function rutaPaso1(): string
+    {
+        return 'registro-sede.show';
     }
 
     protected function prepareForValidation(): void

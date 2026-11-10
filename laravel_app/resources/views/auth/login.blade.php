@@ -19,8 +19,6 @@
         </x-form.layout>
 
         <p class="mt-3 mb-1 text-center"><a href="{{ route('recuperacion.create') }}">¿Olvidaste tu contraseña?</a></p>
-
-        <p class="mt-3 mb-1 text-center text-muted small">Demo: admin@example.com / password</p>
     </div>
 </div>
 @endsection

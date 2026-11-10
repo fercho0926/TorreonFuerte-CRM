@@ -8,3 +8,4 @@ deployment:
     - cd $DEPLOYPATH && php artisan config:cache
     - cd $DEPLOYPATH && php artisan route:cache
     - cd $DEPLOYPATH && php artisan view:cache
+    - cd $DEPLOYPATH && php artisan about --json | grep -q '"debug_mode":false' || (echo "ABORTANDO DESPLIEGUE: APP_DEBUG quedó en true en produccion (revisa el .env real del servidor)" && exit 1)

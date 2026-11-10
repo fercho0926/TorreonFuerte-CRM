@@ -55,6 +55,23 @@ export async function iniciarFechas(form) {
             allowInput: true,
             maxDate: limite(input.dataset.max),
             minDate: limite(input.dataset.min),
+            // Con altInput, Flatpickr vuelve `hidden` el campo real: queda fuera de la validación nativa
+            // y de `esValidable()` (resources/js/forms/validar.js), así que un error ya marcado (típicamente
+            // por el servidor, en una recarga anterior) no se limpia solo al elegir una fecha nueva. Se limpia
+            // a mano, sobre los dos campos (el real y el visible) y sobre el mismo elemento de error estático
+            // que ya renderiza `components/form/_pie.blade.php`.
+            onChange: (_, __, fp) => {
+                if (!fp.input.value) return;
+                [fp.input, fp.altInput].forEach((el) => {
+                    el.classList.remove('is-invalid');
+                    el.classList.add('is-valid');
+                    el.removeAttribute('aria-invalid');
+                });
+                fp.altInput.closest('.fm-campo')?.classList.add('is-valido');
+                const idOriginal = fp.altInput.id;
+                const aviso = idOriginal && document.getElementById(`${idOriginal}-error`);
+                if (aviso) aviso.textContent = '';
+            },
             onReady: (_, __, fp) => {
                 // El campo visible hereda el id y los atributos de accesibilidad del original.
                 const visible = fp.altInput;

@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { leerFormulario, parametrosFiltro, retardo, urlExportar } from './grilla.js';
+import { ESPAÑOL, leerFormulario, parametrosFiltro, retardo, urlExportar } from './grilla.js';
+
+describe('idioma de la grilla (RF-008)', () => {
+    it('traduce también el texto que se ve mientras llega la primera respuesta', () => {
+        // Sin `loadingRecords`, DataTables usa su "Loading..." en inglés antes de la primera
+        // respuesta AJAX, distinto de `emptyTable`/`zeroRecords` (que solo aplican tras confirmar 0 filas).
+        expect(ESPAÑOL.loadingRecords).toBeTruthy();
+        expect(ESPAÑOL.loadingRecords.toLowerCase()).not.toContain('loading');
+    });
+});
 
 describe('parámetros de filtro', () => {
     it('descarta vacíos, nulos y falsos', () => {

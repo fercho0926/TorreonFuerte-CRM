@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\RedirigeAlFormularioPublico;
 use App\Models\Persona;
 use App\Support\Celular;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,9 +13,16 @@ use Illuminate\Validation\Rule;
  */
 class RegistroQrRequest extends FormRequest
 {
+    use RedirigeAlFormularioPublico;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function rutaPaso1(): string
+    {
+        return 'registro.show';
     }
 
     protected function prepareForValidation(): void
