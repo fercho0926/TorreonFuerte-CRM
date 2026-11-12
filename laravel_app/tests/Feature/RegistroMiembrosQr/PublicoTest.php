@@ -157,9 +157,14 @@ class PublicoTest extends TestCase
 
     public function test_el_paso_dos_sin_javascript_viene_con_los_datos_del_miembro(): void
     {
-        Persona::factory()->deSede($this->sede->id)->create(['celular' => '3101112233', 'nombres' => 'Ana', 'barrio' => 'Centro', 'email' => 'ana@correo.com']);
+        Persona::factory()->deSede($this->sede->id)->create([
+            'celular' => '3101112233', 'nombres' => 'Ana', 'barrio' => 'Centro', 'email' => 'ana@correo.com',
+            'tipo_documento' => 'CC', 'numero_documento' => '6666666666',
+        ]);
 
-        $this->post(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '3101112233'])
+        $this->post(route('registro-sede.buscar', $this->sede->registro_token), [
+            'celular' => '3101112233', 'tipo_documento' => 'CC', 'numero_documento' => '6666666666',
+        ])
             ->assertOk()
             ->assertSee('Encontramos tus datos')
             ->assertSee('value="Centro"', false)
@@ -205,7 +210,7 @@ class PublicoTest extends TestCase
         $this->assertSame(0, RegistroMiembroQr::withoutGlobalScopes()->count());
 
         RateLimiter::clear('registro-miembros:127.0.0.1');
-        $this->post(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '3200000000', 'numero_documento' => '111'])
+        $this->post(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '3200000000', 'tipo_documento' => 'CC', 'numero_documento' => '111'])
             ->assertOk()->assertSee('pertenecen a miembros distintos');
     }
 

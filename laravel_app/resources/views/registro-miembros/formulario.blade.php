@@ -18,13 +18,15 @@
         @endif
 
         @if($paso === 1)
-            <p class="login-box-msg">Escribe tu celular. Si ya estás en nuestra base, tus datos aparecerán solos para que los revises.</p>
+            <p class="login-box-msg">Escribe tu celular y tu documento. Si ya estás en nuestra base, tus datos aparecerán solos para que los revises.</p>
 
             <x-form.layout :action="route('registro-sede.buscar', $token)" modo="login" guardar="Continuar" icono="fa-arrow-right" :leyenda="false">
                 <x-form.section titulo="¿Quién eres?" icono="fa-id-card" id="seccion-identificacion">
+                    <x-form.select name="tipo_documento" label="Tipo de documento" icono="fa-id-card" :required="true" col="col-12" vacio="Elige..."
+                        :opciones="$documentos" :value="$datos['tipo_documento'] ?? null" />
+                    <x-form.input name="numero_documento" label="Número de documento" type="numero" icono="fa-id-card" :required="true" ejemplo="Solo números" col="col-12" :value="$datos['numero_documento'] ?? null"
+                        ayuda="Buscamos tus datos con tu celular y tu documento." />
                     <x-form.input name="celular" label="Celular" type="celular" icono="fa-mobile-alt" :required="true" ejemplo="310 555 9999" col="col-12" :value="$datos['celular'] ?? null" />
-                    <x-form.input name="numero_documento" label="Cédula (opcional)" type="numero" icono="fa-id-card" ejemplo="Solo números" col="col-12" :value="$datos['numero_documento'] ?? null"
-                        ayuda="Si la escribes, buscamos tus datos con ella." />
                 </x-form.section>
             </x-form.layout>
         @else

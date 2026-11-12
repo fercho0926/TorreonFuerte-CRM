@@ -10,6 +10,7 @@ use App\Services\RegistroPorQr;
 use App\Support\Celular;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rule;
 
 /**
  * Formulario público del QR de miembros de una sede. No hay sesión: el token identifica la sede y toda
@@ -52,10 +53,18 @@ class RegistroMiembrosPublicoController extends Controller
                 : $this->sinCache(response()->view('registro-miembros.cerrado', ['sede' => $sede]));
         }
 
+        // El paso 1 real (sin JavaScript) exige celular y documento completo; la consulta JSON de
+        // precarga del paso 2 (mientras el miembro todavía está escribiendo) sigue siendo flexible.
+        $exige = !$request->expectsJson();
         $datos = $request->validate([
-            'celular' => ['required_without:numero_documento', 'nullable', 'string', 'max:20'],
-            'numero_documento' => ['nullable', 'string', 'max:30'],
-        ], ['celular.required_without' => 'Escribe tu celular o tu cédula.']);
+            'celular' => $exige ? ['required', 'string', 'max:20'] : ['required_without:numero_documento', 'nullable', 'string', 'max:20'],
+            'tipo_documento' => [$exige ? 'required' : 'nullable', Rule::in(Persona::TIPOS_DOCUMENTO)],
+            'numero_documento' => [$exige ? 'required' : 'nullable', 'string', 'max:30'],
+        ], [
+            'celular.required_without' => 'Escribe tu celular o tu cédula.',
+            'tipo_documento.required' => 'Elige el tipo de documento.',
+            'numero_documento.required' => 'Escribe tu número de documento.',
+        ]);
 
         if ($espera = $this->limitar($request)) {
             return $this->demasiados($request, $espera);
