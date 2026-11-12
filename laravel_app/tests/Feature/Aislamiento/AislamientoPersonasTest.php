@@ -80,8 +80,10 @@ class AislamientoPersonasTest extends TestCase
 
     public function test_el_registro_nuevo_queda_en_la_sede_del_pastor(): void
     {
-        $this->post(route('personas.store'), ['nombres' => 'Nueva', 'apellidos' => 'Visita', 'celular' => '3001010101', 'estado' => 'visitante'])
-            ->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'Nueva', 'apellidos' => 'Visita', 'celular' => '3001010101', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3001010101',
+        ])->assertSessionHasNoErrors();
 
         $this->assertSame($this->A['sede']->id, Persona::withoutGlobalScopes()->where('nombres', 'Nueva')->value('sede_id'));
     }

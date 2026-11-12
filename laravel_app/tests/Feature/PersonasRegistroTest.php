@@ -11,7 +11,7 @@ class PersonasRegistroTest extends TestCase
 {
     use IniciaSesion, RefreshDatabase;
 
-    public function test_registra_un_visitante_solo_con_nombres_apellidos_y_celular(): void
+    public function test_registra_un_visitante_con_nombres_apellidos_celular_y_documento(): void
     {
         $this->comoAdmin();
 
@@ -20,20 +20,22 @@ class PersonasRegistroTest extends TestCase
             'apellidos' => 'Visitante',
             'celular' => '3001234567',
             'estado' => 'visitante',
+            'tipo_documento' => 'CC',
+            'numero_documento' => '3001234567',
         ])->assertSessionHasNoErrors()->assertRedirect();
 
         $persona = Persona::where('nombres', 'Vera')->firstOrFail();
         $this->assertSame('visitante', $persona->estado);
-        $this->assertNull($persona->numero_documento);
+        $this->assertSame('3001234567', $persona->numero_documento);
         $this->assertDatabaseHas('historial_cambios', ['sujeto_tipo' => 'persona', 'sujeto_id' => $persona->id, 'accion' => 'creada']);
     }
 
-    public function test_exige_al_menos_un_medio_de_contacto(): void
+    public function test_exige_celular_tipo_y_numero_de_documento(): void
     {
         $this->comoAdmin();
 
-        $this->post(route('personas.store'), ['nombres' => 'Sin', 'apellidos' => 'Contacto', 'estado' => 'visitante'])
-            ->assertSessionHasErrors(['celular', 'email']);
+        $this->post(route('personas.store'), ['nombres' => 'Sin', 'apellidos' => 'Datos', 'estado' => 'visitante'])
+            ->assertSessionHasErrors(['celular', 'tipo_documento', 'numero_documento']);
     }
 
     public function test_avisa_de_posible_duplicado_y_permite_confirmar(): void
@@ -41,7 +43,10 @@ class PersonasRegistroTest extends TestCase
         $this->comoAdmin();
         $existente = Persona::factory()->create(['nombres' => 'Ana', 'apellidos' => 'Pérez', 'celular' => '3105550000']);
 
-        $datos = ['nombres' => 'ana', 'apellidos' => 'pérez', 'celular' => '3105550000', 'estado' => 'visitante'];
+        $datos = [
+            'nombres' => 'ana', 'apellidos' => 'pérez', 'celular' => '3105550000', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3105550000',
+        ];
 
         $antes = Persona::count(); // incluye el miembro dueño de la cuenta del administrador (spec 016)
 
@@ -53,15 +58,13 @@ class PersonasRegistroTest extends TestCase
         $this->assertSame($antes + 1, Persona::count());
     }
 
-    public function test_varios_visitantes_sin_documento_pueden_coexistir(): void
+    public function test_varios_visitantes_sin_documento_pueden_coexistir_a_nivel_de_datos(): void
     {
-        $this->comoAdmin();
+        // El formulario de administración exige documento (regla de negocio), pero la unicidad por
+        // sede sigue permitiendo varios registros sin número (p. ej. altas rápidas desde una célula).
+        Persona::factory()->visitante()->create(['nombres' => 'Uno', 'apellidos' => 'Visita']);
+        Persona::factory()->visitante()->create(['nombres' => 'Dos', 'apellidos' => 'Visita']);
 
-        foreach (['Uno', 'Dos'] as $i => $nombre) {
-            $this->post(route('personas.store'), ['nombres' => $nombre, 'apellidos' => 'Visita', 'celular' => '300000000'.$i, 'estado' => 'visitante'])
-                ->assertSessionHasNoErrors();
-        }
-
-        $this->assertSame(2, Persona::whereNull('numero_documento')->count());
+        $this->assertSame(2, Persona::whereNull('numero_documento')->whereIn('nombres', ['Uno', 'Dos'])->count());
     }
 }

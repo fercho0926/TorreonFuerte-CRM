@@ -28,6 +28,7 @@ class UnaSolaPersonaTest extends TestCase
         return $cambios + [
             'nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado,
             'celular' => $p->celular, 'email' => $p->email, 'lider_id' => $p->lider_id,
+            'tipo_documento' => $p->tipo_documento ?? 'CC', 'numero_documento' => $p->numero_documento ?? '100'.$p->id,
         ];
     }
 

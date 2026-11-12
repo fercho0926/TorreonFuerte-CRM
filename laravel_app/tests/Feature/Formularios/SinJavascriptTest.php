@@ -26,6 +26,9 @@ class SinJavascriptTest extends TestCase
         $this->assertMatchesRegularExpression('/<select id="fm-estado"/', $html);
         $this->assertMatchesRegularExpression('/<input type="date" id="fm-fecha_nacimiento"/', $html);
         $this->assertMatchesRegularExpression('/<input type="tel" id="fm-celular"/', $html);
+
+        // Designar líder desde la creación solo aparece llegando desde el módulo Líderes.
+        $html = $this->get(route('personas.create', ['es_lider' => 1]))->getContent();
         $this->assertMatchesRegularExpression('/<input type="checkbox"[^>]*id="fm-es_lider"/', $html);
 
         $html = $this->get(route('eventos.create'))->getContent();
@@ -40,6 +43,7 @@ class SinJavascriptTest extends TestCase
         // Datos tal como los enviaría el navegador sin JavaScript (celular sin máscara).
         $this->post(route('personas.store'), [
             'nombres' => 'Sin', 'apellidos' => 'Javascript', 'celular' => '3105559999', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3105559999',
         ])->assertSessionHasNoErrors();
         $this->assertSame(1, Persona::where('apellidos', 'Javascript')->count());
 

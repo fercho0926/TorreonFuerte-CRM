@@ -37,18 +37,22 @@ class PersonaRequest extends FormRequest
     {
         /** @var Persona|null $persona */
         $persona = $this->route('persona');
-        $creando = !$persona;
         $conCuenta = $persona?->cuenta()->exists() ?? false;
 
         return self::reglasDeAlta() + [
-            'estado' => ['required', Rule::in(array_keys(Persona::ESTADOS))],
+            'estado' => ['required', Rule::in($persona ? array_keys(Persona::ESTADOS) : array_diff(array_keys(Persona::ESTADOS), ['inactivo']))],
+            'invitado_por' => ['nullable', 'string', 'max:255'],
+            'tipo_documento' => ['required', Rule::in(Persona::TIPOS_DOCUMENTO)],
+            'numero_documento' => [
+                'required', 'string', 'max:30',
+                app(SedeContext::class)->unico('personas', 'numero_documento')->ignore($persona?->id),
+            ],
+            // El celular es obligatorio: es el canal por el que se envía información por WhatsApp.
             'celular' => array_merge(
-                ['nullable', 'string', 'max:20'],
-                $creando ? ['required_without:email'] : [],
-                // Con cuenta, el celular es el de la cuenta (claves por WhatsApp) y no se comparte (spec 016, RF-009).
-                $conCuenta ? ['required', self::celularLibreEntreCuentas($persona)] : [],
+                ['required', 'string', 'max:20', Celular::regla()],
+                $conCuenta ? [self::celularLibreEntreCuentas($persona)] : [],
             ),
-            'email' => array_merge(['nullable', 'email', 'max:255'], $creando ? ['required_without:celular'] : []),
+            'email' => ['nullable', 'email', 'max:255'],
             'lider_id' => ['nullable', app(SedeContext::class)->existe('personas')->where('es_lider', true)->whereNull('deleted_at')],
             'es_lider' => ['boolean'],
             'confirmar_duplicado' => ['boolean'],
@@ -85,7 +89,6 @@ class PersonaRequest extends FormRequest
             $prefijo.'nombres' => ['required', 'string', 'max:255'],
             $prefijo.'apellidos' => ['required', 'string', 'max:255'],
             $prefijo.'fecha_nacimiento' => ['nullable', 'date', 'before_or_equal:today'],
-            $prefijo.'direccion' => ['nullable', 'string', 'max:255'],
             $prefijo.'barrio' => ['nullable', 'string', 'max:255'],
             $prefijo.'ciudad' => ['nullable', 'string', 'max:255'],
         ];
@@ -94,9 +97,21 @@ class PersonaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'celular.required_without' => 'Indica al menos un medio de contacto: celular o correo.',
-            'email.required_without' => 'Indica al menos un medio de contacto: celular o correo.',
+            'celular.required' => 'El celular es obligatorio: es el canal para enviar información por WhatsApp.',
             'lider_id.exists' => 'El líder elegido no existe o ya no es líder.',
+            'tipo_documento.required' => 'Elige el tipo de documento.',
+            'tipo_documento.in' => 'Elige un tipo de documento válido.',
+            'numero_documento.required' => 'Escribe el número de documento.',
+            'numero_documento.unique' => 'Ya existe un miembro con ese número de documento en esta sede.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'tipo_documento' => 'tipo de documento',
+            'numero_documento' => 'número de documento',
+            'celular' => 'celular',
         ];
     }
 }

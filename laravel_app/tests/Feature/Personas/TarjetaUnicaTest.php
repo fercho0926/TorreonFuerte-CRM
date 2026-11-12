@@ -64,11 +64,15 @@ class TarjetaUnicaTest extends TestCase
 
     public function test_siguen_las_reglas_de_contacto_y_de_duplicados(): void
     {
-        $this->post(route('personas.store'), ['nombres' => 'Sin', 'apellidos' => 'Contacto', 'estado' => 'visitante'])->assertSessionHasErrors(['celular', 'email']);
+        $this->post(route('personas.store'), ['nombres' => 'Sin', 'apellidos' => 'Contacto', 'estado' => 'visitante'])
+            ->assertSessionHasErrors(['celular', 'tipo_documento', 'numero_documento']);
 
-        $datos = ['nombres' => 'Rosa', 'apellidos' => 'Repetida', 'celular' => '3105559999', 'estado' => 'visitante'];
+        $datos = [
+            'nombres' => 'Rosa', 'apellidos' => 'Repetida', 'celular' => '3105559999', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3105559999',
+        ];
         $this->post(route('personas.store'), $datos)->assertSessionHasNoErrors();
-        $this->post(route('personas.store'), $datos)->assertSessionHas('duplicado');
+        $this->post(route('personas.store'), array_merge($datos, ['numero_documento' => '3105559998']))->assertSessionHas('duplicado');
     }
 
     public function test_la_ficha_agrupa_contacto_estado_en_el_bloque_de_datos_personales(): void

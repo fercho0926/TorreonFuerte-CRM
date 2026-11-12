@@ -77,8 +77,10 @@ class AlcancePorRolTest extends TestCase
         $this->escenario();
         $this->comoLider($this->liderA);
 
-        $this->post(route('personas.store'), ['nombres' => 'Nueva', 'apellidos' => 'Visita', 'celular' => '3001239999', 'estado' => 'visitante'])
-            ->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'Nueva', 'apellidos' => 'Visita', 'celular' => '3001239999', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3001239999',
+        ])->assertSessionHasNoErrors();
 
         $this->assertSame($this->liderA->id, Persona::where('nombres', 'Nueva')->value('lider_id'));
     }
@@ -90,6 +92,7 @@ class AlcancePorRolTest extends TestCase
 
         $this->post(route('personas.store'), [
             'nombres' => 'Intento', 'apellidos' => 'Lider', 'celular' => '3001230000', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3001230000',
             'es_lider' => 1,
         ])->assertSessionHasNoErrors();
 

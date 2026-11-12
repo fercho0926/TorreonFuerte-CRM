@@ -161,7 +161,10 @@ class MigracionSedesTest extends TestCase
     {
         $a = $this->crearSede(['nombre' => 'A']);
         $this->comoPastorDe($a);
-        $this->post(route('personas.store'), ['nombres' => 'Nueva', 'apellidos' => 'Persona', 'celular' => '3001234567', 'estado' => 'visitante'])->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'Nueva', 'apellidos' => 'Persona', 'celular' => '3001234567', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3001234567',
+        ])->assertSessionHasNoErrors();
 
         $this->assertSame([], array_filter(MigracionSedes::contarSinSede()));
     }

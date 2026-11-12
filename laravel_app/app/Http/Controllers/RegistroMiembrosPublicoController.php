@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RegistroMiembroQrRequest;
+use App\Models\Persona;
 use App\Models\Sede;
 use App\Services\RegistroMiembrosQr;
 use App\Services\RegistroPorQr;
@@ -86,7 +87,17 @@ class RegistroMiembrosPublicoController extends Controller
 
         return $this->sinCache(response()->view('registro-miembros.formulario', [
             'sede' => $sede, 'paso' => 2, 'datos' => $datos, 'persona' => $persona, 'aviso' => null,
+            'lideres' => $persona ? collect() : $this->lideresDeLaSede($sede),
         ]));
+    }
+
+    /** Líderes activos de la sede, para que un miembro activo nuevo elija quién lo cuida. */
+    private function lideresDeLaSede(Sede $sede)
+    {
+        return Persona::withoutGlobalScopes()
+            ->where('sede_id', $sede->id)->lideres()->activas()
+            ->orderBy('apellidos')->orderBy('nombres')
+            ->get();
     }
 
     public function store(RegistroMiembroQrRequest $request, string $token)

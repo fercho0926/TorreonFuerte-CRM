@@ -32,23 +32,21 @@ class ValidacionContactoTest extends TestCase
         return new DOMXPath($dom);
     }
 
-    public function test_el_resumen_muestra_el_mensaje_de_contacto_una_sola_vez(): void
+    public function test_el_resumen_muestra_el_mensaje_del_celular_obligatorio_una_sola_vez(): void
     {
         $respuesta = $this->from(route('personas.create'))->followingRedirects()->post(route('personas.store'), [
             'nombres' => 'Ana', 'apellidos' => 'Prueba', 'estado' => 'visitante',
         ]);
 
         $xp = $this->xpath($respuesta->getContent());
-        $mensaje = 'Indica al menos un medio de contacto: celular o correo.';
+        $mensaje = 'El celular es obligatorio: es el canal para enviar información por WhatsApp.';
 
         $resumen = $xp->query('//*[@data-resumen-servidor]//li[contains(., "'.$mensaje.'")]');
-        $this->assertSame(1, $resumen->length, 'El resumen no debe repetir el mismo mensaje por cada campo.');
+        $this->assertSame(1, $resumen->length, 'El resumen no debe repetir el mismo mensaje.');
 
-        // Los dos campos siguen marcados como inválidos individualmente (no se pierde la señal visual).
-        foreach (['fm-celular', 'fm-email'] as $id) {
-            $campo = $xp->query('//*[@id="'.$id.'"]')->item(0);
-            $this->assertNotNull($campo, "No se encontró el campo #{$id}");
-            $this->assertSame('true', $campo->getAttribute('aria-invalid'));
-        }
+        // El campo sigue marcado como inválido individualmente (no se pierde la señal visual).
+        $campo = $xp->query('//*[@id="fm-celular"]')->item(0);
+        $this->assertNotNull($campo, 'No se encontró el campo #fm-celular');
+        $this->assertSame('true', $campo->getAttribute('aria-invalid'));
     }
 }

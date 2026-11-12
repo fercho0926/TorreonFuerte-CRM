@@ -62,6 +62,7 @@ class SinCambioSinEntradaTest extends TestCase
                 'nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado, 'celular' => $p->celular,
                 'email' => $p->email, 'direccion' => $p->direccion, 'barrio' => $p->barrio, 'ciudad' => $p->ciudad,
                 'fecha_nacimiento' => $p->fecha_nacimiento?->toDateString(), 'lider_id' => $p->lider_id,
+                'tipo_documento' => $p->tipo_documento ?? 'CC', 'numero_documento' => $p->numero_documento ?? '100'.$p->id,
             ])->assertSessionHasNoErrors();
             // `sede` de la célula es texto (lugar o sector), no la relación con la sede.
             $columnas = $celula->fresh()->getAttributes();

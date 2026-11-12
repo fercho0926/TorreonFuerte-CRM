@@ -64,6 +64,7 @@ class MiembroCelulasMinisteriosTest extends TestCase
         $this->put(route('personas.update', $persona), [
             'nombres' => $persona->nombres, 'apellidos' => $persona->apellidos, 'estado' => $persona->estado,
             'celular' => $persona->celular, 'lider_id' => $otroLider->id,
+            'tipo_documento' => $persona->tipo_documento ?? 'CC', 'numero_documento' => $persona->numero_documento ?? '100'.$persona->id,
         ])->assertSessionHasNoErrors();
 
         $this->assertContains('lider', $this->de($persona, 'liderazgo'));

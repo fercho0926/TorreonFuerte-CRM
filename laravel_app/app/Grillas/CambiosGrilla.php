@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\AlcanceService;
 use App\Services\SedeContext;
 use App\Support\AccionesHistorial;
+use App\Support\BusquedaTexto;
 use App\Support\Modulos;
 use App\Support\Niveles;
 use Illuminate\Database\Eloquent\Builder;
@@ -142,12 +143,12 @@ class CambiosGrilla extends Grilla
 
     protected function buscar(Builder|Collection $consulta, string $q): Builder|Collection
     {
-        $like = '%'.str_replace(['%', '_'], '', $q).'%';
+        $like = '%'.BusquedaTexto::normalizar(str_replace(['%', '_'], '', $q)).'%';
 
         return $consulta->where(fn (Builder $w) => $w
-            ->where('historial_cambios.sujeto_nombre', 'like', $like)
-            ->orWhere('historial_cambios.relacionado_nombre', 'like', $like)
-            ->orWhere('historial_cambios.actor_nombre', 'like', $like)
-            ->orWhere('historial_cambios.detalle', 'like', $like));
+            ->whereRaw(BusquedaTexto::columnaSql('historial_cambios.sujeto_nombre').' like ?', [$like])
+            ->orWhereRaw(BusquedaTexto::columnaSql('historial_cambios.relacionado_nombre').' like ?', [$like])
+            ->orWhereRaw(BusquedaTexto::columnaSql('historial_cambios.actor_nombre').' like ?', [$like])
+            ->orWhereRaw(BusquedaTexto::columnaSql('historial_cambios.detalle').' like ?', [$like]));
     }
 }

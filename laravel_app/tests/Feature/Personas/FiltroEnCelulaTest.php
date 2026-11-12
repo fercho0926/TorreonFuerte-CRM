@@ -53,7 +53,7 @@ class FiltroEnCelulaTest extends TestCase
         $celula = Celula::create(['sede_id' => $this->A['sede']->id, 'nombre' => 'Célula nueva', 'lider_id' => $this->A['lider']->id, 'estado' => 'activa']);
         $celula->miembros()->attach($this->invitada->id, ['fecha_ingreso' => now()->toDateString()]);
 
-        $base = ['nombres' => 'Invitada', 'apellidos' => 'Delagua', 'celular' => $this->invitada->celular];
+        $base = ['nombres' => 'Invitada', 'apellidos' => 'Delagua', 'celular' => $this->invitada->celular, 'tipo_documento' => 'CC', 'numero_documento' => '9988776655'];
 
         $this->put(route('personas.update', $this->invitada), $base + ['estado' => 'miembro_activo'])
             ->assertSessionHasNoErrors();

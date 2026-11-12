@@ -314,7 +314,7 @@ class CuentasDeMiembros
      */
     private function crearMiembro(array $cuenta, array $miembro, User $actor, ?int $sedeId): Persona
     {
-        $datos = array_intersect_key($miembro, array_flip(['nombres', 'apellidos', 'fecha_nacimiento', 'direccion', 'barrio', 'ciudad'])) + [
+        $datos = array_intersect_key($miembro, array_flip(['nombres', 'apellidos', 'fecha_nacimiento', 'barrio', 'ciudad'])) + [
             'celular' => $cuenta['celular'],
             'email' => $cuenta['email'],
             'estado' => 'miembro_activo',

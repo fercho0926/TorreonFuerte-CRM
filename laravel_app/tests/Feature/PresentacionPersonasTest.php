@@ -12,18 +12,18 @@ class PresentacionPersonasTest extends TestCase
 {
     use IniciaSesion, RefreshDatabase;
 
-    public function test_la_ficha_muestra_enlaces_de_llamada_y_whatsapp_con_celular(): void
+    public function test_la_ficha_muestra_el_enlace_de_whatsapp_con_celular_y_nunca_de_llamada(): void
     {
         $this->comoAdmin();
         $persona = Persona::factory()->create(['celular' => '310 555 9999']);
 
         $this->get(route('personas.show', $persona))
             ->assertOk()
-            ->assertSee('href="tel:3105559999"', false)
-            ->assertSee('href="https://wa.me/573105559999"', false);
+            ->assertSee('href="https://wa.me/573105559999"', false)
+            ->assertDontSee('href="tel:', false);
     }
 
-    public function test_sin_celular_no_se_muestran_los_enlaces(): void
+    public function test_sin_celular_no_se_muestra_el_enlace(): void
     {
         $this->comoAdmin();
         $persona = Persona::factory()->create(['celular' => null, 'email' => 'a@b.co']);

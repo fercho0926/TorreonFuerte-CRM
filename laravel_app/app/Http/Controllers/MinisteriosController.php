@@ -57,7 +57,7 @@ class MinisteriosController extends Controller
             return $redirect;
         }
 
-        $data = $this->validateData($request);
+        $data = $this->validateData($request, null);
         $personaIds = $this->integrantesPermitidos($request, null);
 
         DB::transaction(function () use ($data, $personaIds) {
@@ -113,7 +113,7 @@ class MinisteriosController extends Controller
             return $redirect;
         }
 
-        $data = $this->validateData($request);
+        $data = $this->validateData($request, $ministerio);
         $personaIds = $this->integrantesPermitidos($request, $ministerio);
 
         DB::transaction(function () use ($ministerio, $data, $personaIds) {
@@ -228,10 +228,24 @@ class MinisteriosController extends Controller
         return $this->alcance()->personasVisibles($this->usuarioActual())->orderBy('apellidos')->orderBy('nombres')->get();
     }
 
-    private function validateData(Request $request): array
+    private function validateData(Request $request, ?Ministerio $ministerio): array
     {
         $data = $request->validate([
-            'nombre' => ['required', 'string', 'max:255'],
+            'nombre' => [
+                'required', 'string', 'max:255',
+                function (string $atributo, mixed $valor, \Closure $fallar) use ($ministerio) {
+                    $normalizado = \App\Support\BusquedaTexto::normalizar((string) $valor);
+
+                    $existe = Ministerio::query()
+                        ->when($ministerio, fn ($q) => $q->whereKeyNot($ministerio->id))
+                        ->whereRaw(\App\Support\BusquedaTexto::columnaSql('nombre').' = ?', [$normalizado])
+                        ->exists();
+
+                    if ($existe) {
+                        $fallar('Ya existe un ministerio con ese nombre en esta sede (sin importar tildes ni mayúsculas).');
+                    }
+                },
+            ],
             'descripcion' => ['nullable', 'string'],
             'encargado_id' => ['nullable', app(SedeContext::class)->existe('personas')],
             'estado' => ['required', Rule::in(Ministerio::ESTADOS)],

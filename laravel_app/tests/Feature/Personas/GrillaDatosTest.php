@@ -93,7 +93,7 @@ class GrillaDatosTest extends TestCase
         $csv = $respuesta->streamedContent();
 
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
-        $this->assertStringContainsString('Nombre;Estado;Celular;Correo;Líder', $csv);
+        $this->assertStringContainsString('Nombre;Estado;Celular;Correo;Documento;Líder', $csv);
         $this->assertStringContainsString("'=Peligro", $csv, 'neutraliza fórmulas');
         $this->assertStringNotContainsString('Fuera', $csv);
         $this->assertStringContainsString('text/csv', $respuesta->headers->get('Content-Type'));

@@ -27,7 +27,8 @@ class PestanaMiembroTest extends TestCase
         $p = $this->A['persona'];
         $this->put(route('personas.update', $p), $cambios + [
             'nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado,
-            'celular' => $p->celular, 'direccion' => $p->direccion, 'lider_id' => $p->lider_id,
+            'celular' => $p->celular, 'barrio' => $p->barrio, 'lider_id' => $p->lider_id,
+            'tipo_documento' => $p->tipo_documento ?? 'CC', 'numero_documento' => $p->numero_documento ?? '100'.$p->id,
         ])->assertSessionHasNoErrors();
     }
 
@@ -44,15 +45,15 @@ class PestanaMiembroTest extends TestCase
 
     public function test_la_edicion_muestra_cada_campo_con_su_valor_anterior_y_nuevo_y_quien_lo_hizo(): void
     {
-        $this->A['persona']->update(['direccion' => 'Calle 10 # 5-20', 'celular' => '3001112233']);
-        $this->editar(['direccion' => 'Carrera 8 # 3-15', 'celular' => '3009998877']);
+        $this->A['persona']->update(['barrio' => 'Barrio Viejo', 'celular' => '3001112233']);
+        $this->editar(['barrio' => 'Barrio Nuevo', 'celular' => '3009998877']);
 
         $html = $this->get(route('personas.show', [$this->A['persona'], 'pestana' => 'historico']))->assertOk()->getContent();
 
         $this->assertStringContainsString('Datos editados', $html);
-        $this->assertStringContainsString('Dirección:', $html);
-        $this->assertStringContainsString('Calle 10 # 5-20', $html);
-        $this->assertStringContainsString('Carrera 8 # 3-15', $html);
+        $this->assertStringContainsString('Barrio:', $html);
+        $this->assertStringContainsString('Barrio Viejo', $html);
+        $this->assertStringContainsString('Barrio Nuevo', $html);
         $this->assertStringContainsString('Celular:', $html);
         $this->assertStringContainsString($this->A['pastor']->name, $html);
         $this->assertStringNotContainsString('Nombres:', $html, 'no lista los campos que no cambiaron');

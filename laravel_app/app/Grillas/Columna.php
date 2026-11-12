@@ -6,6 +6,7 @@ use App\Models\Persona;
 use App\Models\Sede;
 use App\Models\User;
 use App\Services\SedeContext;
+use App\Support\BusquedaTexto;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -109,10 +110,10 @@ class Columna
         $this->filtro = self::FILTRO_TEXTO;
         $campos ??= $this->clave;
         $this->filtroFn = $campos instanceof Closure ? $campos : function (Builder $q, string $valor) use ($campos) {
-            $like = '%'.$valor.'%';
+            $like = '%'.BusquedaTexto::normalizar($valor).'%';
             $q->where(function (Builder $q) use ($campos, $like) {
                 foreach ((array) $campos as $campo) {
-                    $q->orWhere($campo, 'like', $like);
+                    $q->orWhereRaw(BusquedaTexto::columnaSql($campo).' like ?', [$like]);
                 }
             });
         };

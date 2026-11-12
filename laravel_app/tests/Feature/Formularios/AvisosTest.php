@@ -23,6 +23,7 @@ class AvisosTest extends TestCase
     {
         $html = $this->from(route('personas.create'))->followingRedirects()->post(route('personas.store'), [
             'nombres' => 'Aviso', 'apellidos' => 'Exito', 'celular' => '3105551111', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3105551111',
         ])->getContent();
 
         $this->assertStringContainsString('data-avisos', $html);

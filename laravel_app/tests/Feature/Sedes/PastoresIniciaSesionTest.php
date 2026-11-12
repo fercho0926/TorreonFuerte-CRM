@@ -35,8 +35,10 @@ class PastoresIniciaSesionTest extends TestCase
                 ->assertOk()
                 ->assertViewHas('pagina', fn ($p) => $p->total() === 2 + $indice);
 
-            $this->post(route('personas.store'), ['nombres' => 'Visita', 'apellidos' => 'De '.$correo, 'celular' => '3004445555', 'estado' => 'visitante'])
-                ->assertSessionHasNoErrors();
+            $this->post(route('personas.store'), [
+                'nombres' => 'Visita', 'apellidos' => 'De '.$correo, 'celular' => '3004445555', 'estado' => 'visitante',
+                'tipo_documento' => 'CC', 'numero_documento' => '3004445555'.$indice,
+            ])->assertSessionHasNoErrors();
 
             $this->assertSame($sede->id, Persona::where('apellidos', 'De '.$correo)->value('sede_id'));
             $this->post(route('logout'));

@@ -45,7 +45,7 @@ class AislamientoTest extends TestCase
 
         $this->post(route('registro-sede.store', $this->token($this->A)), [
             'celular' => $ajeno->celular, 'nombres' => 'Intruso', 'apellidos' => 'Prueba', 'fecha_nacimiento' => '1990-01-01',
-            'estado_inicial' => 'visitante', 'barrio' => 'Hackeado',
+            'estado_inicial' => 'visitante', 'barrio' => 'Hackeado', 'tipo_documento' => 'CC', 'numero_documento' => '7777777777',
         ])->assertRedirect();
 
         $this->assertSame([$ajeno->nombres, $ajeno->barrio], [$this->B['persona']->fresh()->nombres, $this->B['persona']->fresh()->barrio]);
