@@ -4,6 +4,7 @@ namespace App\Grillas;
 
 use App\Models\Rol;
 use App\Models\User;
+use App\Support\BusquedaTexto;
 use App\Support\Niveles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -63,8 +64,10 @@ class RolesGrilla extends Grilla
 
     protected function buscar(Builder|Collection $consulta, string $q): Builder|Collection
     {
-        $like = '%'.str_replace(['%', '_'], '', $q).'%';
+        $like = '%'.BusquedaTexto::normalizar(str_replace(['%', '_'], '', $q)).'%';
 
-        return $consulta->where(fn ($w) => $w->where('roles.nombre', 'like', $like)->orWhere('roles.descripcion', 'like', $like));
+        return $consulta->where(fn ($w) => $w
+            ->whereRaw(BusquedaTexto::columnaSql('roles.nombre').' like ?', [$like])
+            ->orWhereRaw(BusquedaTexto::columnaSql('roles.descripcion').' like ?', [$like]));
     }
 }

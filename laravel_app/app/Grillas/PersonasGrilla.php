@@ -69,6 +69,9 @@ class PersonasGrilla extends Grilla
                 ->valor(fn (Persona $p) => $p->celular)
                 ->prioridad(3),
             Columna::make('correo', 'Correo')->valor(fn (Persona $p) => $p->email)->soloExportar(),
+            Columna::make('documento', 'Documento')
+                ->valor(fn (Persona $p) => $p->numero_documento ? $p->tipo_documento.' '.$p->numero_documento : null)
+                ->soloExportar(),
             Columna::make('lider', 'Líder')
                 ->ordenaPersona('personas', 'lider_id')
                 ->filtraPersona('lider')

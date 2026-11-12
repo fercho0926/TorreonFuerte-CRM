@@ -29,11 +29,11 @@ class RegistroMiembrosQr
     public const SIN_CAMBIOS = 'sin_cambios';
 
     /** Campos de texto o fecha que un miembro existente puede actualizar. */
-    public const CAMPOS = ['nombres', 'apellidos', 'fecha_nacimiento', 'email', 'direccion', 'barrio', 'ciudad'];
+    public const CAMPOS = ['nombres', 'apellidos', 'fecha_nacimiento', 'email', 'barrio', 'ciudad'];
 
     public const ETIQUETAS = [
         'nombres' => 'Nombres', 'apellidos' => 'Apellidos', 'fecha_nacimiento' => 'Fecha de nacimiento',
-        'email' => 'Correo', 'direccion' => 'Dirección', 'barrio' => 'Barrio', 'ciudad' => 'Ciudad',
+        'email' => 'Correo', 'barrio' => 'Barrio', 'ciudad' => 'Ciudad',
         'tipo_documento' => 'Tipo de documento', 'numero_documento' => 'Cédula',
     ];
 
@@ -51,7 +51,7 @@ class RegistroMiembrosQr
 
     /**
      * @param  array<string, mixed>  $datos  celular, nombres, apellidos, fecha_nacimiento, estado_inicial, tipo_documento,
-     *                                       numero_documento, email, direccion, barrio, ciudad
+     *                                       numero_documento, lider_id (solo si estado_inicial es miembro_activo), email, barrio, ciudad
      * @return array{resultado: string, persona: ?Persona, cambios: array<string, array{0: mixed, 1: mixed}>}
      *
      * @throws ValidationException
@@ -73,6 +73,10 @@ class RegistroMiembrosQr
 
             return $this->contexto->conSede($sede->id, fn () => DB::transaction(function () use ($sede, $datos, $busqueda) {
                 $persona = $busqueda['persona'];
+
+                if (!$persona && $datos['numero_documento'] && Persona::withoutGlobalScopes()->where('sede_id', $sede->id)->where('numero_documento', $datos['numero_documento'])->exists()) {
+                    throw ValidationException::withMessages(['numero_documento' => 'Ese número de documento ya pertenece a otro miembro de esta sede.']);
+                }
 
                 return $persona
                     ? $this->actualizar($sede, $persona, $datos)
@@ -97,10 +101,11 @@ class RegistroMiembrosQr
             'tipo_documento' => $datos['tipo_documento'],
             'numero_documento' => $datos['numero_documento'],
             'email' => $datos['email'],
-            'direccion' => $datos['direccion'],
             'barrio' => $datos['barrio'],
             'ciudad' => $datos['ciudad'],
             'estado' => $datos['estado_inicial'],
+            // Solo un miembro activo elige líder al registrarse; un visitante aún no tiene uno.
+            'lider_id' => $datos['estado_inicial'] === 'miembro_activo' ? $datos['lider_id'] ?? null : null,
         ]);
 
         $this->liderazgo->registrarCambio($persona, 'creada_qr', null, ['estado' => $persona->estado, 'origen' => 'QR de miembros']);
@@ -220,7 +225,7 @@ class RegistroMiembrosQr
     private function normalizar(array $datos): array
     {
         $limpio = [];
-        foreach (['nombres', 'apellidos', 'fecha_nacimiento', 'tipo_documento', 'numero_documento', 'email', 'direccion', 'barrio', 'ciudad', 'estado_inicial'] as $campo) {
+        foreach (['nombres', 'apellidos', 'fecha_nacimiento', 'tipo_documento', 'numero_documento', 'email', 'barrio', 'ciudad', 'estado_inicial', 'lider_id'] as $campo) {
             $valor = isset($datos[$campo]) ? trim((string) $datos[$campo]) : '';
             $limpio[$campo] = $valor === '' ? null : preg_replace('/\s+/', ' ', $valor);
         }
@@ -246,7 +251,6 @@ class RegistroMiembrosQr
             'tipo_documento' => $persona->tipo_documento,
             'numero_documento' => $persona->numero_documento,
             'email' => $persona->email,
-            'direccion' => $persona->direccion,
             'barrio' => $persona->barrio,
             'ciudad' => $persona->ciudad,
         ], fn ($valor) => $valor !== null && $valor !== '');

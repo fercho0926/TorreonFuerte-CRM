@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\RedirigeAlFormularioPublico;
 use App\Models\Persona;
+use App\Models\Sede;
 use App\Services\RegistroMiembrosQr;
 use App\Support\Celular;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,7 +30,7 @@ class RegistroMiembroQrRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['numero_documento', 'tipo_documento', 'estado_inicial', 'email', 'direccion', 'barrio', 'ciudad'] as $campo) {
+        foreach (['numero_documento', 'tipo_documento', 'estado_inicial', 'lider_id', 'email', 'barrio', 'ciudad'] as $campo) {
             if ($this->has($campo)) {
                 $valor = trim((string) $this->input($campo));
                 $this->merge([$campo => $valor === '' ? null : $valor]);
@@ -44,11 +45,18 @@ class RegistroMiembroQrRequest extends FormRequest
             'nombres' => ['required', 'string', 'max:100'],
             'apellidos' => ['required', 'string', 'max:100'],
             'fecha_nacimiento' => ['required', 'date', 'before_or_equal:today', 'after_or_equal:1900-01-01'],
-            'tipo_documento' => ['nullable', 'required_with:numero_documento', Rule::in(Persona::TIPOS_DOCUMENTO)],
-            'numero_documento' => ['nullable', 'string', 'max:30'],
+            'tipo_documento' => ['required', Rule::in(Persona::TIPOS_DOCUMENTO)],
+            'numero_documento' => ['required', 'string', 'max:30'],
             'estado_inicial' => ['nullable', Rule::in(RegistroMiembrosQr::ESTADOS_INICIALES)],
+            'lider_id' => [
+                'nullable', 'required_if:estado_inicial,miembro_activo',
+                Rule::exists('personas', 'id')->where(function ($q) {
+                    $sede = Sede::where('registro_token', (string) $this->route('token'))->first();
+
+                    $q->where('sede_id', $sede?->id)->where('es_lider', true)->whereNull('deleted_at');
+                }),
+            ],
             'email' => ['nullable', 'email', 'max:255'],
-            'direccion' => ['nullable', 'string', 'max:255'],
             'barrio' => ['nullable', 'string', 'max:255'],
             'ciudad' => ['nullable', 'string', 'max:255'],
         ];
@@ -66,9 +74,12 @@ class RegistroMiembroQrRequest extends FormRequest
             'fecha_nacimiento.date' => 'La fecha de nacimiento no es válida.',
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
             'fecha_nacimiento.after_or_equal' => 'La fecha de nacimiento no es válida.',
-            'tipo_documento.required_with' => 'Elige el tipo de documento.',
+            'tipo_documento.required' => 'Elige el tipo de documento.',
             'tipo_documento.in' => 'Elige un tipo de documento válido.',
+            'numero_documento.required' => 'Escribe tu número de documento.',
             'estado_inicial.in' => 'Elige si te registras como visitante o como miembro activo.',
+            'lider_id.required_if' => 'Elige quién es tu líder.',
+            'lider_id.exists' => 'El líder elegido no es válido.',
             'email.email' => 'Escribe un correo válido (por ejemplo ana@correo.com).',
         ];
     }
@@ -80,7 +91,6 @@ class RegistroMiembroQrRequest extends FormRequest
             'fecha_nacimiento' => 'fecha de nacimiento',
             'numero_documento' => 'cédula',
             'email' => 'correo',
-            'direccion' => 'dirección',
         ];
     }
 }

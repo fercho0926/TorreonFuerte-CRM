@@ -27,7 +27,10 @@ class PublicoTest extends TestCase
 
     private function datos(array $extra = []): array
     {
-        return $extra + ['celular' => '310 111 2233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'estado_inicial' => 'visitante'];
+        return $extra + [
+            'celular' => '310 111 2233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'estado_inicial' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '9999999999',
+        ];
     }
 
     private function enviar(array $extra = [])
@@ -47,22 +50,24 @@ class PublicoTest extends TestCase
 
     public function test_flujo_de_dos_pasos_sin_javascript_para_un_miembro_nuevo(): void
     {
+        $lider = Persona::factory()->deSede($this->sede->id)->lider()->create();
+
         $paso2 = $this->post(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '3101112233'])
             ->assertOk()
             ->assertSee('Completa tus datos')
             ->assertSee('name="estado_inicial"', false)
+            ->assertSee('name="lider_id"', false)
             ->assertSee('name="email"', false)
-            ->assertSee('name="direccion"', false)
             ->assertSee('name="barrio"', false)
             ->assertSee('name="ciudad"', false)
             ->assertHeader('Cache-Control', 'no-store, private');
         $this->assertStringContainsString('registro-sede/'.$this->sede->registro_token, $paso2->getContent());
 
-        $this->enviar(['email' => 'ana@correo.com', 'estado_inicial' => 'miembro_activo'])
+        $this->enviar(['email' => 'ana@correo.com', 'estado_inicial' => 'miembro_activo', 'lider_id' => $lider->id])
             ->assertRedirect(route('registro-sede.listo', $this->sede->registro_token));
 
-        $persona = Persona::withoutGlobalScopes()->where('sede_id', $this->sede->id)->firstOrFail();
-        $this->assertSame(['3101112233', 'miembro_activo', 'ana@correo.com'], [preg_replace('/\D/', '', $persona->celular), $persona->estado, $persona->email]);
+        $persona = Persona::withoutGlobalScopes()->where('sede_id', $this->sede->id)->where('nombres', 'Ana')->firstOrFail();
+        $this->assertSame(['3101112233', 'miembro_activo', 'ana@correo.com', $lider->id], [preg_replace('/\D/', '', $persona->celular), $persona->estado, $persona->email, $persona->lider_id]);
 
         $this->get(route('registro-sede.listo', $this->sede->registro_token))
             ->assertOk()->assertSee('quedaste registrado')->assertHeader('Cache-Control', 'no-store, private');
@@ -75,7 +80,7 @@ class PublicoTest extends TestCase
             ['fecha_nacimiento' => now()->addDay()->toDateString()], ['fecha_nacimiento' => '1800-01-01'],
             ['tipo_documento' => '', 'numero_documento' => '123'], ['tipo_documento' => 'XX', 'numero_documento' => '123'],
             ['estado_inicial' => 'lider'], ['email' => 'no-es-correo'], ['nombres' => str_repeat('a', 101)],
-            ['direccion' => str_repeat('a', 256)], ['barrio' => str_repeat('a', 256)], ['ciudad' => str_repeat('a', 256)],
+            ['barrio' => str_repeat('a', 256)], ['ciudad' => str_repeat('a', 256)],
         ];
 
         foreach ($casos as $caso) {
@@ -91,8 +96,41 @@ class PublicoTest extends TestCase
         $this->enviar(['estado_inicial' => null])->assertSessionHasErrors('estado_inicial');
 
         RateLimiter::clear('registro-miembros:127.0.0.1');
-        Persona::factory()->deSede($this->sede->id)->create(['celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04']);
+        Persona::factory()->deSede($this->sede->id)->create([
+            'celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04',
+            'tipo_documento' => 'CC', 'numero_documento' => '9999999999',
+        ]);
         $this->enviar(['estado_inicial' => null])->assertSessionHasNoErrors()->assertRedirect();
+    }
+
+    public function test_el_lider_es_obligatorio_solo_si_se_registra_como_miembro_activo(): void
+    {
+        // Visitante: no se exige líder aunque no se envíe.
+        $this->enviar(['estado_inicial' => 'visitante'])->assertSessionHasNoErrors()->assertRedirect();
+
+        RateLimiter::clear('registro-miembros:127.0.0.1');
+        $this->enviar(['celular' => '3101119999', 'numero_documento' => '8888888888', 'estado_inicial' => 'miembro_activo'])
+            ->assertSessionHasErrors('lider_id');
+    }
+
+    public function test_el_lider_elegido_debe_ser_de_la_misma_sede(): void
+    {
+        $otraSede = $this->crearSede(['nombre' => 'Otra sede']);
+        $liderAjeno = Persona::factory()->deSede($otraSede->id)->lider()->create();
+
+        $this->enviar(['estado_inicial' => 'miembro_activo', 'lider_id' => $liderAjeno->id])
+            ->assertSessionHasErrors('lider_id');
+    }
+
+    public function test_al_registrarse_como_miembro_activo_queda_con_el_lider_elegido(): void
+    {
+        $lider = Persona::factory()->deSede($this->sede->id)->lider()->create();
+
+        $this->enviar(['estado_inicial' => 'miembro_activo', 'lider_id' => $lider->id])
+            ->assertSessionHasNoErrors()->assertRedirect();
+
+        $persona = Persona::withoutGlobalScopes()->where('sede_id', $this->sede->id)->where('nombres', 'Ana')->firstOrFail();
+        $this->assertSame($lider->id, $persona->lider_id);
     }
 
     public function test_la_busqueda_json_precarga_todos_los_datos_del_miembro(): void
@@ -100,13 +138,13 @@ class PublicoTest extends TestCase
         Persona::factory()->deSede($this->sede->id)->create([
             'celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04',
             'tipo_documento' => 'CC', 'numero_documento' => '1020304050', 'email' => 'ana@correo.com',
-            'direccion' => 'Calle 1', 'barrio' => 'Centro', 'ciudad' => 'Bogotá',
+            'barrio' => 'Centro', 'ciudad' => 'Bogotá',
         ]);
 
         $esperado = [
             'estado' => 'existente', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'celular' => '3101112233',
             'tipo_documento' => 'CC', 'numero_documento' => '1020304050', 'email' => 'ana@correo.com',
-            'direccion' => 'Calle 1', 'barrio' => 'Centro', 'ciudad' => 'Bogotá',
+            'barrio' => 'Centro', 'ciudad' => 'Bogotá',
         ];
 
         $this->postJson(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '310 111 2233'])
@@ -131,7 +169,10 @@ class PublicoTest extends TestCase
 
     public function test_actualizar_muestra_lo_que_cambio_y_sin_cambios_lo_dice(): void
     {
-        Persona::factory()->deSede($this->sede->id)->create(['celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'barrio' => 'Centro']);
+        Persona::factory()->deSede($this->sede->id)->create([
+            'celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'barrio' => 'Centro',
+            'tipo_documento' => 'CC', 'numero_documento' => '9999999999',
+        ]);
 
         $this->enviar(['barrio' => 'Norte', 'email' => 'ana@correo.com'])->assertRedirect();
         $this->get(route('registro-sede.listo', $this->sede->registro_token))
@@ -144,7 +185,10 @@ class PublicoTest extends TestCase
 
     public function test_reactivar_se_confirma_con_bienvenida(): void
     {
-        $persona = Persona::factory()->deSede($this->sede->id)->create(['celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04']);
+        $persona = Persona::factory()->deSede($this->sede->id)->create([
+            'celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04',
+            'tipo_documento' => 'CC', 'numero_documento' => '9999999999',
+        ]);
         app(\App\Services\SedeContext::class)->conSede($this->sede->id, fn () => app(LiderazgoService::class)->inactivar($persona));
 
         $this->enviar()->assertRedirect();

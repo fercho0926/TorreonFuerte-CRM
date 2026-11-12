@@ -99,7 +99,6 @@ class MiembrosPorNivelTest extends TestCase
             ->assertSee('Aliviando el fuego')
             ->assertSee('data-grilla="niveles.miembros"', false)
             ->assertSee('Beto')
-            ->assertSee('Llamar')
             ->assertSee('WhatsApp')
             ->assertSee(route('niveles.miembros.exportar'), false)
             ->assertSee('Completaron este nivel')

@@ -72,7 +72,10 @@ class SedeActivaAdminTest extends TestCase
     {
         $this->comoAdminEnSede($this->B['sede']);
 
-        $this->post(route('personas.store'), ['nombres' => 'EnBeta', 'apellidos' => 'Nueva', 'celular' => '3001234567', 'estado' => 'visitante'])->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'EnBeta', 'apellidos' => 'Nueva', 'celular' => '3001234567', 'estado' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '3001234567',
+        ])->assertSessionHasNoErrors();
 
         $this->assertSame($this->B['sede']->id, Persona::withoutGlobalScopes()->where('nombres', 'EnBeta')->value('sede_id'));
     }

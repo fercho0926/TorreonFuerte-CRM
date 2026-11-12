@@ -57,14 +57,14 @@ class ServicioTest extends TestCase
         foreach (['visitante', 'miembro_activo'] as $i => $estado) {
             $resultado = $this->registrar([
                 'celular' => '31011122'.$i.'0', 'estado_inicial' => $estado, 'email' => 'ana@correo.com',
-                'direccion' => 'Calle 1', 'barrio' => 'Centro', 'ciudad' => 'Bogotá',
+                'barrio' => 'Centro', 'ciudad' => 'Bogotá',
             ]);
 
             $persona = $resultado['persona']->fresh();
             $this->assertSame('nueva', $resultado['resultado']);
             $this->assertSame($estado, $persona->estado);
             $this->assertSame($this->sede->id, $persona->sede_id);
-            $this->assertSame(['ana@correo.com', 'Calle 1', 'Centro', 'Bogotá'], [$persona->email, $persona->direccion, $persona->barrio, $persona->ciudad]);
+            $this->assertSame(['ana@correo.com', 'Centro', 'Bogotá'], [$persona->email, $persona->barrio, $persona->ciudad]);
             $this->assertCount(1, $this->cambios($persona, 'creada_qr'));
             $this->assertNull($this->cambios($persona, 'creada_qr')->first()->user_id);
         }
@@ -74,10 +74,10 @@ class ServicioTest extends TestCase
 
     public function test_los_datos_opcionales_vacios_quedan_nulos(): void
     {
-        $persona = $this->registrar(['email' => '', 'direccion' => '  ', 'barrio' => null])['persona']->fresh();
+        $persona = $this->registrar(['email' => '', 'ciudad' => '  ', 'barrio' => null])['persona']->fresh();
 
         $this->assertNull($persona->email);
-        $this->assertNull($persona->direccion);
+        $this->assertNull($persona->ciudad);
         $this->assertNull($persona->barrio);
     }
 
@@ -107,38 +107,38 @@ class ServicioTest extends TestCase
 
     public function test_actualiza_solo_los_campos_que_cambiaron(): void
     {
-        $persona = $this->persona(['direccion' => 'Calle vieja', 'barrio' => 'Centro', 'estado' => 'miembro_activo']);
+        $persona = $this->persona(['ciudad' => 'Bogotá vieja', 'barrio' => 'Centro', 'estado' => 'miembro_activo']);
 
-        $resultado = $this->registrar(['direccion' => 'Calle nueva 123', 'email' => 'ana@correo.com', 'barrio' => 'centro']);
+        $resultado = $this->registrar(['ciudad' => 'Bogotá nueva', 'email' => 'ana@correo.com', 'barrio' => 'centro']);
 
         $this->assertSame('actualizada', $resultado['resultado']);
-        $this->assertEqualsCanonicalizing(['direccion', 'email'], array_keys($resultado['cambios']));
+        $this->assertEqualsCanonicalizing(['ciudad', 'email'], array_keys($resultado['cambios']));
         $persona->refresh();
-        $this->assertSame('Calle nueva 123', $persona->direccion);
+        $this->assertSame('Bogotá nueva', $persona->ciudad);
         $this->assertSame('ana@correo.com', $persona->email);
         $this->assertSame('Centro', $persona->barrio); // solo cambió mayúsculas: no es cambio
 
         $historial = $this->cambios($persona, 'actualizada_qr');
         $this->assertCount(1, $historial);
-        $this->assertSame('Calle vieja', $historial->first()->antes['direccion']);
-        $this->assertSame('Calle nueva 123', $historial->first()->despues['direccion']);
+        $this->assertSame('Bogotá vieja', $historial->first()->antes['ciudad']);
+        $this->assertSame('Bogotá nueva', $historial->first()->despues['ciudad']);
         $this->assertSame('QR de miembros', $historial->first()->despues['origen']);
 
         $registro = RegistroMiembroQr::withoutGlobalScopes()->latest('id')->first();
         $this->assertSame('actualizada', $registro->resultado);
-        $this->assertSame(['Calle vieja', 'Calle nueva 123'], $registro->cambios['direccion']);
+        $this->assertSame(['Bogotá vieja', 'Bogotá nueva'], $registro->cambios['ciudad']);
         $this->assertSame($persona->id, $registro->persona_id);
     }
 
     public function test_un_campo_vacio_nunca_borra_un_dato_guardado(): void
     {
-        $persona = $this->persona(['barrio' => 'Centro', 'email' => 'ana@correo.com', 'direccion' => 'Calle 1']);
+        $persona = $this->persona(['barrio' => 'Centro', 'email' => 'ana@correo.com', 'ciudad' => 'Bogotá']);
 
-        $resultado = $this->registrar(['barrio' => '', 'email' => null, 'direccion' => '   ']);
+        $resultado = $this->registrar(['barrio' => '', 'email' => null, 'ciudad' => '   ']);
 
         $this->assertSame('sin_cambios', $resultado['resultado']);
         $persona->refresh();
-        $this->assertSame(['Centro', 'ana@correo.com', 'Calle 1'], [$persona->barrio, $persona->email, $persona->direccion]);
+        $this->assertSame(['Centro', 'ana@correo.com', 'Bogotá'], [$persona->barrio, $persona->email, $persona->ciudad]);
     }
 
     public function test_sin_cambios_no_escribe_en_la_ficha_ni_en_el_historial(): void

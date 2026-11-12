@@ -15,7 +15,10 @@ class CierreTest extends TestCase
 
     private function datos(array $extra = []): array
     {
-        return $extra + ['celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'estado_inicial' => 'visitante'];
+        return $extra + [
+            'celular' => '3101112233', 'nombres' => 'Ana', 'apellidos' => 'Pérez', 'fecha_nacimiento' => '1990-05-04', 'estado_inicial' => 'visitante',
+            'tipo_documento' => 'CC', 'numero_documento' => '8888888888',
+        ];
     }
 
     public function test_con_el_registro_cerrado_se_muestra_el_aviso_y_no_se_guarda_nada(): void

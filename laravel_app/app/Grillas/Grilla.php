@@ -3,6 +3,7 @@
 namespace App\Grillas;
 
 use App\Models\User;
+use App\Support\BusquedaTexto;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as PaginadorContrato;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -260,13 +261,14 @@ abstract class Grilla
     private function filtrarColeccion(Collection $consulta, Columna $columna, string $valor): Collection
     {
         $leer = $columna->valor ?? fn ($fila) => data_get($fila, $columna->clave);
+        $buscado = BusquedaTexto::normalizar($valor);
 
-        return $consulta->filter(function ($fila) use ($leer, $columna, $valor) {
-            $actual = mb_strtolower((string) $leer($fila));
+        return $consulta->filter(function ($fila) use ($leer, $columna, $buscado) {
+            $actual = BusquedaTexto::normalizar((string) $leer($fila));
 
             return $columna->filtro === Columna::FILTRO_LISTA
-                ? $actual === mb_strtolower($valor)
-                : str_contains($actual, mb_strtolower($valor));
+                ? $actual === $buscado
+                : str_contains($actual, $buscado);
         })->values();
     }
 }

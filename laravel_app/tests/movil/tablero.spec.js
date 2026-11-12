@@ -36,12 +36,12 @@ for (const ruta of ['personas/1', 'lideres/3', 'celulas/1', 'eventos/1', 'sedes/
     });
 }
 
-test('en la ficha del miembro «Llamar» y «WhatsApp» están arriba y a la vista', async ({ page }) => {
+test('en la ficha del miembro «WhatsApp» está arriba y a la vista', async ({ page }) => {
     await page.goto('/personas/3'); // el líder de ejemplo tiene celular
 
-    const llamar = page.locator('a[title="Llamar"]').first();
-    await expect(llamar).toBeVisible();
-    const caja = await llamar.boundingBox();
+    const whatsapp = page.locator('a[title="Escribir por WhatsApp"]').first();
+    await expect(whatsapp).toBeVisible();
+    const caja = await whatsapp.boundingBox();
     expect(caja.y).toBeLessThan(500);
     expect(Math.min(caja.width, caja.height)).toBeGreaterThanOrEqual(43.5);
 });

@@ -47,14 +47,17 @@ class CoberturaHistorialTest extends TestCase
     {
         $A = fn () => $this->A;
         $nueva = fn (array $extra = []) => Persona::factory()->deSede($this->A['sede']->id)->create($extra + ['estado' => 'miembro_activo']);
-        $persona = fn ($p, array $extra = []) => $extra + ['nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado, 'celular' => $p->celular, 'lider_id' => $p->lider_id];
+        $persona = fn ($p, array $extra = []) => $extra + [
+            'nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado, 'celular' => $p->celular, 'lider_id' => $p->lider_id,
+            'tipo_documento' => $p->tipo_documento ?? 'CC', 'numero_documento' => $p->numero_documento ?? '1000'.$p->id,
+        ];
         $nivel = fn (int $posicion) => NivelFormacion::where('posicion', $posicion)->firstOrFail();
         $encuentro = fn (array $extra = []) => $extra + ['nombre' => 'Encuentro Alfa', 'fecha_realizacion' => now()->toDateString(), 'valor' => 0, 'estado' => 'planificado'];
 
         return [
-            'personas.store' => fn () => ['POST', route('personas.store'), ['nombres' => 'Nuevo', 'apellidos' => 'Miembro', 'celular' => '3001234567', 'estado' => 'visitante'], 'persona', 'creada'],
+            'personas.store' => fn () => ['POST', route('personas.store'), ['nombres' => 'Nuevo', 'apellidos' => 'Miembro', 'celular' => '3001234567', 'estado' => 'visitante', 'tipo_documento' => 'CC', 'numero_documento' => '999000111'], 'persona', 'creada'],
             'personas.rapida' => fn () => ['POST', route('personas.rapida'), ['nombres' => 'Rápido', 'apellidos' => 'Alta', 'celular' => '3007654321'], 'persona', 'creada'],
-            'personas.update' => fn () => ['PUT', route('personas.update', $A()['persona']), $persona($A()['persona'], ['direccion' => 'Calle nueva 1']), 'persona', 'editada'],
+            'personas.update' => fn () => ['PUT', route('personas.update', $A()['persona']), $persona($A()['persona'], ['barrio' => 'Barrio nuevo']), 'persona', 'editada'],
             'personas.destroy' => fn () => ['DELETE', route('personas.destroy', $p = $nueva()), [], 'persona', 'eliminada'],
             'personas.inactivar' => fn () => ['POST', route('personas.inactivar', $A()['persona']), [], 'persona', 'inactivada'],
             'personas.reactivar' => fn () => [
@@ -150,6 +153,7 @@ class CoberturaHistorialTest extends TestCase
             ], 'persona', 'creada_qr_actividad']),
             'registro-sede.store' => fn () => $this->sinSesion(['POST', route('registro-sede.store', tap($A()['sede'], fn ($s) => $s->update(['registro_abierto' => true]))->registro_token), [
                 'celular' => '3204445566', 'nombres' => 'Miembro', 'apellidos' => 'QR', 'fecha_nacimiento' => '1990-01-01', 'estado_inicial' => 'visitante',
+                'tipo_documento' => 'CC', 'numero_documento' => '3204445566',
             ], 'persona', 'creada_qr']),
         ];
     }

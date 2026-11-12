@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { iniciar, precargar } from './registro-qr.js';
 
-const CAMPOS = 'nombres,apellidos,fecha_nacimiento,tipo_documento,numero_documento,email,direccion,barrio,ciudad';
+const CAMPOS = 'nombres,apellidos,fecha_nacimiento,tipo_documento,numero_documento,email,barrio,ciudad';
 
 function formulario() {
     document.body.innerHTML = `
@@ -10,7 +10,7 @@ function formulario() {
             <input name="celular"><input name="numero_documento">
             <input name="nombres"><input name="apellidos"><input name="fecha_nacimiento">
             <select name="tipo_documento"><option value=""></option><option value="CC">CC</option></select>
-            <input name="email"><input name="direccion"><input name="barrio"><input name="ciudad">
+            <input name="email"><input name="barrio"><input name="ciudad">
         </form>`;
 
     return document.querySelector('form');
@@ -22,10 +22,10 @@ describe('registro de miembros por QR', () => {
 
         const llenos = precargar(form, {
             nombres: 'Ana', apellidos: 'Pérez', fecha_nacimiento: '1990-05-04', tipo_documento: 'CC', numero_documento: '10203',
-            email: 'ana@correo.com', direccion: 'Calle 1', barrio: 'Centro', ciudad: 'Bogotá',
+            email: 'ana@correo.com', barrio: 'Centro', ciudad: 'Bogotá',
         }, CAMPOS.split(','));
 
-        expect(llenos).toBe(9);
+        expect(llenos).toBe(8);
         expect(form.elements.email.value).toBe('ana@correo.com');
         expect(form.elements.tipo_documento.value).toBe('CC');
         expect(form.elements.ciudad.value).toBe('Bogotá');
@@ -33,11 +33,11 @@ describe('registro de miembros por QR', () => {
 
     it('no pisa lo que la persona ya escribió', () => {
         const form = formulario();
-        form.elements.direccion.value = 'Escrita por ella';
+        form.elements.ciudad.value = 'Escrita por ella';
 
-        precargar(form, { direccion: 'Guardada', barrio: 'Centro' }, CAMPOS.split(','));
+        precargar(form, { ciudad: 'Guardada', barrio: 'Centro' }, CAMPOS.split(','));
 
-        expect(form.elements.direccion.value).toBe('Escrita por ella');
+        expect(form.elements.ciudad.value).toBe('Escrita por ella');
         expect(form.elements.barrio.value).toBe('Centro');
     });
 

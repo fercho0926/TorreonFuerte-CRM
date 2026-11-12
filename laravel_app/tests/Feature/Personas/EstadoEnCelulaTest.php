@@ -13,17 +13,19 @@ class EstadoEnCelulaTest extends TestCase
 {
     use IniciaSesion, RefreshDatabase;
 
-    public function test_se_crea_sin_documento_con_nombres_apellidos_y_celular(): void
+    public function test_se_crea_con_nombres_apellidos_celular_y_documento(): void
     {
         $this->comoPastor();
 
-        $this->post(route('personas.store'), ['nombres' => 'Rosa', 'apellidos' => 'Gómez', 'celular' => '3105559999', 'estado' => 'celula'])
-            ->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'Rosa', 'apellidos' => 'Gómez', 'celular' => '3105559999', 'estado' => 'celula',
+            'tipo_documento' => 'CC', 'numero_documento' => '1122334455',
+        ])->assertSessionHasNoErrors();
 
         $persona = Persona::where('nombres', 'Rosa')->firstOrFail();
         $this->assertSame('celula', $persona->estado);
         $this->assertSame('En célula', $persona->estado_etiqueta);
-        $this->assertNull($persona->numero_documento);
+        $this->assertSame('1122334455', $persona->numero_documento);
     }
 
     public function test_cuenta_como_activa_y_no_aparece_en_sin_lider(): void

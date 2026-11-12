@@ -81,7 +81,6 @@
                     <x-form.input name="miembro[nombres]" label="Nombres" icono="fa-user" :required="true" maxlength="255" />
                     <x-form.input name="miembro[apellidos]" label="Apellidos" icono="fa-user" :required="true" maxlength="255" />
                     <x-form.date name="miembro[fecha_nacimiento]" label="Fecha de nacimiento" />
-                    <x-form.input name="miembro[direccion]" label="Dirección" icono="fa-map-marker-alt" maxlength="255" />
                 </x-form.section>
             @endif
 

@@ -37,6 +37,7 @@ class PastorCabezaTest extends TestCase
         return $cambios + [
             'nombres' => $p->nombres, 'apellidos' => $p->apellidos, 'estado' => $p->estado,
             'celular' => $p->celular, 'email' => $p->email, 'lider_id' => $p->lider_id, 'es_lider' => $p->es_lider ? 1 : 0,
+            'tipo_documento' => $p->tipo_documento ?? 'CC', 'numero_documento' => $p->numero_documento ?? '100'.$p->id,
         ];
     }
 
@@ -60,8 +61,10 @@ class PastorCabezaTest extends TestCase
 
     public function test_crear_un_miembro_como_lider_lo_pone_bajo_el_pastor(): void
     {
-        $this->post(route('personas.store'), ['nombres' => 'Nuevo', 'apellidos' => 'Lider', 'estado' => 'miembro_activo', 'celular' => '3001112233', 'es_lider' => 1])
-            ->assertSessionHasNoErrors();
+        $this->post(route('personas.store'), [
+            'nombres' => 'Nuevo', 'apellidos' => 'Lider', 'estado' => 'miembro_activo', 'celular' => '3001112233', 'es_lider' => 1,
+            'tipo_documento' => 'CC', 'numero_documento' => '3001112233',
+        ])->assertSessionHasNoErrors();
 
         $nuevo = Persona::where('nombres', 'Nuevo')->firstOrFail();
         $this->assertTrue($nuevo->es_lider);
@@ -107,8 +110,10 @@ class PastorCabezaTest extends TestCase
             ->assertSessionHasErrors(['persona_id' => 'Primero asigna el pastor de la sede.']);
         $this->assertFalse($miembro->fresh()->es_lider);
 
-        $this->post(route('personas.store'), ['nombres' => 'Otro', 'apellidos' => 'Lider', 'estado' => 'miembro_activo', 'celular' => '3001112244', 'es_lider' => 1])
-            ->assertSessionHasErrors(['lider_id' => 'Primero asigna el pastor de la sede.']);
+        $this->post(route('personas.store'), [
+            'nombres' => 'Otro', 'apellidos' => 'Lider', 'estado' => 'miembro_activo', 'celular' => '3001112244', 'es_lider' => 1,
+            'tipo_documento' => 'CC', 'numero_documento' => '3001112244',
+        ])->assertSessionHasErrors(['lider_id' => 'Primero asigna el pastor de la sede.']);
         $this->assertSame(0, Persona::where('nombres', 'Otro')->count());
     }
 

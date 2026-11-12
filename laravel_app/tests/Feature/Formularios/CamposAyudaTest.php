@@ -41,6 +41,7 @@ class CamposAyudaTest extends TestCase
     {
         $this->post(route('personas.store'), [
             'nombres' => 'Formato', 'apellidos' => 'Plano', 'celular' => '3105559999', 'estado' => 'visitante', 'fecha_nacimiento' => '1990-03-05',
+            'tipo_documento' => 'CC', 'numero_documento' => '3105559999',
         ])->assertSessionHasNoErrors();
 
         $this->assertSame('1990-03-05', Persona::where('nombres', 'Formato')->first()->fecha_nacimiento->format('Y-m-d'));

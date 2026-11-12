@@ -68,12 +68,12 @@ test('el paginador, las filas por página y el contador se tocan y no se desbord
     }
 });
 
-test('«Llamar» y «WhatsApp» se pulsan con un toque en el listado sin líder', async ({ page }) => {
+test('«WhatsApp» se pulsa con un toque en el listado sin líder', async ({ page }) => {
     await page.goto('/sin-lider');
     await page.waitForSelector('.dt-container');
 
-    const llamar = page.locator('a[title="Llamar"]').first();
-    await expect(llamar).toBeVisible();
-    const caja = await llamar.boundingBox();
+    const whatsapp = page.locator('a[title="Escribir por WhatsApp"]').first();
+    await expect(whatsapp).toBeVisible();
+    const caja = await whatsapp.boundingBox();
     expect(Math.min(caja.width, caja.height)).toBeGreaterThanOrEqual(43.5);
 });

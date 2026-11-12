@@ -24,7 +24,7 @@
         <x-form.confirm :action="route('personas.destroy', $persona)" method="DELETE" titulo="¿Eliminar definitivamente?" mensaje="Solo es posible si no tiene historial." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="">Eliminar</x-form.confirm>
     @else
         @if(\App\Http\Controllers\Controller::usuarioDeLaPeticion()?->esAdmin() && $persona->cuenta()->exists())
-            {{-- Solo en pantallas anchas: en el celular no debe empujar «Llamar» y «WhatsApp» hacia abajo. --}}
+            {{-- Solo en pantallas anchas: en el celular no debe empujar el botón de WhatsApp hacia abajo. --}}
             <span class="text-muted small align-self-center d-none d-lg-inline"><i class="fas fa-user-lock me-1" aria-hidden="true"></i>Tiene cuenta de usuario; elimina primero la cuenta.</span>
         @endif
     @endpuede
@@ -224,12 +224,18 @@
             <div class="card-header"><h3 class="card-title"><i class="fas fa-id-card me-1" aria-hidden="true"></i>Datos personales</h3></div>
             <ul class="list-group list-group-flush perfil-datos">
                 <li class="list-group-item">
+                    <i class="fas fa-id-card" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Documento</span>
+                    <span>{{ $persona->numero_documento ? $persona->tipo_documento.' '.$persona->numero_documento : '—' }}</span>
+                </li>
+                <li class="list-group-item">
                     <i class="fas fa-birthday-cake" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Fecha de nacimiento</span>
                     <span>{{ $persona->fecha_nacimiento ? $persona->fecha_nacimiento_legible.' ('.$persona->edad.' años)' : '—' }}</span>
                 </li>
+                @if($persona->estado === 'visitante' && $persona->invitado_por)
+                    <li class="list-group-item"><i class="fas fa-hand-holding-heart" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Invitado por</span><span>{{ $persona->invitado_por }}</span></li>
+                @endif
                 <li class="list-group-item"><i class="fas fa-mobile-alt" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Celular</span><span>{{ $persona->celular ?? '—' }}</span></li>
                 <li class="list-group-item"><i class="fas fa-envelope" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Correo</span><span class="text-break">{{ $persona->email ?? '—' }}</span></li>
-                <li class="list-group-item"><i class="fas fa-map-marker-alt" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Dirección</span><span>{{ $persona->direccion ?? '—' }}</span></li>
                 <li class="list-group-item"><i class="fas fa-city" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Barrio / Ciudad</span><span>{{ $persona->barrio ?? '—' }} / {{ $persona->ciudad ?? '—' }}</span></li>
                 <li class="list-group-item">
                     <i class="fas fa-user-tie" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Líder</span>

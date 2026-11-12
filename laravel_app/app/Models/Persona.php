@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\BusquedaTexto;
 use App\Support\Celular;
 use App\Models\Concerns\PerteneceASede;
 use App\Models\Concerns\TieneHistorial;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'lider_id',
     'es_lider',
     'estado',
+    'invitado_por',
     'inactivado_en',
     'trasladada_a_sede_id',
     'trasladada_en',
@@ -94,6 +96,7 @@ class Persona extends Model
             'barrio' => 'Barrio',
             'ciudad' => 'Ciudad',
             'estado' => ['Estado', self::ESTADOS],
+            'invitado_por' => 'Invitado por',
             'lider_id' => ['Líder', 'persona'],
             'es_lider' => ['Es líder', 'booleano'],
             'reasignado_a' => ['Miembros reasignados a', 'persona'],
@@ -242,18 +245,21 @@ class Persona extends Model
 
     /**
      * Busca por texto parcial en nombres, apellidos, documento y celular. Cada palabra debe
-     * coincidir con alguno de esos campos, por lo que "ana pérez" encuentra a Ana Pérez.
+     * coincidir con alguno de esos campos, por lo que "ana perez" encuentra a Ana Pérez (sin
+     * importar tildes ni mayúsculas).
      */
     public function scopeBuscar($query, ?string $texto)
     {
         foreach (preg_split('/\s+/', trim((string) $texto), -1, PREG_SPLIT_NO_EMPTY) as $palabra) {
-            $like = '%'.str_replace(['%', '_'], '', $palabra).'%';
+            $sinAcentos = str_replace(['%', '_'], '', BusquedaTexto::normalizar($palabra));
+            $like = '%'.$sinAcentos.'%';
+            $likeSinNormalizar = '%'.str_replace(['%', '_'], '', $palabra).'%';
 
-            $query->where(function ($q) use ($like) {
-                $q->where('nombres', 'like', $like)
-                    ->orWhere('apellidos', 'like', $like)
-                    ->orWhere('numero_documento', 'like', $like)
-                    ->orWhere('celular', 'like', $like);
+            $query->where(function ($q) use ($like, $likeSinNormalizar) {
+                $q->whereRaw(BusquedaTexto::columnaSql('nombres').' like ?', [$like])
+                    ->orWhereRaw(BusquedaTexto::columnaSql('apellidos').' like ?', [$like])
+                    ->orWhere('numero_documento', 'like', $likeSinNormalizar)
+                    ->orWhere('celular', 'like', $likeSinNormalizar);
             });
         }
 

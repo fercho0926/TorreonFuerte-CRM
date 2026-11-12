@@ -57,9 +57,6 @@
             <dt class="col-sm-3">Correo</dt>
             <dd class="col-sm-9">{{ $lider->email ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Dirección</dt>
-            <dd class="col-sm-9">{{ $lider->direccion ?? '—' }}</dd>
-
             <dt class="col-sm-3">Barrio / Ciudad</dt>
             <dd class="col-sm-9">{{ $lider->barrio ?? '—' }} / {{ $lider->ciudad ?? '—' }}</dd>
         </dl>
