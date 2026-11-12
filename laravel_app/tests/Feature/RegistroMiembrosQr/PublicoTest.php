@@ -52,7 +52,9 @@ class PublicoTest extends TestCase
     {
         $lider = Persona::factory()->deSede($this->sede->id)->lider()->create();
 
-        $paso2 = $this->post(route('registro-sede.buscar', $this->sede->registro_token), ['celular' => '3101112233'])
+        $paso2 = $this->post(route('registro-sede.buscar', $this->sede->registro_token), [
+            'celular' => '3101112233', 'tipo_documento' => 'CC', 'numero_documento' => '7777777777',
+        ])
             ->assertOk()
             ->assertSee('Completa tus datos')
             ->assertSee('name="estado_inicial"', false)
