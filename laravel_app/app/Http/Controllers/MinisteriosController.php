@@ -65,7 +65,7 @@ class MinisteriosController extends Controller
             $this->registrarIntegrantes($ministerio, $ministerio->integrantes()->sync($personaIds));
         });
 
-        return redirect()->route('ministerios.index')->with('success', 'Ministerio creado correctamente.');
+        return redirect()->route('ministerios.index')->with('success', __('mensajes.ministerio_creado'));
     }
 
     public function show(Request $request, Ministerio $ministerio)
@@ -122,7 +122,7 @@ class MinisteriosController extends Controller
             $this->registrarIntegrantes($ministerio, $ministerio->integrantes()->sync($personaIds));
         });
 
-        return redirect()->route('ministerios.index')->with('success', 'Ministerio actualizado correctamente.');
+        return redirect()->route('ministerios.index')->with('success', __('mensajes.ministerio_actualizado'));
     }
 
     public function destroy(Ministerio $ministerio)
@@ -133,7 +133,7 @@ class MinisteriosController extends Controller
 
         $ministerio->delete();
 
-        return redirect()->route('ministerios.index')->with('success', 'Ministerio eliminado correctamente.');
+        return redirect()->route('ministerios.index')->with('success', __('mensajes.ministerio_eliminado'));
     }
 
     /**
@@ -186,7 +186,7 @@ class MinisteriosController extends Controller
             }
         });
 
-        return redirect()->route('ministerios.show', $ministerio)->with('success', 'Integrantes actualizados correctamente.');
+        return redirect()->route('ministerios.show', $ministerio)->with('success', __('mensajes.integrantes_actualizados'));
     }
 
     /**

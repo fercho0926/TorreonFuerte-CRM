@@ -65,7 +65,7 @@ class SedesController extends Controller
 
         $sede = $this->sedes->crear($request->validated(), $this->usuarioActual());
 
-        return redirect()->route('sedes.show', $sede)->with('success', 'Sede creada correctamente con su pastor'.($sede->pastora_persona_id ? ' y su pastora.' : '.'));
+        return redirect()->route('sedes.show', $sede)->with('success', $sede->pastora_persona_id ? __('mensajes.sede_creada_con_pastor_y_pastora') : __('mensajes.sede_creada_con_pastor'));
     }
 
     public function show(Request $request, Sede $sede)
@@ -115,7 +115,7 @@ class SedesController extends Controller
 
         $this->sedes->editar($sede, $request->validated(), $this->usuarioActual());
 
-        return redirect()->route('sedes.show', $sede)->with('success', 'Sede actualizada correctamente.');
+        return redirect()->route('sedes.show', $sede)->with('success', __('mensajes.sede_actualizada'));
     }
 
     public function pastores(Sede $sede)
@@ -155,7 +155,7 @@ class SedesController extends Controller
 
         $this->sedes->cambiarPastor($sede, $rol, $data, $this->usuarioActual());
 
-        return redirect()->route('sedes.show', $sede)->with('success', $rol === 'pastora' ? 'Pastora actualizada.' : 'Pastor actualizado.');
+        return redirect()->route('sedes.show', $sede)->with('success', $rol === 'pastora' ? __('mensajes.pastora_actualizada') : __('mensajes.pastor_actualizado'));
     }
 
     public function desactivar(Sede $sede)
@@ -168,7 +168,7 @@ class SedesController extends Controller
 
         $this->sedes->desactivar($sede, $this->usuarioActual());
 
-        return redirect()->route('sedes.show', $sede)->with('success', 'Sede desactivada. Sus datos se conservan.');
+        return redirect()->route('sedes.show', $sede)->with('success', __('mensajes.sede_desactivada'));
     }
 
     public function reactivar(Sede $sede)
@@ -181,7 +181,7 @@ class SedesController extends Controller
 
         $this->sedes->reactivar($sede, $this->usuarioActual());
 
-        return redirect()->route('sedes.show', $sede)->with('success', 'Sede reactivada.');
+        return redirect()->route('sedes.show', $sede)->with('success', __('mensajes.sede_reactivada'));
     }
 
     public function destroy(Sede $sede)
@@ -198,6 +198,6 @@ class SedesController extends Controller
             abort(422, 'Solo se pueden desactivar sedes con datos. Desactívala en lugar de eliminarla.');
         }
 
-        return redirect()->route('sedes.index')->with('success', 'Sede eliminada.');
+        return redirect()->route('sedes.index')->with('success', __('mensajes.sede_eliminada'));
     }
 }

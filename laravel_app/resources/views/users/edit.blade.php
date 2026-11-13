@@ -6,7 +6,7 @@
 
 @if(\App\Support\Permisos::puede('gestionarClaves', $user))
     @section('page-actions')
-        <x-form.confirm :action="route('users.clave.store', $user)" titulo="¿Enviar una clave nueva?" :mensaje="'La contraseña actual de '.$user->name.' dejará de servir. Se abrirá la clave para enviarla por WhatsApp.'" boton="Generar clave" variante="success" tamano=""><i class="fab fa-whatsapp me-1" aria-hidden="true"></i>Enviar nueva clave</x-form.confirm>
+        <x-form.confirm :action="route('users.clave.store', $user)" titulo="¿Enviar una clave nueva?" :mensaje="'La contraseña actual de '.$user->name.' dejará de servir. Se abrirá la clave para enviarla por WhatsApp.'" boton="Generar clave" variante="success" tamano=""><i class="fab fa-whatsapp me-1" aria-hidden="true"></i>{{ __('interfaz.enviar_nueva_clave') }}</x-form.confirm>
     @endsection
 @endif
 
@@ -28,7 +28,7 @@
                 </p>
             </div>
             @if($user->persona_id)
-                <a href="{{ route('personas.show', $user->persona_id) }}" class="btn btn-outline-primary"><i class="fas fa-user-edit me-1" aria-hidden="true"></i>Editar datos personales</a>
+                <a href="{{ route('personas.show', $user->persona_id) }}" class="btn btn-outline-primary"><i class="fas fa-user-edit me-1" aria-hidden="true"></i>{{ __('interfaz.editar_datos_personales') }}</a>
             @endif
         </div>
     </x-form.section>

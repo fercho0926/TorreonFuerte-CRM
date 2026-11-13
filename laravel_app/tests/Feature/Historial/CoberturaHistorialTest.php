@@ -145,6 +145,7 @@ class CoberturaHistorialTest extends TestCase
             'solicitudes-clave.descartar' => fn () => ['POST', route('solicitudes-clave.descartar', $this->solicitud($A()['liderUser'])), [], 'solicitud_clave', 'descartada'],
 
             // Cuenta propia y rutas públicas.
+            'idioma.update' => fn () => $this->comoDueno(['POST', route('idioma.update'), ['idioma' => 'en'], 'usuario', 'editado']),
             'cuenta.clave.update' => fn () => $this->comoDueno(['PUT', route('cuenta.clave.update'), ['password_actual' => 'password', 'password' => 'nueva-segura-1', 'password_confirmation' => 'nueva-segura-1'], 'usuario', 'clave_cambiada']),
             'cambiar-clave.update' => fn () => $this->comoDueno(['PUT', route('cambiar-clave.update'), ['password' => 'nueva-segura-1', 'password_confirmation' => 'nueva-segura-1'], 'usuario', 'clave_cambiada'], true),
             'recuperacion.store' => fn () => $this->sinSesion(['POST', route('recuperacion.store'), ['email' => $A()['liderUser']->email], 'solicitud_clave', 'creado']),

@@ -10,9 +10,18 @@ iniciarMenuRecordado();
 // Formularios modernos: validación, selectores, máscaras, calendario, envío y diálogos.
 import './forms/index.js';
 
+// Campos que siempre deben empezar en blanco (p. ej. el monto de un abono nuevo), aunque el
+// navegador intente restaurar el último valor escrito al volver a cargar la página.
+import { iniciarLimpiarAlCargar } from './forms/limpiar-al-cargar.js';
+
+iniciarLimpiarAlCargar();
+
 // Grillas con DataTables (ordenar, filtrar por columna, paginar y exportar): se descargan solo si la pantalla tiene una.
 if (document.querySelector('table[data-grilla]')) {
-    import('./grilla/grilla.js').then(({ iniciarGrillas }) => iniciarGrillas());
+    import('./grilla/grilla.js').then(({ iniciarGrillas, iniciarPanelesDeAccion }) => {
+        iniciarGrillas();
+        iniciarPanelesDeAccion();
+    });
 }
 
 // Gráficas del tablero (ApexCharts): se descargan solo si la pantalla tiene alguna.

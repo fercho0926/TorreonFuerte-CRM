@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Grillas\Grilla;
 use App\Grillas\EventosGrilla;
+use App\Grillas\InscripcionesEventoGrilla;
 use App\Http\Controllers\Concerns\PestanaHistorico;
 use App\Http\Controllers\Concerns\ServicioGrilla;
 use App\Services\SedeContext;
@@ -12,6 +13,7 @@ use App\Models\EventoPago;
 use App\Models\EventoPersona;
 use App\Models\Persona;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 
 class EventosController extends Controller
@@ -61,7 +63,7 @@ class EventosController extends Controller
             ]);
         }
 
-        return redirect()->route('eventos.index')->with('success', 'Evento creado correctamente.');
+        return redirect()->route('eventos.index')->with('success', __('mensajes.evento_creado'));
     }
 
     public function show(Request $request, Evento $evento)
@@ -70,7 +72,9 @@ class EventosController extends Controller
             return $redirect;
         }
 
-        if ($this->pestanaActiva($request) === 'historico') {
+        $pestana = $this->pestanaActiva($request, ['asistencia']);
+
+        if ($pestana === 'historico') {
             return view('eventos.show', [
                 'evento' => $evento,
                 'pestana' => 'historico',
@@ -78,6 +82,8 @@ class EventosController extends Controller
             ]);
         }
 
+        // Se carga siempre (no solo en «asistencia»): totalEsperado()/totalRecaudado() de «Datos» la necesitan
+        // ya filtrada por el alcance del usuario ($visibles), no una carga perezosa sin ese filtro.
         $visibles = $this->idsDePersonasVisibles();
 
         $evento->load(['inscripciones' => function ($query) use ($visibles) {
@@ -85,11 +91,46 @@ class EventosController extends Controller
                 ->when($visibles !== null, fn ($q) => $q->whereIn('persona_id', $visibles));
         }]);
 
+        $personasSinInscribir = collect();
+        $datosGrillaInscripciones = [];
+
+        if ($pestana === 'asistencia') {
+            $personasSinInscribir = $this->personasDisponibles()
+                ->reject(fn (Persona $persona) => $evento->inscripciones->contains('persona_id', $persona->id));
+
+            // Permite que <x-ui.grilla> genere sus enlaces (`route('eventos.inscripciones.datos')`, etc.)
+            // sin pasar {evento} explícitamente: esta ficha siempre la fija a este evento.
+            URL::defaults(['evento' => $evento->id]);
+            $datosGrillaInscripciones = $this->datosDeLaGrillaInscripciones($request, $evento);
+        }
+
         return view('eventos.show', [
             'evento' => $evento,
-            'personasSinInscribir' => $this->personasDisponibles()
-                ->reject(fn (Persona $persona) => $evento->inscripciones->contains('persona_id', $persona->id)),
-        ]);
+            'pestana' => $pestana,
+            'personasSinInscribir' => $personasSinInscribir,
+        ] + $datosGrillaInscripciones);
+    }
+
+    /** Variables para `<x-ui.grilla>` de los miembros inscritos de este evento (spec 019). */
+    private function datosDeLaGrillaInscripciones(Request $request, Evento $evento): array
+    {
+        $grillaInscripciones = app(InscripcionesEventoGrilla::class);
+        $usuario = $this->usuarioActual();
+        $request->merge(['evento' => $evento->id]);
+        $estadoInscripciones = $grillaInscripciones->estado($request, $usuario);
+        $porPaginaInscripciones = $grillaInscripciones->porPagina($request->input('por_pagina'));
+
+        $paginaInscripciones = $grillaInscripciones->paginar($usuario, $estadoInscripciones, $porPaginaInscripciones, max(1, (int) $request->input('page', 1)))
+            ->withPath(route('eventos.inscripciones.index', $evento))
+            ->appends($request->query());
+
+        return [
+            'grillaInscripciones' => $grillaInscripciones,
+            'estadoInscripciones' => $estadoInscripciones,
+            'paginaInscripciones' => $paginaInscripciones,
+            'porPaginaInscripciones' => $porPaginaInscripciones,
+            'totalInscripciones' => $grillaInscripciones->total($usuario, $estadoInscripciones),
+        ];
     }
 
     public function edit(Evento $evento)
@@ -113,7 +154,7 @@ class EventosController extends Controller
 
         $evento->update($data);
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Evento actualizado correctamente.');
+        return redirect()->route('eventos.show', $evento)->with('success', __('mensajes.evento_actualizado'));
     }
 
     public function destroy(Evento $evento)
@@ -124,7 +165,7 @@ class EventosController extends Controller
 
         $evento->delete();
 
-        return redirect()->route('eventos.index')->with('success', 'Evento eliminado correctamente.');
+        return redirect()->route('eventos.index')->with('success', __('mensajes.evento_eliminado'));
     }
 
     /**
@@ -146,7 +187,7 @@ class EventosController extends Controller
             ['costo_individual' => $data['costo_individual'] ?? null]
         );
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Miembro inscrito correctamente.');
+        return redirect()->route('eventos.show', [$evento, 'pestana' => 'asistencia'])->with('success', __('mensajes.miembro_inscrito_evento'));
     }
 
     /**
@@ -162,13 +203,13 @@ class EventosController extends Controller
         abort_unless($inscripcion->evento_id === $evento->id, 404);
 
         if ($inscripcion->pagos()->exists()) {
-            return redirect()->route('eventos.show', $evento)
-                ->with('error', 'No se puede quitar a este miembro porque ya tiene abonos registrados.');
+            return redirect()->route('eventos.show', [$evento, 'pestana' => 'asistencia'])
+                ->with('error', __('mensajes.no_quitar_miembro_abonos'));
         }
 
         $inscripcion->delete();
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Miembro retirado del evento.');
+        return redirect()->route('eventos.show', [$evento, 'pestana' => 'asistencia'])->with('success', __('mensajes.miembro_retirado_evento'));
     }
 
     /**
@@ -192,7 +233,7 @@ class EventosController extends Controller
 
         EventoPago::create($data);
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Abono registrado correctamente.');
+        return redirect()->route('eventos.show', [$evento, 'pestana' => 'asistencia'])->with('success', __('mensajes.abono_registrado'));
     }
 
     /**
@@ -209,7 +250,7 @@ class EventosController extends Controller
 
         $pago->delete();
 
-        return redirect()->route('eventos.show', $evento)->with('success', 'Abono eliminado.');
+        return redirect()->route('eventos.show', [$evento, 'pestana' => 'asistencia'])->with('success', __('mensajes.abono_eliminado'));
     }
 
     private function personasDisponibles()

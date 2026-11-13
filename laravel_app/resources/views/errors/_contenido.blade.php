@@ -4,6 +4,6 @@
         <i class="fas {{ $icono }} fa-4x text-{{ $tipo }} mb-3" aria-hidden="true"></i>
         <h2 class="fw-bold">{{ $codigo }}</h2>
         <p class="lead mb-4">{{ $mensaje }}</p>
-        <a href="{{ url('/') }}" class="btn btn-primary"><i class="fas fa-home me-1" aria-hidden="true"></i>Volver al inicio</a>
+        <a href="{{ url('/') }}" class="btn btn-primary"><i class="fas fa-home me-1" aria-hidden="true"></i>{{ __('interfaz.volver_al_inicio') }}</a>
     </div>
 </div>

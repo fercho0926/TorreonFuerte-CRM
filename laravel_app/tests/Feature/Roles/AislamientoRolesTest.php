@@ -106,7 +106,7 @@ class AislamientoRolesTest extends TestCase
         \App\Models\EventoPersona::create(['sede_id' => $this->A['sede']->id, 'evento_id' => $this->A['evento']->id, 'persona_id' => $otro->id]);
 
         $this->entrarCon('rama', $this->A['lider']);
-        $this->get(route('eventos.show', $this->A['evento']))
+        $this->get(route('eventos.show', [$this->A['evento'], 'pestana' => 'asistencia']))
             ->assertOk()
             ->assertSee('PersonaAlfa')
             ->assertDontSee('InscritoAjeno');

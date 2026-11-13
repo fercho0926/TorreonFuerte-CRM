@@ -15,7 +15,7 @@
     $encabezadosCampos = collect($filas)->first()['campos'] ?? [];
 @endphp
 <div class="fm-lista" data-lista-asistencia>
-    <p class="fm-lista-total" aria-live="polite"><span data-lista-total>{{ count($filas) }}</span> miembro(s)</p>
+    <p class="fm-lista-total" aria-live="polite"><span data-lista-total>{{ count($filas) }}</span> {{ __('interfaz.miembro_s') }}</p>
     @if(count($filas) === 0)
         <p class="text-muted">{{ $vacio }}</p>
     @else
@@ -23,7 +23,7 @@
             <table class="table table-hover fm-lista__tabla tabla-apilable mb-0">
                 <thead>
                     <tr>
-                        <th scope="col">Miembro</th>
+                        <th scope="col">{{ __('interfaz.miembro') }}</th>
                         @foreach($columnas as $col)
                             <th scope="col">{{ $col }}</th>
                         @endforeach

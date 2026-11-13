@@ -34,11 +34,17 @@ class Menu
                 $opcion['activa'] = self::activa($opcion, $rutaActual);
                 $opcion['url'] = route($opcion['ruta']);
                 $opcion['insignia'] = isset($opcion['insignia']) ? (int) ($insignias[$opcion['insignia']] ?? 0) : 0;
+                // La etiqueta se traduce aquí (no en config/menu.php, que puede quedar cacheado con
+                // config:cache y congelar el idioma): lang/{es,en}/menu.php, indexado por la ruta.
+                // Los puntos de la ruta (ej. "personas.index") se cambian por "_": Laravel trata los
+                // puntos de una clave de traducción como niveles anidados, no como texto literal.
+                $opcion['etiqueta'] = __('menu.opciones.'.str_replace('.', '_', $opcion['ruta']));
                 $opciones[] = $opcion;
             }
 
             if ($opciones) {
-                $secciones[] = ['clave' => $seccion['clave'], 'titulo' => $seccion['titulo'], 'opciones' => $opciones,
+                $titulo = $seccion['titulo'] ? __('menu.secciones.'.$seccion['clave']) : null;
+                $secciones[] = ['clave' => $seccion['clave'], 'titulo' => $titulo, 'opciones' => $opciones,
                     'abierta' => collect($opciones)->contains('activa', true)];
             }
         }
@@ -54,7 +60,7 @@ class Menu
      */
     public static function migas(array $secciones, ?string $titulo = null): array
     {
-        $migas = [['texto' => 'Inicio', 'url' => route('dashboard')]];
+        $migas = [['texto' => __('interfaz.inicio'), 'url' => route('dashboard')]];
 
         foreach ($secciones as $seccion) {
             foreach ($seccion['opciones'] as $opcion) {

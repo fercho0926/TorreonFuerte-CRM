@@ -44,7 +44,7 @@ class AvancesNivelController extends Controller
             $this->usuarioActual(),
         );
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Nivel registrado en el camino.');
+        return redirect()->route('personas.show', $persona)->with('success', __('mensajes.avance_nivel_registrado'));
     }
 
     public function destroy(AvanceNivel $avance)
@@ -61,6 +61,6 @@ class AvancesNivelController extends Controller
             return redirect()->route('personas.show', $persona)->with('error', $e->errors()['avance'][0]);
         }
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Nivel retirado del camino.');
+        return redirect()->route('personas.show', $persona)->with('success', __('mensajes.avance_nivel_retirado'));
     }
 }

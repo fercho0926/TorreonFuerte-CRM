@@ -5,16 +5,16 @@
 @endphp
 <x-ui.tarjeta titulo="Registros por QR" icono="fa-user-check" :contador="$registros->count()" :tabla="true" id="registros-miembros-qr">
     @if($registros->isEmpty())
-        <p class="p-3 mb-0 text-muted">Todavía nadie se ha registrado con el QR de miembros.</p>
+        <p class="p-3 mb-0 text-muted">{{ __('interfaz.todavia_nadie_se_ha_registrado_con_el_qr') }}</p>
     @else
         <table class="tabla-apilable table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Celular</th>
-                    <th>Resultado</th>
-                    <th>Fecha y hora</th>
-                    <th>Cambios</th>
+                    <th>{{ __('interfaz.nombre') }}</th>
+                    <th>{{ __('interfaz.celular') }}</th>
+                    <th>{{ __('interfaz.resultado') }}</th>
+                    <th>{{ __('interfaz.fecha_y_hora') }}</th>
+                    <th>{{ __('interfaz.cambios') }}</th>
                 </tr>
             </thead>
             <tbody>

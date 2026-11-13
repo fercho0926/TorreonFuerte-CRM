@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="callout callout-info py-2 px-3 mb-3">
-    <small>Todo lo que ha cambiado en la plataforma: quién, cuándo y qué. Las entradas no se pueden editar ni borrar, y este listado no se exporta.</small>
+    <small>{{ __('interfaz.todo_lo_que_ha_cambiado_en_la_plataforma') }}</small>
 </div>
 
 <x-ui.grilla :grilla="$grilla" :pagina="$pagina" :estado="$estado" :por-pagina="$porPagina" :total="$total" titulo="Cambios" icono="fa-history">

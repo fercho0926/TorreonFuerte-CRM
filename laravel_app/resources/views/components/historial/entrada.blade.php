@@ -54,19 +54,19 @@
                 <li>
                     <span class="historial-campo">{{ $campo['etiqueta'] }}:</span>
                     @if($campo['secreto'] ?? false)
-                        <span>Clave cambiada</span>
+                        <span>{{ __('interfaz.clave_cambiada') }}</span>
                     @elseif(!$lectura->puedeVerSensible($usuario, $campo['modulo_sensible'] ?? null))
                         <span>—</span>
                     @elseif($campo['solo'] ?? false)
                         <span class="historial-despues">{{ $campo['despues'] }}</span>
                     @elseif($campo['largo'] ?? false)
-                        <details class="historial-largo"><summary>Ver texto anterior y nuevo</summary>
-                            <p class="mb-1"><strong>Antes:</strong> {{ $campo['antes'] }}</p>
-                            <p class="mb-0"><strong>Después:</strong> {{ $campo['despues'] }}</p>
+                        <details class="historial-largo"><summary>{{ __('interfaz.ver_texto_anterior_y_nuevo') }}</summary>
+                            <p class="mb-1"><strong>{{ __('interfaz.antes') }}</strong> {{ $campo['antes'] }}</p>
+                            <p class="mb-0"><strong>{{ __('interfaz.despues') }}</strong> {{ $campo['despues'] }}</p>
                         </details>
                     @else
                         <span class="historial-antes">{{ $campo['antes'] }}</span>
-                        <span aria-label="cambió a"> → </span>
+                        <span aria-label="{{ __('interfaz.cambio_a') }}"> → </span>
                         <span class="historial-despues">{{ $campo['despues'] }}</span>
                     @endif
                 </li>
@@ -93,7 +93,7 @@
     @endif
 
     @if(!empty($detalle['datos']) && in_array($cambio->accion, ['eliminado', 'eliminada'], true))
-        <details class="historial-largo"><summary>Datos que tenía</summary>
+        <details class="historial-largo"><summary>{{ __('interfaz.datos_que_tenia') }}</summary>
             <ul class="historial-cambios mb-0">
                 @foreach($detalle['datos'] as $etiqueta => $valor)<li><span class="historial-campo">{{ $etiqueta }}:</span> {{ $valor }}</li>@endforeach
             </ul>

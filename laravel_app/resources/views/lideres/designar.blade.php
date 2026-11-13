@@ -14,5 +14,5 @@
     </x-form.section>
 </x-form.layout>
 
-<a href="{{ route('personas.create', ['es_lider' => 1]) }}" class="btn btn-outline-primary mb-4"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>Nuevo miembro como líder</a>
+<a href="{{ route('personas.create', ['es_lider' => 1]) }}" class="btn btn-outline-primary mb-4"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>{{ __('interfaz.nuevo_miembro_como_lider') }}</a>
 @endsection

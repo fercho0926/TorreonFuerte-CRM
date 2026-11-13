@@ -47,7 +47,7 @@ class CuentaController extends Controller
 
         $this->guardarContrasena($user, (string) $request->input('password'));
 
-        return redirect()->route('dashboard')->with('success', 'Listo: tu contraseña quedó guardada.');
+        return redirect()->route('dashboard')->with('success', __('mensajes.password_guardada'));
     }
 
     /** «Mi cuenta»: datos básicos y cambio de contraseña. */
@@ -79,7 +79,7 @@ class CuentaController extends Controller
 
         $this->guardarContrasena($user, (string) $request->input('password'));
 
-        return redirect()->route('cuenta.edit')->with('success', 'Tu contraseña se cambió correctamente.');
+        return redirect()->route('cuenta.edit')->with('success', __('mensajes.password_cambiada_cuenta'));
     }
 
     /**

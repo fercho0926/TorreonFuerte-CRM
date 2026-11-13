@@ -25,6 +25,26 @@ export const ESPAÑOL = {
     aria: { orderable: 'Ordenar por esta columna', orderableReverse: 'Ordenar en sentido inverso' },
 };
 
+// Selector de idioma en la interfaz (spec 020): las grillas estándar también deben cambiar de
+// idioma (principio III), no solo el resto del texto de la pantalla.
+export const INGLES = {
+    emptyTable: 'No results found.',
+    zeroRecords: 'No results found.',
+    loadingRecords: 'Loading…',
+    info: 'Showing _START_ to _END_ of _TOTAL_',
+    infoEmpty: 'No results',
+    infoFiltered: '(out of _MAX_ total)',
+    lengthMenu: 'Rows per page: _MENU_',
+    processing: 'Loading…',
+    paginate: { first: '«', previous: '‹', next: '›', last: '»' },
+    aria: { orderable: 'Sort by this column', orderableReverse: 'Sort in reverse order' },
+};
+
+/** Textos fijos de DataTables según el idioma activo de la página (RF-002, principio III). */
+export function idiomaGrilla() {
+    return document.documentElement.lang === 'en' ? INGLES : ESPAÑOL;
+}
+
 /** Parámetros que se envían al servidor (también usados para el enlace de exportación). */
 export function parametrosFiltro(estado) {
     const limpio = {};
@@ -136,7 +156,7 @@ export function iniciarGrilla(tabla) {
         searching: false,
         responsive: !telefono.matches,
         autoWidth: false,
-        language: { ...ESPAÑOL, emptyTable: tabla.dataset.vacio || ESPAÑOL.emptyTable, zeroRecords: tabla.dataset.vacio || ESPAÑOL.zeroRecords },
+        language: { ...idiomaGrilla(), emptyTable: tabla.dataset.vacio || idiomaGrilla().emptyTable, zeroRecords: tabla.dataset.vacio || idiomaGrilla().zeroRecords },
         layout: {
             topStart: null,
             topEnd: null,
@@ -241,4 +261,20 @@ export function iniciarGrilla(tabla) {
 
 export function iniciarGrillas() {
     document.querySelectorAll('table[data-grilla]').forEach(iniciarGrilla);
+}
+
+/**
+ * Cierra cualquier panel de acción de una fila (`<details class="grilla-panel">`, por ejemplo
+ * «Registrar abono») al hacer clic fuera. El panel funciona sin JavaScript (es un <details> nativo);
+ * esto solo mejora el cierre automático.
+ */
+export function iniciarPanelesDeAccion() {
+    if (document.documentElement.dataset.panelesAccion) return;
+    document.documentElement.dataset.panelesAccion = '1';
+
+    document.addEventListener('click', (e) => {
+        document.querySelectorAll('details.grilla-panel[open]').forEach((panel) => {
+            if (!panel.contains(e.target)) panel.open = false;
+        });
+    });
 }

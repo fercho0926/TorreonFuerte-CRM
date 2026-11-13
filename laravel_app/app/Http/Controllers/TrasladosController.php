@@ -50,6 +50,6 @@ class TrasladosController extends Controller
         $this->traslados->trasladar($persona, $destino, $this->usuarioActual());
 
         return redirect()->route('personas.show', $persona)
-            ->with('success', "{$persona->nombre_completo} fue trasladada a {$destino->nombre}. Su registro aquí quedó inactivo con su historial; en la nueva sede aparece sin líder, célula ni ministerios.");
+            ->with('success', __('mensajes.traslado_realizado', ['miembro' => $persona->nombre_completo, 'sede' => $destino->nombre]));
     }
 }

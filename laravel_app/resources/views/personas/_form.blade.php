@@ -15,7 +15,7 @@
 
 @if($duplicado)
     <div class="alert alert-warning" role="alert">
-        <strong>Posible duplicado:</strong> ya existe un miembro con el mismo nombre y celular:
+        <strong>{{ __('interfaz.posible_duplicado') }}</strong> ya existe un miembro con el mismo nombre y celular:
         @if($duplicado['puedeVer'])
             <a href="{{ route('personas.show', $duplicado['id']) }}" target="_blank" rel="noopener">{{ $duplicado['nombre'] }}</a>.
         @else
@@ -23,7 +23,7 @@
         @endif
         <div class="form-check mt-2">
             <input type="checkbox" class="form-check-input" id="confirmar_duplicado" name="confirmar_duplicado" value="1">
-            <label class="form-check-label" for="confirmar_duplicado">Es otro miembro, guardar de todos modos</label>
+            <label class="form-check-label" for="confirmar_duplicado">{{ __('interfaz.es_otro_miembro_guardar_de_todos_modos') }}</label>
         </div>
     </div>
 @endif

@@ -6,29 +6,29 @@
 
 @section('page-actions')
     @puede('editar', $persona)
-        <a href="{{ route('personas.edit', $persona) }}" class="btn btn-primary">Editar</a>
+        <a href="{{ route('personas.edit', $persona) }}" class="btn btn-primary">{{ __('interfaz.editar') }}</a>
     @endpuede
     @puede('inactivar', $persona)
         @if($persona->estado === 'inactivo')
             <x-form.accion :action="route('personas.reactivar', $persona)" boton="Reactivar" variante="success" icono="fa-undo" />
         @else
-            <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a este miembro?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="">Inactivar</x-form.confirm>
+            <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a este miembro?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="">{{ __('interfaz.inactivar') }}</x-form.confirm>
         @endif
     @endpuede
     @puede('trasladar', \App\Models\Sede::class)
         @if(!$persona->trasladada_a_sede_id)
-            <a href="{{ route('traslados.create', $persona) }}" class="btn btn-outline-primary">Trasladar a otra sede</a>
+            <a href="{{ route('traslados.create', $persona) }}" class="btn btn-outline-primary">{{ __('interfaz.trasladar_a_otra_sede') }}</a>
         @endif
     @endpuede
     @puede('eliminar', $persona)
-        <x-form.confirm :action="route('personas.destroy', $persona)" method="DELETE" titulo="¿Eliminar definitivamente?" mensaje="Solo es posible si no tiene historial." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="">Eliminar</x-form.confirm>
+        <x-form.confirm :action="route('personas.destroy', $persona)" method="DELETE" titulo="¿Eliminar definitivamente?" mensaje="Solo es posible si no tiene historial." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="">{{ __('interfaz.eliminar') }}</x-form.confirm>
     @else
         @if(\App\Http\Controllers\Controller::usuarioDeLaPeticion()?->esAdmin() && $persona->cuenta()->exists())
             {{-- Solo en pantallas anchas: en el celular no debe empujar el botón de WhatsApp hacia abajo. --}}
-            <span class="text-muted small align-self-center d-none d-lg-inline"><i class="fas fa-user-lock me-1" aria-hidden="true"></i>Tiene cuenta de usuario; elimina primero la cuenta.</span>
+            <span class="text-muted small align-self-center d-none d-lg-inline"><i class="fas fa-user-lock me-1" aria-hidden="true"></i>{{ __('interfaz.tiene_cuenta_de_usuario_elimina_primero_') }}</span>
         @endif
     @endpuede
-    <a href="{{ route('personas.index') }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ route('personas.index') }}" class="btn btn-outline-secondary">{{ __('interfaz.volver') }}</a>
 @endsection
 
 @section('content')
@@ -65,19 +65,19 @@
             <div class="col-4">
                 <div class="description-block">
                     <h5 class="description-header">{{ $celulasTotal }}</h5>
-                    <span class="description-text">Células</span>
+                    <span class="description-text">{{ __('interfaz.celulas') }}</span>
                 </div>
             </div>
             <div class="col-4">
                 <div class="description-block">
                     <h5 class="description-header">{{ $cuenta('encuentros') }}</h5>
-                    <span class="description-text">Encuentros</span>
+                    <span class="description-text">{{ __('interfaz.encuentros') }}</span>
                 </div>
             </div>
             <div class="col-4">
                 <div class="description-block">
                     <h5 class="description-header">{{ $cuenta('inscripcionesEventos') }}</h5>
-                    <span class="description-text">Eventos</span>
+                    <span class="description-text">{{ __('interfaz.eventos') }}</span>
                 </div>
             </div>
         </div>
@@ -132,7 +132,7 @@
         @if($persona->miembros->isNotEmpty())
             <div class="card mb-4">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-users me-1" aria-hidden="true"></i>Miembros a su cargo</h3>
+                    <h3 class="card-title"><i class="fas fa-users me-1" aria-hidden="true"></i>{{ __('interfaz.miembros_a_su_cargo') }}</h3>
                     <div class="card-tools"><x-ui.insignia color="info">{{ $persona->miembros->count() }} miembros</x-ui.insignia></div>
                 </div>
                 <div class="card-body p-0">
@@ -153,19 +153,19 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>Eventos</h3>
+                <h3 class="card-title"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>{{ __('interfaz.eventos') }}</h3>
                 <div class="card-tools"><x-ui.insignia color="secondary">{{ $inscripciones->count() }}</x-ui.insignia></div>
             </div>
             <div class="card-body table-responsive p-0">
                 <table class="tabla-apilable table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Fecha</th>
-                            <th>Costo</th>
-                            <th>Pagado</th>
-                            <th>Saldo</th>
-                            <th>Estado</th>
+                            <th>{{ __('interfaz.nombre') }}</th>
+                            <th>{{ __('interfaz.fecha') }}</th>
+                            <th>{{ __('interfaz.costo') }}</th>
+                            <th>{{ __('interfaz.pagado') }}</th>
+                            <th>{{ __('interfaz.saldo') }}</th>
+                            <th>{{ __('interfaz.estado') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -188,17 +188,17 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-church me-1" aria-hidden="true"></i>Encuentros</h3>
+                <h3 class="card-title"><i class="fas fa-church me-1" aria-hidden="true"></i>{{ __('interfaz.encuentros') }}</h3>
                 <div class="card-tools"><x-ui.insignia color="secondary">{{ $persona->encuentros->count() }}</x-ui.insignia></div>
             </div>
             <div class="card-body table-responsive p-0">
                 <table class="tabla-apilable table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Fecha</th>
-                            <th>Asistió</th>
-                            <th>Valor pagado</th>
+                            <th>{{ __('interfaz.nombre') }}</th>
+                            <th>{{ __('interfaz.fecha') }}</th>
+                            <th>{{ __('interfaz.asistio') }}</th>
+                            <th>{{ __('interfaz.valor_pagado') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -221,28 +221,28 @@
     {{-- Columna lateral --}}
     <div class="col-lg-4">
         <div class="card mb-4">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-id-card me-1" aria-hidden="true"></i>Datos personales</h3></div>
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-id-card me-1" aria-hidden="true"></i>{{ __('interfaz.datos_personales') }}</h3></div>
             <ul class="list-group list-group-flush perfil-datos">
                 <li class="list-group-item">
-                    <i class="fas fa-id-card" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Documento</span>
+                    <i class="fas fa-id-card" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.documento') }}</span>
                     <span>{{ $persona->numero_documento ? $persona->tipo_documento.' '.$persona->numero_documento : '—' }}</span>
                 </li>
                 <li class="list-group-item">
-                    <i class="fas fa-birthday-cake" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Fecha de nacimiento</span>
+                    <i class="fas fa-birthday-cake" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.fecha_de_nacimiento') }}</span>
                     <span>{{ $persona->fecha_nacimiento ? $persona->fecha_nacimiento_legible.' ('.$persona->edad.' años)' : '—' }}</span>
                 </li>
                 @if($persona->estado === 'visitante' && $persona->invitado_por)
-                    <li class="list-group-item"><i class="fas fa-hand-holding-heart" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Invitado por</span><span>{{ $persona->invitado_por }}</span></li>
+                    <li class="list-group-item"><i class="fas fa-hand-holding-heart" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.invitado_por') }}</span><span>{{ $persona->invitado_por }}</span></li>
                 @endif
-                <li class="list-group-item"><i class="fas fa-mobile-alt" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Celular</span><span>{{ $persona->celular ?? '—' }}</span></li>
-                <li class="list-group-item"><i class="fas fa-envelope" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Correo</span><span class="text-break">{{ $persona->email ?? '—' }}</span></li>
-                <li class="list-group-item"><i class="fas fa-city" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Barrio / Ciudad</span><span>{{ $persona->barrio ?? '—' }} / {{ $persona->ciudad ?? '—' }}</span></li>
+                <li class="list-group-item"><i class="fas fa-mobile-alt" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.celular') }}</span><span>{{ $persona->celular ?? '—' }}</span></li>
+                <li class="list-group-item"><i class="fas fa-envelope" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.correo') }}</span><span class="text-break">{{ $persona->email ?? '—' }}</span></li>
+                <li class="list-group-item"><i class="fas fa-city" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.barrio_ciudad') }}</span><span>{{ $persona->barrio ?? '—' }} / {{ $persona->ciudad ?? '—' }}</span></li>
                 <li class="list-group-item">
-                    <i class="fas fa-user-tie" aria-hidden="true"></i><span class="perfil-datos-etiqueta">Líder</span>
+                    <i class="fas fa-user-tie" aria-hidden="true"></i><span class="perfil-datos-etiqueta">{{ __('interfaz.lider_2') }}</span>
                     @if($persona->lider)
                         <a href="{{ route('personas.show', $persona->lider) }}" class="d-inline-flex align-items-center gap-2"><x-ui.avatar :miembro="$persona->lider" tamano="sm" />{{ $persona->lider->nombre_completo }}</a>
                     @else
-                        <span class="text-muted">Sin líder asignado</span>
+                        <span class="text-muted">{{ __('interfaz.sin_lider_asignado') }}</span>
                     @endif
                 </li>
             </ul>
@@ -255,7 +255,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-people-arrows me-1" aria-hidden="true"></i>Células</h3>
+                <h3 class="card-title"><i class="fas fa-people-arrows me-1" aria-hidden="true"></i>{{ __('interfaz.celulas') }}</h3>
                 <div class="card-tools"><x-ui.insignia color="success">{{ $celulasTotal }}</x-ui.insignia></div>
             </div>
             <ul class="list-group list-group-flush">
@@ -270,14 +270,14 @@
                     <li class="list-group-item perfil-item">
                         <span class="perfil-item-icono text-bg-info" aria-hidden="true"><i class="fas fa-people-arrows"></i></span>
                         <span class="perfil-item-cuerpo"><a href="{{ route('celulas.show', $celula) }}" class="fw-semibold">{{ $celula->nombre }}</a><small class="d-block text-muted">{{ $celula->miembros->count() }} miembros</small></span>
-                        <x-ui.insignia color="secondary">Co-líder</x-ui.insignia>
+                        <x-ui.insignia color="secondary">{{ __('interfaz.co_lider') }}</x-ui.insignia>
                     </li>
                 @endforeach
                 @foreach($persona->celulas as $celula)
                     <li class="list-group-item perfil-item">
                         <span class="perfil-item-icono text-bg-success" aria-hidden="true"><i class="fas fa-people-arrows"></i></span>
                         <span class="perfil-item-cuerpo"><a href="{{ route('celulas.show', $celula) }}" class="fw-semibold">{{ $celula->nombre }}</a><small class="d-block text-muted">Líder: {{ $celula->lider->nombre_completo }}</small></span>
-                        <x-ui.insignia color="light" class="border">Miembro</x-ui.insignia>
+                        <x-ui.insignia color="light" class="border">{{ __('interfaz.miembro') }}</x-ui.insignia>
                     </li>
                 @endforeach
                 @if($celulasTotal === 0)
@@ -288,7 +288,7 @@
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-hands-helping me-1" aria-hidden="true"></i>Ministerios</h3>
+                <h3 class="card-title"><i class="fas fa-hands-helping me-1" aria-hidden="true"></i>{{ __('interfaz.ministerios') }}</h3>
                 <div class="card-tools"><x-ui.insignia color="danger">{{ $ministeriosTotal }}</x-ui.insignia></div>
             </div>
             <ul class="list-group list-group-flush">
@@ -296,7 +296,7 @@
                     <li class="list-group-item perfil-item">
                         <span class="perfil-item-icono text-bg-danger" aria-hidden="true"><i class="fas fa-hands-helping"></i></span>
                         <span class="perfil-item-cuerpo"><a href="{{ route('ministerios.show', $ministerio) }}" class="fw-semibold">{{ $ministerio->nombre }}</a></span>
-                        <x-ui.insignia color="primary">Encargado</x-ui.insignia>
+                        <x-ui.insignia color="primary">{{ __('interfaz.encargado') }}</x-ui.insignia>
                     </li>
                 @endforeach
                 @foreach($persona->ministerios as $ministerio)

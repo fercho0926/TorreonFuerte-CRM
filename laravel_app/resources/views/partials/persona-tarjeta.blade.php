@@ -12,7 +12,7 @@
         </div>
         <div class="mt-2">
             @include('partials.acciones-contacto', ['persona' => $persona])
-            <a href="{{ route('personas.show', $persona) }}" class="btn btn-sm btn-outline-secondary">Ver</a>
+            <a href="{{ route('personas.show', $persona) }}" class="btn btn-sm btn-outline-secondary">{{ __('interfaz.ver') }}</a>
         </div>
     </div>
 </div>

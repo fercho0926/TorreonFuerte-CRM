@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {{-- Tema claro fijo: data-lte-color-mode="off" desactiva el selector de tema de AdminLTE. --}}
-<html lang="es" data-bs-theme="light" data-lte-color-mode="off">
+<html lang="{{ app()->getLocale() }}" data-bs-theme="light" data-lte-color-mode="off">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -16,10 +16,10 @@
         <div class="container-fluid">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="Mostrar u ocultar el menú"><i class="fas fa-bars"></i></a>
+                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button" aria-label="{{ __('interfaz.mostrar_u_ocultar_el_menu') }}"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-md-block">
-                    <a href="{{ route('dashboard') }}" class="nav-link">Inicio</a>
+                    <a href="{{ route('dashboard') }}" class="nav-link">{{ __('interfaz.inicio') }}</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto align-items-center">
@@ -27,9 +27,9 @@
                     <li class="nav-item me-2">
                         <form method="POST" action="{{ route('sede-activa.update') }}" class="d-flex align-items-center gap-1">
                             @csrf
-                            <label class="small text-muted d-none d-lg-inline mb-0" for="sede-activa">Sede activa</label>
+                            <label class="small text-muted d-none d-lg-inline mb-0" for="sede-activa">{{ __('interfaz.sede_activa') }}</label>
                             <select id="sede-activa" name="sede_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                                <option value="" {{ $enTodasLasSedes ? 'selected' : '' }}>Todas las sedes</option>
+                                <option value="" {{ $enTodasLasSedes ? 'selected' : '' }}>{{ __('interfaz.todas_las_sedes') }}</option>
                                 @foreach($sedesSelector as $opcion)
                                     <option value="{{ $opcion->id }}" {{ $sedeActual?->id === $opcion->id ? 'selected' : '' }}>{{ $opcion->nombre }}{{ $opcion->activa ? '' : ' (inactiva)' }}</option>
                                 @endforeach
@@ -37,9 +37,23 @@
                         </form>
                     </li>
                     @if($enTodasLasSedes)
-                        <li class="nav-item me-2 d-none d-md-block"><span class="badge text-bg-warning">Todas las sedes: solo consulta</span></li>
+                        <li class="nav-item me-2 d-none d-md-block"><span class="badge text-bg-warning">{{ __('interfaz.todas_las_sedes_solo_consulta') }}</span></li>
                     @endif
-                @elseif($sedeActual)
+                @endif
+                @if($usuarioActual)
+                    <li class="nav-item me-2">
+                        <form method="POST" action="{{ route('idioma.update') }}" class="d-flex gap-1" aria-label="{{ __('interfaz.idioma') }}">
+                            @csrf
+                            <button type="submit" name="idioma" value="es" class="btn btn-sm d-flex align-items-center justify-content-center {{ app()->getLocale() === 'es' ? 'btn-primary' : 'btn-outline-secondary' }}" style="min-width:44px;min-height:44px" aria-label="{{ __('interfaz.espanol') }}" title="{{ __('interfaz.espanol') }}">
+                                @include('partials.bandera', ['pais' => 'es'])
+                            </button>
+                            <button type="submit" name="idioma" value="en" class="btn btn-sm d-flex align-items-center justify-content-center {{ app()->getLocale() === 'en' ? 'btn-primary' : 'btn-outline-secondary' }}" style="min-width:44px;min-height:44px" aria-label="{{ __('interfaz.english') }}" title="{{ __('interfaz.english') }}">
+                                @include('partials.bandera', ['pais' => 'gb'])
+                            </button>
+                        </form>
+                    </li>
+                @endif
+                @if($sedeActual && !$esAdminSede)
                     <li class="nav-item me-3 d-none d-sm-block"><span class="navbar-text fw-bold"><i class="fas fa-church"></i> <span class="nombre-sede">{{ $sedeActual->nombre }}</span></span></li>
                 @endif
                 @if($usuarioActual)
@@ -56,10 +70,10 @@
                                 <small class="d-block">{{ $sedeActual?->nombre ?? 'Todas las sedes' }}</small>
                             </li>
                             <li class="user-footer d-flex justify-content-between align-items-center gap-2">
-                                <a href="{{ route('cuenta.edit') }}" class="btn btn-outline-primary"><i class="fas fa-id-card"></i> Mi cuenta</a>
+                                <a href="{{ route('cuenta.edit') }}" class="btn btn-outline-primary"><i class="fas fa-id-card"></i> {{ __('interfaz.mi_cuenta') }}</a>
                                 <form method="POST" action="{{ route('logout') }}" class="text-end">
                                     @csrf
-                                    <button type="submit" class="btn btn-outline-secondary "><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+                                    <button type="submit" class="btn btn-outline-secondary "><i class="fas fa-sign-out-alt"></i> {{ __('interfaz.cerrar_sesion') }}</button>
                                 </form>
                             </li>
                         </ul>
@@ -76,7 +90,7 @@
             </a>
         </div>
         <div class="sidebar-wrapper">
-            <nav class="mt-2" aria-label="Menú principal">
+            <nav class="mt-2" aria-label="{{ __('interfaz.menu_principal') }}">
                 <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                     @foreach($menu as $seccion)
                         @if($seccion['titulo'])
@@ -98,7 +112,7 @@
 
     <main class="app-main">
         @if($esAdminSede && $enTodasLasSedes)
-            <p class="aviso-sede-movil" role="status">Todas las sedes: solo consulta</p>
+            <p class="aviso-sede-movil" role="status">{{ __('interfaz.todas_las_sedes_solo_consulta') }}</p>
         @endif
         @if($sedeActual)
             {{-- Marca de agua con el nombre de la sede en la que se está trabajando (todas las páginas). --}}

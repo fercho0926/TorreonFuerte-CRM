@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'modulo' => \App\Http\Middleware\AutorizaModulo::class,
             'administrador' => \App\Http\Middleware\SoloAdministrador::class,
         ]);
-        $middleware->web(append: [\App\Http\Middleware\ResuelveSede::class, \App\Http\Middleware\ExigeCambioDeClave::class]);
+        $middleware->web(append: [\App\Http\Middleware\EstableceIdioma::class, \App\Http\Middleware\ResuelveSede::class, \App\Http\Middleware\ExigeCambioDeClave::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

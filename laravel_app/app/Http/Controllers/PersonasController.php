@@ -197,7 +197,7 @@ class PersonasController extends Controller
             return $persona;
         });
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Miembro creado correctamente.');
+        return redirect()->route('personas.show', $persona)->with('success', __('mensajes.miembro_creado'));
     }
 
     public function edit(Persona $persona)
@@ -224,7 +224,7 @@ class PersonasController extends Controller
 
         if ($persona->es_lider && array_key_exists('es_lider', $data) && !$data['es_lider']) {
             return redirect()->route('lideres.quitar', $persona)
-                ->with('error', 'Para quitar el rol de líder primero decide qué pasará con sus miembros y células.');
+                ->with('error', __('mensajes.decide_primero_miembros_celulas'));
         }
 
         $nuevoLiderId = $data['lider_id'] ?? null;
@@ -287,10 +287,9 @@ class PersonasController extends Controller
             return $cambiaLider ? $this->liderazgo->cambiarLider($persona, $nuevoLider, $user) : [];
         });
 
-        $mensaje = 'Miembro actualizado correctamente.';
-        if ($retiradas) {
-            $mensaje .= ' Se retiró de la(s) célula(s): '.implode(', ', $retiradas).'; elige una célula de su nuevo líder si corresponde.';
-        }
+        $mensaje = $retiradas
+            ? __('mensajes.miembro_actualizado_retirado_celulas', ['celulas' => implode(', ', $retiradas)])
+            : __('mensajes.miembro_actualizado');
 
         return redirect()->route('personas.show', $persona)->with('success', $mensaje);
     }
@@ -307,7 +306,7 @@ class PersonasController extends Controller
             $this->liderazgo->inactivar($persona, $this->usuarioActual());
         }
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Miembro inactivado. Su historial se conserva.');
+        return redirect()->route('personas.show', $persona)->with('success', __('mensajes.miembro_inactivado'));
     }
 
     public function reactivar(Persona $persona)
@@ -322,7 +321,7 @@ class PersonasController extends Controller
             $this->liderazgo->reactivar($persona, $this->usuarioActual());
         }
 
-        return redirect()->route('personas.show', $persona)->with('success', 'Miembro reactivado.');
+        return redirect()->route('personas.show', $persona)->with('success', __('mensajes.miembro_reactivado'));
     }
 
     public function destroy(Persona $persona)
@@ -343,7 +342,7 @@ class PersonasController extends Controller
         $this->liderazgo->registrarCambio($persona, 'eliminada', ['estado' => $persona->estado], null, $this->usuarioActual());
         $persona->delete();
 
-        return redirect()->route('personas.index')->with('success', 'Miembro eliminado correctamente.');
+        return redirect()->route('personas.index')->with('success', __('mensajes.miembro_eliminado'));
     }
 
     /**

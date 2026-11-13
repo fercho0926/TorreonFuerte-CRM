@@ -9,7 +9,7 @@
     $actores = ['qr' => 'Registro público por QR', 'automatico' => 'Automático', 'sistema' => 'Sistema'] + $usuarios;
 @endphp
 <details class="historial-filtros mb-3" @if($hayFiltros) open @endif>
-    <summary class="btn btn-outline-secondary btn-sm"><i class="fas fa-filter me-1" aria-hidden="true"></i>Filtrar el histórico</summary>
+    <summary class="btn btn-outline-secondary btn-sm"><i class="fas fa-filter me-1" aria-hidden="true"></i>{{ __('interfaz.filtrar_el_historico') }}</summary>
     <div class="pt-3">
         <x-form.layout :action="$accion" method="GET" modo="filtro" guardar="Filtrar" icono="fa-filter" :leyenda="false">
             <input type="hidden" name="pestana" value="historico">
@@ -23,7 +23,7 @@
                 <x-form.select name="accion" label="Acción" :opciones="$acciones" :value="$filtros['accion']" vacio="Todas" col="col-sm-6 col-md-3" />
             @endif
             @if($hayFiltros)
-                <div class="col-auto fm-campo"><a href="{{ $accion }}?pestana=historico" class="btn btn-outline-secondary">Limpiar</a></div>
+                <div class="col-auto fm-campo"><a href="{{ $accion }}?pestana=historico" class="btn btn-outline-secondary">{{ __('interfaz.limpiar') }}</a></div>
             @endif
         </x-form.layout>
     </div>

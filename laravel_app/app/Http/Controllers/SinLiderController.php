@@ -55,6 +55,6 @@ class SinLiderController extends Controller
 
         $this->liderazgo->cambiarLider($persona, $lider, $user);
 
-        return redirect()->route('sin-lider.index')->with('success', "{$persona->nombre_completo} quedó a cargo de {$lider->nombre_completo}.");
+        return redirect()->route('sin-lider.index')->with('success', __('mensajes.quedo_a_cargo_de', ['miembro' => $persona->nombre_completo, 'lider' => $lider->nombre_completo]));
     }
 }

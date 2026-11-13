@@ -16,7 +16,7 @@ export const CON_SESION = [
     'celulas', 'celulas/create', 'celulas/1', 'celulas/1/edit',
     'niveles', 'niveles/create', 'niveles/1/edit', 'niveles/miembros?nivel=1',
     'encuentros', 'encuentros/create', 'encuentros/1', 'encuentros/1/edit',
-    'eventos', 'eventos/create', 'eventos/1', 'eventos/1/edit',
+    'eventos', 'eventos/create', 'eventos/1', 'eventos/1?pestana=asistencia', 'eventos/1/edit',
     'ministerios', 'ministerios/create', 'ministerios/1', 'ministerios/1/edit',
     'sedes', 'sedes/create', 'sedes/1', 'sedes/1/edit', 'sedes/1/pastores',
     'sin-lider', 'sedes/1?pestana=organigrama', 'sedes/1?pestana=registro', 'roles', 'roles/create', 'roles/pastor',

@@ -136,7 +136,7 @@ class Modulos
      */
     public static function rutasPublicas(): array
     {
-        return ['login', 'login.post', 'logout', 'recuperacion.*', 'registro.*', 'registro-sede.*', 'cuenta.*', 'cambiar-clave.*', 'up', 'storage.*'];
+        return ['login', 'login.post', 'logout', 'recuperacion.*', 'registro.*', 'registro-sede.*', 'cuenta.*', 'cambiar-clave.*', 'idioma.*', 'up', 'storage.*'];
     }
 
     /** Módulo de una ruta por su nombre, o nulo si es reservada, pública o desconocida. */

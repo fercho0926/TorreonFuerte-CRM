@@ -47,7 +47,7 @@ class SolicitudesClaveController extends Controller
         $this->autorizar('gestionarClaves', $solicitud->user);
 
         if ($solicitud->estado !== SolicitudClave::PENDIENTE) {
-            return redirect()->route('solicitudes-clave.index')->with('error', 'Esta solicitud ya fue atendida o descartada.');
+            return redirect()->route('solicitudes-clave.index')->with('error', __('mensajes.solicitud_ya_atendida'));
         }
 
         $actor = $this->usuarioActual();
@@ -73,6 +73,6 @@ class SolicitudesClaveController extends Controller
             app(\App\Services\Historial::class)->accion('descartada', fn () => $solicitud->update(['estado' => SolicitudClave::DESCARTADA, 'atendida_por' => $this->usuarioActual()->id, 'atendida_en' => now()]));
         }
 
-        return redirect()->route('solicitudes-clave.index')->with('success', 'Solicitud descartada.');
+        return redirect()->route('solicitudes-clave.index')->with('success', __('mensajes.solicitud_descartada'));
     }
 }

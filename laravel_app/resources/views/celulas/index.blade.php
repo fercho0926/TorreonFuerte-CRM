@@ -6,7 +6,7 @@
 
 @if($puedeGestionarEstructura)
     @section('page-actions')
-            <a href="{{ route('celulas.create') }}" class="btn btn-primary">Crear célula</a>
+            <a href="{{ route('celulas.create') }}" class="btn btn-primary">{{ __('interfaz.crear_celula') }}</a>
     @endsection
 @endif
 

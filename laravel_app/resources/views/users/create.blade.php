@@ -27,8 +27,8 @@
 @else
     <div class="card card-outline card-primary mb-3">
         <div class="card-body d-flex flex-wrap align-items-center gap-2">
-            <span><i class="fas fa-phone me-1 text-muted" aria-hidden="true"></i>Celular: <strong>{{ $celularLegible }}</strong></span>
-            <a href="{{ route('users.create', $esAdmin && $sedeElegidaId ? ['sede_id' => $sedeElegidaId] : []) }}" class="btn btn-outline-secondary ms-auto">Cambiar celular</a>
+            <span><i class="fas fa-phone me-1 text-muted" aria-hidden="true"></i>{{ __('interfaz.celular_2') }} <strong>{{ $celularLegible }}</strong></span>
+            <a href="{{ route('users.create', $esAdmin && $sedeElegidaId ? ['sede_id' => $sedeElegidaId] : []) }}" class="btn btn-outline-secondary ms-auto">{{ __('interfaz.cambiar_celular') }}</a>
         </div>
     </div>
 
@@ -37,21 +37,21 @@
             @php($existente = $personas->first())
             <div class="alert alert-warning" role="alert">
                 <strong>{{ $existente->nombre_completo }}</strong> ya tiene una cuenta. Cada miembro tiene una sola cuenta.
-                <a href="{{ route('users.edit', $existente->cuenta) }}" class="alert-link">Ver su cuenta</a>
+                <a href="{{ route('users.edit', $existente->cuenta) }}" class="alert-link">{{ __('interfaz.ver_su_cuenta') }}</a>
             </div>
             @break
         @case('inactivo')
             @php($existente = $personas->first())
             <div class="alert alert-warning" role="alert">
                 <strong>{{ $existente->nombre_completo }}</strong> está inactivo. Reactívalo desde su ficha y vuelve a crear la cuenta.
-                <a href="{{ route('personas.show', $existente) }}" class="alert-link">Abrir su ficha</a>
+                <a href="{{ route('personas.show', $existente) }}" class="alert-link">{{ __('interfaz.abrir_su_ficha') }}</a>
             </div>
             @break
         @case('otra_sede')
-            <div class="alert alert-info" role="alert">Ese celular pertenece a un miembro de otra sede; solicita su traslado.</div>
+            <div class="alert alert-info" role="alert">{{ __('interfaz.ese_celular_pertenece_a_un_miembro_de_ot') }}</div>
             @break
         @case('no_visible')
-            <div class="alert alert-info" role="alert">Ese celular pertenece a un miembro fuera de tu alcance; pide a tu pastor que cree la cuenta.</div>
+            <div class="alert alert-info" role="alert">{{ __('interfaz.ese_celular_pertenece_a_un_miembro_fuera') }}</div>
             @break
     @endswitch
 

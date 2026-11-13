@@ -55,7 +55,7 @@ trait RecorreFormularios
         return [
             'célula (ficha)' => route('celulas.show', $this->A['celula']),
             'encuentro (ficha)' => route('encuentros.show', $this->A['encuentro']),
-            'evento (ficha)' => route('eventos.show', $this->A['evento']),
+            'evento (ficha)' => route('eventos.show', [$this->A['evento'], 'pestana' => 'asistencia']),
             'ministerio (ficha)' => route('ministerios.show', $this->A['ministerio']),
             'persona (ficha)' => route('personas.show', $this->A['persona']),
             'sede (ficha)' => route('sedes.show', $this->A['sede']),

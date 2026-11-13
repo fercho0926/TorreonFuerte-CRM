@@ -22,11 +22,11 @@
                     @else
                         <x-ui.estado valor="inactivo" etiqueta="Registro cerrado" />
                         @if($destino->registro_abierto)
-                            <small class="text-muted ms-1">Se cierra solo cuando la actividad no está vigente.</small>
+                            <small class="text-muted ms-1">{{ __('interfaz.se_cierra_solo_cuando_la_actividad_no_es') }}</small>
                         @endif
                     @endif
                 </p>
-                <label for="enlace-registro-{{ $tipoQr }}" class="form-label">Enlace de registro</label>
+                <label for="enlace-registro-{{ $tipoQr }}" class="form-label">{{ __('interfaz.enlace_de_registro') }}</label>
                 <div class="input-group mb-3">
                     <input type="text" id="enlace-registro-{{ $tipoQr }}" class="form-control" value="{{ $destino->urlRegistro() }}" readonly>
                     <button type="button" class="btn btn-outline-secondary" data-copiar="{{ $destino->urlRegistro() }}">

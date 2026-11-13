@@ -14,8 +14,8 @@
         <h3 class="card-title mb-0">{{ $titulo }}</h3>
         @unless($soloLectura)
             <div class="d-flex flex-wrap gap-2" data-matriz-atajos hidden>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-matriz-todo="1">Todo en lectura</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-matriz-todo="0">Todo sin acceso</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-matriz-todo="1">{{ __('interfaz.todo_en_lectura') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-matriz-todo="0">{{ __('interfaz.todo_sin_acceso') }}</button>
             </div>
         @endunless
     </div>

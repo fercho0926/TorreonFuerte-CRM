@@ -2,8 +2,8 @@
 @php($maximo = max(1, $resumenNiveles['niveles']->max('total') ?? 0, $resumenNiveles['sin_iniciar']))
 <div class="card card-warning card-outline mb-4">
     <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-route me-1" aria-hidden="true"></i>Miembros por nivel</h3>
-        <div class="card-tools"><a href="{{ route('niveles.index') }}" class="btn btn-sm btn-outline-secondary">Ver niveles</a></div>
+        <h3 class="card-title"><i class="fas fa-route me-1" aria-hidden="true"></i>{{ __('interfaz.miembros_por_nivel') }}</h3>
+        <div class="card-tools"><a href="{{ route('niveles.index') }}" class="btn btn-sm btn-outline-secondary">{{ __('interfaz.ver_niveles') }}</a></div>
     </div>
     <ul class="list-group list-group-flush tarjeta-niveles">
         @forelse($resumenNiveles['niveles'] as $i => $fila)
@@ -24,7 +24,7 @@
             <a href="{{ route('niveles.miembros.index', ['nivel' => 'sin']) }}" class="tarjeta-nivel tarjeta-nivel--sin">
                 <span class="tarjeta-nivel-numero" aria-hidden="true"><i class="fas fa-hourglass-start"></i></span>
                 <span class="tarjeta-nivel-cuerpo">
-                    <span class="tarjeta-nivel-nombre">Sin iniciar</span>
+                    <span class="tarjeta-nivel-nombre">{{ __('interfaz.sin_iniciar') }}</span>
                     <span class="tarjeta-nivel-barra" aria-hidden="true"><span style="width: {{ round($resumenNiveles['sin_iniciar'] / $maximo * 100) }}%"></span></span>
                 </span>
                 <strong class="tarjeta-nivel-total">{{ $resumenNiveles['sin_iniciar'] }}</strong>

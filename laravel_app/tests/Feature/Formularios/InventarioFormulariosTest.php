@@ -23,7 +23,7 @@ class InventarioFormulariosTest extends TestCase
         'components/form/layout.blade.php' => 'es el propio componente',
         'components/form/confirm.blade.php' => 'es el propio componente de confirmación',
         'components/form/accion.blade.php' => 'es el propio componente de acciones de un botón',
-        'layouts/admin.blade.php' => 'barra superior: cerrar sesión y cambiar de sede activa (formularios compactos)',
+        'layouts/admin.blade.php' => 'barra superior: cerrar sesión, cambiar de sede activa y cambiar de idioma (formularios compactos)',
     ];
 
     public function test_ninguna_vista_tiene_formularios_escritos_a_mano_fuera_de_las_excepciones(): void
@@ -48,9 +48,10 @@ class InventarioFormulariosTest extends TestCase
     {
         $contenido = file_get_contents(resource_path('views/layouts/admin.blade.php'));
 
-        $this->assertSame(2, preg_match_all('/<form[\s>]/', $contenido), 'La barra superior debe tener solo cerrar sesión y sede activa');
+        $this->assertSame(3, preg_match_all('/<form[\s>]/', $contenido), 'La barra superior debe tener solo cerrar sesión, sede activa e idioma');
         $this->assertStringContainsString("route('logout')", $contenido);
         $this->assertStringContainsString("route('sede-activa.update')", $contenido);
+        $this->assertStringContainsString("route('idioma.update')", $contenido);
     }
 
     public function test_cada_pantalla_del_inventario_responde_con_formularios_de_componentes(): void
@@ -63,7 +64,7 @@ class InventarioFormulariosTest extends TestCase
             // Todo <form> de la pantalla (salvo los de la barra superior) debe llevar data-form o data-confirm.
             preg_match_all('/<form\b[^>]*>/', $html, $formularios);
             foreach ($formularios[0] as $etiquetaForm) {
-                if (str_contains($etiquetaForm, route('logout')) || str_contains($etiquetaForm, route('sede-activa.update'))) {
+                if (str_contains($etiquetaForm, route('logout')) || str_contains($etiquetaForm, route('sede-activa.update')) || str_contains($etiquetaForm, route('idioma.update'))) {
                     continue;
                 }
 

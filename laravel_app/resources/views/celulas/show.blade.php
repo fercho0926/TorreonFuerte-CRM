@@ -6,9 +6,9 @@
 
 @section('page-actions')
     @if($puedeGestionarEstructura)
-        <a href="{{ route('celulas.edit', $celula) }}" class="btn btn-primary">Editar</a>
+        <a href="{{ route('celulas.edit', $celula) }}" class="btn btn-primary">{{ __('interfaz.editar') }}</a>
     @endif
-    <a href="{{ route('celulas.index') }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ route('celulas.index') }}" class="btn btn-outline-secondary">{{ __('interfaz.volver') }}</a>
 @endsection
 
 @section('content')
@@ -23,23 +23,23 @@
     </div>
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Líder</dt>
+            <dt class="col-sm-3">{{ __('interfaz.lider_2') }}</dt>
             <dd class="col-sm-9">{{ $celula->lider->nombre_completo }}</dd>
 
-            <dt class="col-sm-3">Co-líder</dt>
+            <dt class="col-sm-3">{{ __('interfaz.co_lider') }}</dt>
             <dd class="col-sm-9">{{ $celula->coLider?->nombre_completo ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Sede</dt>
+            <dt class="col-sm-3">{{ __('interfaz.sede') }}</dt>
             <dd class="col-sm-9">{{ $celula->sede ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Reunión</dt>
+            <dt class="col-sm-3">{{ __('interfaz.reunion') }}</dt>
             <dd class="col-sm-9">
                 {{ $celula->dia_reunion ?? 'Sin definir' }}
                 @if($celula->hora_reunion) a las {{ substr($celula->hora_reunion, 0, 5) }} @endif
                 @if($celula->lugar_reunion) — {{ $celula->lugar_reunion }} @endif
             </dd>
 
-            <dt class="col-sm-3">Estado</dt>
+            <dt class="col-sm-3">{{ __('interfaz.estado') }}</dt>
             <dd class="col-sm-9">
                 <x-ui.estado :valor="$celula->estado" />
             </dd>
@@ -64,12 +64,12 @@
         <table class="tabla-apilable table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th>Nombre completo</th>
-                    <th>Documento</th>
-                    <th>Celular</th>
-                    <th>Estado</th>
+                    <th>{{ __('interfaz.nombre_completo') }}</th>
+                    <th>{{ __('interfaz.documento') }}</th>
+                    <th>{{ __('interfaz.celular') }}</th>
+                    <th>{{ __('interfaz.estado') }}</th>
                     @if($puedeAdministrar)
-                        <th>Acciones</th>
+                        <th>{{ __('interfaz.acciones') }}</th>
                     @endif
                 </tr>
             </thead>
@@ -83,7 +83,7 @@
                         @if($puedeAdministrar)
                             <td data-etiqueta="Acciones">
                                 <x-form.confirm :action="route('celulas.miembros.destroy', [$celula, $miembro])" method="DELETE" titulo="¿Quitar a este miembro de la célula?"
-                                    :mensaje="$miembro->nombre_completo.' dejará de pertenecer a esta célula; su historial se conserva.'" boton="Quitar" :peligro="true">Quitar</x-form.confirm>
+                                    :mensaje="$miembro->nombre_completo.' dejará de pertenecer a esta célula; su historial se conserva.'" boton="Quitar" :peligro="true">{{ __('interfaz.quitar') }}</x-form.confirm>
                             </td>
                         @endif
                     </tr>
@@ -104,7 +104,7 @@
             <x-form.input name="tema" label="Tema" icono="fa-comment-dots" ejemplo="Ej. Estudio de Efesios 1" col="col-md-8" maxlength="255" />
             <x-form.textarea name="notas" label="Notas" :rows="2" />
             <div class="col-12">
-                <label class="fm-etiqueta">Asistencia</label>
+                <label class="fm-etiqueta">{{ __('interfaz.asistencia') }}</label>
                 <x-form.lista-asistencia name="asistio[]" etiqueta="Asistió" vacio="Agrega miembros a la célula antes de registrar asistencia."
                     :filas="$celula->miembros->map(fn ($m) => ['id' => $m->id, 'nombre' => $m->nombre_completo, 'apoyo' => $m->celular])->all()"
                     :marcados="$celula->miembros->pluck('id')->all()" />
@@ -121,9 +121,9 @@
         <table class="tabla-apilable table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th>Fecha</th>
-                    <th>Tema</th>
-                    <th>Asistencia</th>
+                    <th>{{ __('interfaz.fecha') }}</th>
+                    <th>{{ __('interfaz.tema') }}</th>
+                    <th>{{ __('interfaz.asistencia') }}</th>
                     @if($puedeAdministrar)
                         <th></th>
                     @endif
@@ -138,13 +138,13 @@
                         @if($puedeAdministrar)
                             <td data-etiqueta="">
                                 <x-form.confirm :action="route('celulas.reuniones.destroy', [$celula, $reunion])" method="DELETE" titulo="¿Eliminar esta reunión?"
-                                    mensaje="Se borrará la reunión y su registro de asistencia." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="sm">Eliminar</x-form.confirm>
+                                    mensaje="Se borrará la reunión y su registro de asistencia." boton="Eliminar" :peligro="true" variante="outline-danger" tamano="sm">{{ __('interfaz.eliminar') }}</x-form.confirm>
                             </td>
                         @endif
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $puedeAdministrar ? 4 : 3 }}" class="text-center">Aún no hay reuniones registradas.</td>
+                        <td colspan="{{ $puedeAdministrar ? 4 : 3 }}" class="text-center">{{ __('interfaz.aun_no_hay_reuniones_registradas') }}</td>
                     </tr>
                 @endforelse
             </tbody>

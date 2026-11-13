@@ -7,11 +7,11 @@
 <div class="fm-acciones" data-acciones>
     @if($esEscritura)
         @todasLasSedes
-            <span class="fm-acciones__nota text-warning" role="status"><i class="fas fa-eye"></i> Todas las sedes: solo consulta. Elige una sede activa para guardar.</span>
+            <span class="fm-acciones__nota text-warning" role="status"><i class="fas fa-eye"></i> {{ __('interfaz.todas_las_sedes_solo_consulta_elige_una_') }}</span>
         @endtodasLasSedes
     @endif
     @if($cancelar)
-        <a href="{{ $cancelar }}" class="btn btn-outline-secondary">Cancelar</a>
+        <a href="{{ $cancelar }}" class="btn btn-outline-secondary">{{ __('interfaz.cancelar') }}</a>
     @endif
     @if($guardar)
         @if($esEscritura)

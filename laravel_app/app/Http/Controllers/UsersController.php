@@ -184,7 +184,7 @@ class UsersController extends Controller
         // Las contraseñas de otros miembros no se escriben: se generan claves temporales (spec 005).
         $user->save();
 
-        $respuesta = redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
+        $respuesta = redirect()->route('users.index')->with('success', __('mensajes.usuario_actualizado'));
 
         if ($actor->esAdmin() && $user->revision_vinculo && $request->filled('vincular_a')) {
             $elegido = Persona::withoutGlobalScopes()->whereNull('deleted_at')->find((int) $request->input('vincular_a'));
@@ -193,7 +193,7 @@ class UsersController extends Controller
             }
 
             if ($this->cuentas->resolverRevision($user, $elegido, $actor)) {
-                $respuesta->with('warning', 'La cuenta quedó vinculada. El miembro creado durante la unificación tiene datos propios y se conservó; revísalo en Miembros.');
+                $respuesta->with('warning', __('mensajes.cuenta_vinculada_miembro_conservado'));
             }
         }
 
@@ -213,7 +213,7 @@ class UsersController extends Controller
 
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
+        return redirect()->route('users.index')->with('success', __('mensajes.usuario_eliminado'));
     }
 
     private function esElUnicoAdministrador(User $user): bool

@@ -67,11 +67,11 @@
 
 @if($resumenSedes)
     <div class="card mb-4">
-        <div class="card-header"><h3 class="card-title">Resumen por sede</h3></div>
+        <div class="card-header"><h3 class="card-title">{{ __('interfaz.resumen_por_sede') }}</h3></div>
         <div class="card-body table-responsive p-0">
             <table class="tabla-apilable table table-hover mb-0">
                 <thead>
-                    <tr><th>Sede</th><th>Estado</th><th>Miembros</th><th>Líderes</th><th>Células</th><th>Eventos próximos</th><th>Recaudo de eventos</th></tr>
+                    <tr><th>{{ __('interfaz.sede') }}</th><th>{{ __('interfaz.estado') }}</th><th>{{ __('interfaz.miembros') }}</th><th>{{ __('interfaz.lideres') }}</th><th>{{ __('interfaz.celulas') }}</th><th>{{ __('interfaz.eventos_proximos') }}</th><th>{{ __('interfaz.recaudo_de_eventos') }}</th></tr>
                 </thead>
                 <tbody>
                     @foreach($resumenSedes as $fila)
@@ -88,7 +88,7 @@
                 </tbody>
                 <tfoot>
                     <tr class="fw-bold">
-                        <td colspan="2">Total global (todas las sedes)</td>
+                        <td colspan="2">{{ __('interfaz.total_global_todas_las_sedes') }}</td>
                         <td data-etiqueta="Miembros" data-primaria>{{ $resumenSedes->sum('personas') }}</td>
                         <td data-etiqueta="Líderes">{{ $resumenSedes->sum('lideres') }}</td>
                         <td data-etiqueta="Células">{{ $resumenSedes->sum('celulas') }}</td>
@@ -99,16 +99,16 @@
             </table>
         </div>
     </div>
-    <p class="text-muted small">Las cifras de este tablero suman <strong>todas las sedes</strong>. Elige una sede activa en la barra superior para ver una sola.</p>
+    <p class="text-muted small">{{ __('interfaz.las_cifras_de_este_tablero_suman') }} <strong>{{ __('interfaz.todas_las_sedes_2') }}</strong>{{ __('interfaz.elige_una_sede_activa_en_la_barra_superi') }}</p>
 @endif
 
 {{-- Resumen mensual: gráfica (8) + metas (4) y pie con indicadores --}}
 @if($mensual)
 <div class="card mb-4">
     <div class="card-header">
-        <h3 class="card-title">Resumen de los últimos 12 meses</h3>
+        <h3 class="card-title">{{ __('interfaz.resumen_de_los_ultimos_12_meses') }}</h3>
         <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse" aria-label="Plegar">
+            <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse" aria-label="{{ __('interfaz.plegar') }}">
                 <i data-lte-icon="expand" class="fas fa-plus"></i><i data-lte-icon="collapse" class="fas fa-minus"></i>
             </button>
         </div>
@@ -121,7 +121,7 @@
             </div>
             @if($metas)
                 <div class="col-md-4">
-                    <p class="text-center"><strong>Metas</strong></p>
+                    <p class="text-center"><strong>{{ __('interfaz.metas') }}</strong></p>
                     @foreach($metas as $meta)
                         <div class="progress-group">
                             {{ $meta['texto'] }}
@@ -151,14 +151,14 @@
                         <span class="text-secondary"><i class="fas fa-minus" aria-hidden="true"></i></span>
                     @endif
                     <h5 class="fw-bold mb-0">{{ number_format($nuevosMes) }}</h5>
-                    <span class="text-uppercase small text-muted">Nuevos este mes</span>
+                    <span class="text-uppercase small text-muted">{{ __('interfaz.nuevos_este_mes') }}</span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="text-center border-md-end">
-                    <span class="text-info"><i class="fas fa-calendar" aria-hidden="true"></i> 12 meses</span>
+                    <span class="text-info"><i class="fas fa-calendar" aria-hidden="true"></i> {{ __('interfaz.12_meses') }}</span>
                     <h5 class="fw-bold mb-0">{{ number_format(array_sum($mensual['miembros'])) }}</h5>
-                    <span class="text-uppercase small text-muted">Miembros nuevos</span>
+                    <span class="text-uppercase small text-muted">{{ __('interfaz.miembros_nuevos') }}</span>
                 </div>
             </div>
             @puedeModulo('eventos')
@@ -166,14 +166,14 @@
                     <div class="text-center border-end">
                         <span class="text-success"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i> {{ $porcentaje($totalRecaudadoEventos, $totalEsperadoEventos) }}%</span>
                         <h5 class="fw-bold mb-0">${{ number_format($totalRecaudadoEventos, 2) }}</h5>
-                        <span class="text-uppercase small text-muted">Total recaudado en eventos</span>
+                        <span class="text-uppercase small text-muted">{{ __('interfaz.total_recaudado_en_eventos') }}</span>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="text-center">
                         <span class="text-warning"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i> {{ $eventoCount }} eventos</span>
                         <h5 class="fw-bold mb-0">${{ number_format($totalEsperadoEventos, 2) }}</h5>
-                        <span class="text-uppercase small text-muted">Total esperado en eventos</span>
+                        <span class="text-uppercase small text-muted">{{ __('interfaz.total_esperado_en_eventos') }}</span>
                     </div>
                 </div>
             @endpuedeModulo
@@ -188,7 +188,7 @@
         @puedeModulo('miembros')
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>Miembros nuevos</h3>
+                <h3 class="card-title"><i class="fas fa-user-plus me-1" aria-hidden="true"></i>{{ __('interfaz.miembros_nuevos') }}</h3>
                 @if($personasNuevas->isNotEmpty())
                     <div class="card-tools"><x-ui.insignia color="success">{{ $personasNuevas->count() }} recientes</x-ui.insignia></div>
                 @endif
@@ -210,25 +210,25 @@
                     </ul>
                 @endif
             </div>
-            <div class="card-footer text-center"><a href="{{ route('personas.index') }}">Ver todos los miembros</a></div>
+            <div class="card-footer text-center"><a href="{{ route('personas.index') }}">{{ __('interfaz.ver_todos_los_miembros') }}</a></div>
         </div>
         @endpuedeModulo
 
         @puedeModulo('eventos')
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>Próximos eventos</h3>
+                <h3 class="card-title"><i class="fas fa-glass-cheers me-1" aria-hidden="true"></i>{{ __('interfaz.proximos_eventos') }}</h3>
             </div>
             <div class="card-body table-responsive p-0">
                 <table class="tabla-apilable table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Tipo</th>
-                            <th>Fecha</th>
-                            <th>Inscritos</th>
-                            <th>Esperado</th>
-                            <th>Recaudado</th>
+                            <th>{{ __('interfaz.nombre') }}</th>
+                            <th>{{ __('interfaz.tipo') }}</th>
+                            <th>{{ __('interfaz.fecha') }}</th>
+                            <th>{{ __('interfaz.inscritos') }}</th>
+                            <th>{{ __('interfaz.esperado') }}</th>
+                            <th>{{ __('interfaz.recaudado') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,9 +249,9 @@
             </div>
             <div class="card-footer clearfix">
                 @puedeModulo('eventos', 'escritura')
-                    <a href="{{ route('eventos.create') }}" class="btn btn-sm btn-primary float-start">Crear evento</a>
+                    <a href="{{ route('eventos.create') }}" class="btn btn-sm btn-primary float-start">{{ __('interfaz.crear_evento') }}</a>
                 @endpuedeModulo
-                <a href="{{ route('eventos.index') }}" class="btn btn-sm btn-secondary float-end">Ver todos los eventos</a>
+                <a href="{{ route('eventos.index') }}" class="btn btn-sm btn-secondary float-end">{{ __('interfaz.ver_todos_los_eventos') }}</a>
             </div>
         </div>
         @endpuedeModulo
@@ -284,7 +284,7 @@
 
         @if(array_sum($porEstado) > 0)
             <div class="card mb-4">
-                <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie me-1" aria-hidden="true"></i>Miembros por estado</h3></div>
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie me-1" aria-hidden="true"></i>{{ __('interfaz.miembros_por_estado') }}</h3></div>
                 <div class="card-body">
                     <div class="grafica-tablero" data-grafica='@json($graficaEstados)'
                         role="img" aria-label="Miembros por estado: {{ collect($porEstado)->map(fn ($n, $e) => "$e $n")->implode(', ') }}"></div>
@@ -303,7 +303,7 @@
         @if($personasSinLider !== null)
             <div class="card mb-4">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-user-clock me-1" aria-hidden="true"></i>Miembros sin líder</h3>
+                    <h3 class="card-title"><i class="fas fa-user-clock me-1" aria-hidden="true"></i>{{ __('interfaz.miembros_sin_lider') }}</h3>
                     <div class="card-tools"><x-ui.insignia color="warning">{{ $sinLiderTotal }}</x-ui.insignia></div>
                 </div>
                 <div class="card-body p-0">

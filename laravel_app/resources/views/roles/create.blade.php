@@ -7,7 +7,7 @@
 @section('content')
 @include('users._pestanas', ['activa' => 'roles'])
 @if(!empty($duplicado))
-    <div class="alert alert-info" role="status"><i class="fas fa-copy" aria-hidden="true"></i> Parte de los permisos de <strong>{{ $rol->nombre }}</strong>; ponle un nombre nuevo.</div>
+    <div class="alert alert-info" role="status"><i class="fas fa-copy" aria-hidden="true"></i> {{ __('interfaz.parte_de_los_permisos_de') }} <strong>{{ $rol->nombre }}</strong>{{ __('interfaz.ponle_un_nombre_nuevo') }}</div>
 @endif
 <x-form.layout :global="true" :action="route('roles.store')" guardar="Crear rol" icono="fa-save" :cancelar="route('roles.index')">
     @if(!empty($duplicado))

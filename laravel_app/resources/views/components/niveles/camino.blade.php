@@ -12,18 +12,18 @@
     $icono = ['completado' => 'fa-star', 'siguiente' => 'fa-location-dot', 'pendiente' => 'fa-lock'];
 @endphp
 <section class="camino" aria-labelledby="camino-titulo" data-estaciones="{{ $camino['total'] }}">
-    <h3 id="camino-titulo" class="camino-titulo">Camino de niveles</h3>
+    <h3 id="camino-titulo" class="camino-titulo">{{ __('interfaz.camino_de_niveles') }}</h3>
 
     @if($camino['total'] === 0)
         <p class="camino-resumen text-muted">
             El plan de niveles aún no tiene niveles.
-            @puedeModulo('niveles', 'escritura')<a href="{{ route('niveles.create') }}">Crear el primero</a>@endpuedeModulo
+            @puedeModulo('niveles', 'escritura')<a href="{{ route('niveles.create') }}">{{ __('interfaz.crear_el_primero') }}</a>@endpuedeModulo
         </p>
     @else
         <p class="camino-resumen">
             <strong>{{ $camino['completados'] }} de {{ $camino['total'] }} niveles</strong>
             @if($camino['terminado'])
-                · <span class="camino-fin"><i class="fas fa-trophy" aria-hidden="true"></i> ¡Camino terminado!</span>
+                · <span class="camino-fin"><i class="fas fa-trophy" aria-hidden="true"></i> {{ __('interfaz.camino_terminado') }}</span>
             @elseif($camino['actual'])
                 · Nivel actual: {{ $camino['actual']->nombre }}
             @else
@@ -59,7 +59,7 @@
                             </span>
                             @if($e['estado'] === 'completado' || $e['nivel']->descripcion)
                                 <details class="estacion-detalle">
-                                    <summary>Detalle</summary>
+                                    <summary>{{ __('interfaz.detalle') }}</summary>
                                     <div class="estacion-detalle-cuerpo">
                                         @if($e['nivel']->descripcion)<p class="mb-1">{{ $e['nivel']->descripcion }}</p>@endif
                                         @if($e['avance'])
@@ -72,7 +72,7 @@
                                             </p>
                                             @if($e['avance']->nota)<p class="mb-1 text-muted">{{ $e['avance']->nota }}</p>@endif
                                             @if($escribe && $e['avance']->esManual())
-                                                <x-form.confirm :action="route('niveles.avances.destroy', $e['avance'])" method="DELETE" titulo="¿Quitar este nivel?" :mensaje="'Se retira «'.$e['nivel']->nombre.'» del camino de '.$miembro->nombre_completo.'.'" boton="Quitar" :peligro="true" variante="outline-danger" tamano="sm">Quitar</x-form.confirm>
+                                                <x-form.confirm :action="route('niveles.avances.destroy', $e['avance'])" method="DELETE" titulo="¿Quitar este nivel?" :mensaje="'Se retira «'.$e['nivel']->nombre.'» del camino de '.$miembro->nombre_completo.'.'" boton="Quitar" :peligro="true" variante="outline-danger" tamano="sm">{{ __('interfaz.quitar') }}</x-form.confirm>
                                             @endif
                                         @endif
                                     </div>
@@ -86,7 +86,7 @@
 
         @if($escribe && count($pendientes))
             <details class="camino-registrar">
-                <summary>Registrar avance</summary>
+                <summary>{{ __('interfaz.registrar_avance') }}</summary>
                 <x-form.layout :action="route('niveles.avances.store')" modo="linea" guardar="Marcar completado" icono="fa-check" :leyenda="false" :id="'avance-'.$miembro->id">
                     <input type="hidden" name="persona_id" value="{{ $miembro->id }}">
                     <x-form.select name="nivel_id" label="Nivel" icono="fa-route" :opciones="$pendientes" :value="$camino['siguiente']?->id" :vacio="null" :required="true" col="col-md-5" />

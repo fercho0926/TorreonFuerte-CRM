@@ -6,7 +6,7 @@
 
 @section('page-actions')
     @puedeModulo('usuarios', 'escritura')
-    <a href="{{ route('users.create') }}" class="btn btn-primary">Crear usuario</a>
+    <a href="{{ route('users.create') }}" class="btn btn-primary">{{ __('interfaz.crear_usuario') }}</a>
     @endpuedeModulo
 @endsection
 

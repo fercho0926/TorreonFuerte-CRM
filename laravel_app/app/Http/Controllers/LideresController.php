@@ -128,8 +128,8 @@ class LideresController extends Controller
 
         $pastor = $persona->fresh()->lider;
         $mensaje = $pastor
-            ? "{$persona->nombre_completo} ahora es líder, bajo el pastor {$pastor->nombre_completo}."
-            : "{$persona->nombre_completo} ahora es líder.";
+            ? __('mensajes.lider_designado_con_pastor', ['miembro' => $persona->nombre_completo, 'pastor' => $pastor->nombre_completo])
+            : __('mensajes.lider_designado', ['miembro' => $persona->nombre_completo]);
 
         return redirect()->route('lideres.show', $persona)->with('success', $mensaje);
     }
@@ -175,7 +175,7 @@ class LideresController extends Controller
             ], 422);
         }
 
-        return redirect()->route('lideres.index')->with('success', 'Se quitó el rol de líder; no se eliminó al miembro.');
+        return redirect()->route('lideres.index')->with('success', __('mensajes.rol_lider_quitado'));
     }
 
     /**

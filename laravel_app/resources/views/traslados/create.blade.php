@@ -15,7 +15,7 @@
 
 @if(array_sum($pendientes) > 0)
     <div class="alert alert-warning">
-        <strong>Antes de trasladar hay que reasignar lo que este miembro dirige:</strong>
+        <strong>{{ __('interfaz.antes_de_trasladar_hay_que_reasignar_lo_') }}</strong>
         <ul class="mb-0">
             @if($pendientes['personas'])<li>{{ $pendientes['personas'] }} miembro(s) a su cargo — reasígnalos con "Quitar rol" del líder.</li>@endif
             @if($pendientes['celulas'])<li>{{ $pendientes['celulas'] }} célula(s) — cambia su líder o co-líder.</li>@endif

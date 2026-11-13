@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['sede_id', 'email', 'password', 'debe_cambiar_clave', 'clave_vence_en', 'role', 'persona_id', 'revision_vinculo'])]
+#[Fillable(['sede_id', 'email', 'password', 'debe_cambiar_clave', 'clave_vence_en', 'role', 'persona_id', 'revision_vinculo', 'idioma'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +30,9 @@ class User extends Authenticatable
 
     /** El nombre y el celular salen del miembro: se carga siempre con la cuenta. */
     protected $with = ['persona'];
+
+    /** Español por defecto (RF-004), igual que el valor por defecto de la migración. */
+    protected $attributes = ['idioma' => 'es'];
 
     /**
      * Campos del historial (spec 015). La contraseña y el token de sesión nunca se guardan: solo que cambiaron.
@@ -46,6 +49,7 @@ class User extends Authenticatable
             'persona_id' => ['Ficha de miembro', 'persona'],
             'debe_cambiar_clave' => ['Debe cambiar la clave', 'booleano'],
             'password' => 'Contraseña',
+            'idioma' => 'Idioma',
         ];
     }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ESPAÑOL, leerFormulario, parametrosFiltro, retardo, urlExportar } from './grilla.js';
+import { ESPAÑOL, INGLES, idiomaGrilla, leerFormulario, parametrosFiltro, retardo, urlExportar } from './grilla.js';
 
 describe('idioma de la grilla (RF-008)', () => {
     it('traduce también el texto que se ve mientras llega la primera respuesta', () => {
@@ -7,6 +7,19 @@ describe('idioma de la grilla (RF-008)', () => {
         // respuesta AJAX, distinto de `emptyTable`/`zeroRecords` (que solo aplican tras confirmar 0 filas).
         expect(ESPAÑOL.loadingRecords).toBeTruthy();
         expect(ESPAÑOL.loadingRecords.toLowerCase()).not.toContain('loading');
+    });
+});
+
+describe('idioma de la grilla según el idioma de la página (spec 020)', () => {
+    it('usa el español cuando <html lang> es "es"', () => {
+        document.documentElement.lang = 'es';
+        expect(idiomaGrilla()).toBe(ESPAÑOL);
+    });
+
+    it('usa el inglés cuando <html lang> es "en"', () => {
+        document.documentElement.lang = 'en';
+        expect(idiomaGrilla()).toBe(INGLES);
+        expect(idiomaGrilla().emptyTable).toBe('No results found.');
     });
 });
 

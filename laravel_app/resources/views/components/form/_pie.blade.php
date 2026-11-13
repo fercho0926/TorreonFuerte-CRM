@@ -3,4 +3,4 @@
     <small id="{{ $id }}-ayuda" class="fm-ayuda">{{ $ayuda }}</small>
 @endif
 <div id="{{ $id }}-error" class="invalid-feedback" role="alert">{{ $errors->first($clave) }}</div>
-<div class="fm-ok" aria-hidden="true"><i class="fas fa-check-circle"></i> Correcto</div>
+<div class="fm-ok" aria-hidden="true"><i class="fas fa-check-circle"></i> {{ __('interfaz.correcto') }}</div>

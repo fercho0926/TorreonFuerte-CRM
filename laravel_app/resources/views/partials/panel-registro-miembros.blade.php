@@ -22,12 +22,12 @@
                     @else
                         <x-ui.estado valor="inactivo" etiqueta="Registro cerrado" />
                         @if($sede->registro_abierto && !$sede->activa)
-                            <small class="text-muted ms-1">Se cierra solo mientras la sede está inactiva.</small>
+                            <small class="text-muted ms-1">{{ __('interfaz.se_cierra_solo_mientras_la_sede_esta_ina') }}</small>
                         @endif
                     @endif
                 </p>
-                <p class="text-muted small">Quien lo escanee puede registrarse como miembro nuevo o actualizar sus datos.</p>
-                <label for="enlace-registro-miembros" class="form-label">Enlace de registro</label>
+                <p class="text-muted small">{{ __('interfaz.quien_lo_escanee_puede_registrarse_como_') }}</p>
+                <label for="enlace-registro-miembros" class="form-label">{{ __('interfaz.enlace_de_registro') }}</label>
                 <div class="input-group mb-3">
                     <input type="text" id="enlace-registro-miembros" class="form-control" value="{{ $enlace }}" readonly>
                     <button type="button" class="btn btn-outline-secondary" data-copiar="{{ $enlace }}">

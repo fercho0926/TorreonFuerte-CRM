@@ -29,7 +29,7 @@
         <x-ui.acciones-fila :ver="route('personas.show', $persona)" :editar="route('personas.edit', $persona)" :puede-editar="\App\Support\Permisos::puede('editar', $persona)" :nombre="$persona->nombre_completo">
             @puede('inactivar', $persona)
                 @if($persona->estado !== 'inactivo')
-                    <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a este miembro?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="sm">Inactivar</x-form.confirm>
+                    <x-form.confirm :action="route('personas.inactivar', $persona)" method="POST" titulo="¿Inactivar a este miembro?" mensaje="Su historial se conserva." boton="Inactivar" :peligro="false" variante="outline-secondary" tamano="sm">{{ __('interfaz.inactivar') }}</x-form.confirm>
                 @endif
             @endpuede
         </x-ui.acciones-fila>

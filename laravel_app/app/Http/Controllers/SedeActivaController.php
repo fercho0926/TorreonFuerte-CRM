@@ -26,10 +26,10 @@ class SedeActivaController extends Controller
 
         if (!empty($data['sede_id'])) {
             Session::put('sede_activa_id', (int) $data['sede_id']);
-            $mensaje = 'Trabajando en la sede '.Sede::find($data['sede_id'])->nombre.'.';
+            $mensaje = __('mensajes.trabajando_en_la_sede', ['sede' => Sede::find($data['sede_id'])->nombre]);
         } else {
             Session::forget('sede_activa_id');
-            $mensaje = 'Viendo todas las sedes (solo consulta).';
+            $mensaje = __('mensajes.viendo_todas_las_sedes');
         }
 
         return redirect()->back()->with('success', $mensaje);

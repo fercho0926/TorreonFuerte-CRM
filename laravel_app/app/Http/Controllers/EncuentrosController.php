@@ -69,7 +69,7 @@ class EncuentrosController extends Controller
             app(AvancesNivelService::class)->recalcularEncuentro($encuentro, null, $this->usuarioActual());
         });
 
-        return redirect()->route('encuentros.index')->with('success', 'Encuentro creado correctamente.');
+        return redirect()->route('encuentros.index')->with('success', __('mensajes.encuentro_creado'));
     }
 
     public function show(Request $request, Encuentro $encuentro)
@@ -128,7 +128,7 @@ class EncuentrosController extends Controller
             app(AvancesNivelService::class)->recalcularEncuentro($encuentro->fresh(), $nivelAnterior, $this->usuarioActual());
         });
 
-        return redirect()->route('encuentros.index')->with('success', 'Encuentro actualizado correctamente.');
+        return redirect()->route('encuentros.index')->with('success', __('mensajes.encuentro_actualizado'));
     }
 
     public function destroy(Encuentro $encuentro)
@@ -142,7 +142,7 @@ class EncuentrosController extends Controller
             $encuentro->delete();
         });
 
-        return redirect()->route('encuentros.index')->with('success', 'Encuentro eliminado correctamente.');
+        return redirect()->route('encuentros.index')->with('success', __('mensajes.encuentro_eliminado'));
     }
 
     /**
@@ -202,7 +202,7 @@ class EncuentrosController extends Controller
             app(AvancesNivelService::class)->recalcularEncuentro($encuentro->fresh(), null, $this->usuarioActual());
         });
 
-        return redirect()->route('encuentros.show', $encuentro)->with('success', 'Asistencia y pagos actualizados.');
+        return redirect()->route('encuentros.show', $encuentro)->with('success', __('mensajes.asistencia_pagos_actualizados'));
     }
 
     private function personasDisponibles()

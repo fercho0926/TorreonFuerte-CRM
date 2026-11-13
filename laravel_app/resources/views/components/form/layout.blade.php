@@ -28,7 +28,7 @@
     @if($conErrores)
         @php($mensajesVistos = [])
         <div class="alert alert-danger fm-resumen" role="alert" data-resumen-servidor>
-            <strong>Revisa los campos marcados:</strong>
+            <strong>{{ __('interfaz.revisa_los_campos_marcados') }}</strong>
             <ul>
                 @foreach($errors->keys() as $campoConError)
                     @php($mensaje = $errors->first($campoConError))
@@ -44,7 +44,7 @@
     @endif
 
     @if($leyenda && in_array($modo, ['completo'], true))
-        <p class="fm-leyenda"><span class="fm-req-marca">*</span> Campo obligatorio</p>
+        <p class="fm-leyenda"><span class="fm-req-marca">*</span> {{ __('interfaz.campo_obligatorio') }}</p>
     @endif
 
     @if(in_array($modo, ['filtro', 'linea'], true))

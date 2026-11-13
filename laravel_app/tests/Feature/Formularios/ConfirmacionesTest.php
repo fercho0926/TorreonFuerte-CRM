@@ -37,7 +37,7 @@ class ConfirmacionesTest extends TestCase
             route('celulas.show', $this->A['celula']) => ['¿Quitar a este miembro de la célula?'],
             route('celulas.index') => ['¿Eliminar esta célula?'],
             route('eventos.index') => ['¿Eliminar este evento?'],
-            route('eventos.show', $this->A['evento']) => ['¿Eliminar este abono?'],
+            route('eventos.show', [$this->A['evento'], 'pestana' => 'asistencia']) => ['¿Eliminar este abono?'],
             route('encuentros.index') => ['¿Eliminar este encuentro?'],
             route('ministerios.index') => ['¿Eliminar este ministerio?'],
             route('users.index') => ['¿Eliminar usuario?'],
@@ -60,7 +60,7 @@ class ConfirmacionesTest extends TestCase
         $this->armarDosSedes();
         $this->comoAdminEnSede($this->A['sede']);
 
-        $html = $this->get(route('eventos.show', $this->A['evento']))->getContent();
+        $html = $this->get(route('eventos.show', [$this->A['evento'], 'pestana' => 'asistencia']))->getContent();
 
         $this->assertStringContainsString('Se borrará el abono de $10,000.00', $html);
         $this->assertStringContainsString('data-confirm-peligro="1"', $html);

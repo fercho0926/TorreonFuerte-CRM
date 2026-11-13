@@ -63,7 +63,7 @@ class RolesController extends Controller
         $duplicado = $request->filled('duplicado_de') && Rol::where('clave', $request->input('duplicado_de'))->exists();
         $rol = $this->roles->crear($request->safe()->only(['nombre', 'descripcion', 'alcance', 'asignable']), $request->niveles(), $this->usuarioActual(), $duplicado ? 'duplicado' : 'creado');
 
-        return redirect()->route('roles.show', $rol)->with('success', 'Rol «'.$rol->nombre.'» creado correctamente.');
+        return redirect()->route('roles.show', $rol)->with('success', __('mensajes.rol_creado', ['nombre' => $rol->nombre]));
     }
 
     public function edit(Rol $rol)
@@ -101,7 +101,7 @@ class RolesController extends Controller
 
         $rol = $this->roles->actualizar($rol, $datos, $niveles, $this->usuarioActual());
 
-        return redirect()->route('roles.show', $rol)->with('success', 'Rol «'.$rol->nombre.'» actualizado correctamente.');
+        return redirect()->route('roles.show', $rol)->with('success', __('mensajes.rol_actualizado', ['nombre' => $rol->nombre]));
     }
 
     public function destroy(Rol $rol)
@@ -118,7 +118,7 @@ class RolesController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return redirect()->route('roles.index')->with('success', 'Rol «'.$rol->nombre.'» eliminado.');
+        return redirect()->route('roles.index')->with('success', __('mensajes.rol_eliminado', ['nombre' => $rol->nombre]));
     }
 
     public function show(Request $request, Rol $rol)

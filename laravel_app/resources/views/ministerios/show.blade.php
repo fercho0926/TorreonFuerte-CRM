@@ -6,9 +6,9 @@
 
 @section('page-actions')
     @puedeModulo('ministerios', 'escritura')
-        <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-primary">Editar</a>
+        <a href="{{ route('ministerios.edit', $ministerio) }}" class="btn btn-primary">{{ __('interfaz.editar') }}</a>
     @endpuedeModulo
-    <a href="{{ route('ministerios.index') }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ route('ministerios.index') }}" class="btn btn-outline-secondary">{{ __('interfaz.volver') }}</a>
 @endsection
 
 @section('content')
@@ -23,21 +23,21 @@
     </div>
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Encargado</dt>
+            <dt class="col-sm-3">{{ __('interfaz.encargado') }}</dt>
             <dd class="col-sm-9">
                 @if($ministerio->encargado)
                     {{ $ministerio->encargado->nombre_completo }}
                 @else
-                    <span class="text-muted">Sin encargado asignado</span>
+                    <span class="text-muted">{{ __('interfaz.sin_encargado_asignado') }}</span>
                 @endif
             </dd>
 
-            <dt class="col-sm-3">Estado</dt>
+            <dt class="col-sm-3">{{ __('interfaz.estado') }}</dt>
             <dd class="col-sm-9">
                 <x-ui.estado :valor="$ministerio->estado" />
             </dd>
 
-            <dt class="col-sm-3">Descripción</dt>
+            <dt class="col-sm-3">{{ __('interfaz.descripcion') }}</dt>
             <dd class="col-sm-9">{{ $ministerio->descripcion ?? '—' }}</dd>
         </dl>
     </div>

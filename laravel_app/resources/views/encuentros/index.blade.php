@@ -6,7 +6,7 @@
 
 @section('page-actions')
     @puedeModulo('encuentros', 'escritura')
-    <a href="{{ route('encuentros.create') }}" class="btn btn-primary">Crear encuentro</a>
+    <a href="{{ route('encuentros.create') }}" class="btn btn-primary">{{ __('interfaz.crear_encuentro') }}</a>
     @endpuedeModulo
 @endsection
 

@@ -6,7 +6,7 @@
 
 @puede('designarLider')
     @section('page-actions')
-            <a href="{{ route('lideres.designar') }}" class="btn btn-primary">Designar líder</a>
+            <a href="{{ route('lideres.designar') }}" class="btn btn-primary">{{ __('interfaz.designar_lider') }}</a>
     @endsection
 @endpuede
 

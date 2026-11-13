@@ -16,16 +16,16 @@
     <x-form.section :titulo="$lider->nombre_completo" descripcion="Al quitar el rol no se elimina al miembro. Esto es lo que quedaría sin líder." icono="fa-user-tie" id="seccion-impacto">
         <div class="col-12">
             <ul>
-                <li><strong>{{ $impacto['personas'] }}</strong> miembro(s) a su cargo</li>
-                <li><strong>{{ $impacto['celulas'] }}</strong> célula(s)</li>
+                <li><strong>{{ $impacto['personas'] }}</strong> {{ __('interfaz.miembro_s_a_su_cargo') }}</li>
+                <li><strong>{{ $impacto['celulas'] }}</strong> {{ __('interfaz.celula_s') }}</li>
             </ul>
             @if($personas->isNotEmpty())
-                <details class="mb-2"><summary>Ver miembros</summary>
+                <details class="mb-2"><summary>{{ __('interfaz.ver_miembros') }}</summary>
                     <ul>@foreach($personas as $p)<li>{{ $p->nombre_completo }}</li>@endforeach</ul>
                 </details>
             @endif
             @if($celulas->isNotEmpty())
-                <details class="mb-3"><summary>Ver células</summary>
+                <details class="mb-3"><summary>{{ __('interfaz.ver_celulas') }}</summary>
                     <ul>@foreach($celulas as $c)<li>{{ $c->nombre }}</li>@endforeach</ul>
                 </details>
             @endif

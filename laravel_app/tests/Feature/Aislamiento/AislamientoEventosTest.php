@@ -26,7 +26,7 @@ class AislamientoEventosTest extends TestCase
     public function test_eventos_inscripciones_y_pagos_solo_de_la_sede_propia(): void
     {
         $this->get(route('eventos.index'))->assertOk()->assertSee('Evento Alfa')->assertDontSee('Evento Beta');
-        $this->get(route('eventos.show', $this->A['evento']))->assertOk()->assertSee('PersonaAlfa')->assertDontSee('PersonaBeta');
+        $this->get(route('eventos.show', [$this->A['evento'], 'pestana' => 'asistencia']))->assertOk()->assertSee('PersonaAlfa')->assertDontSee('PersonaBeta');
 
         $this->get(route('eventos.show', $this->B['evento']))->assertNotFound();
         $this->get(route('eventos.edit', $this->B['evento']))->assertNotFound();

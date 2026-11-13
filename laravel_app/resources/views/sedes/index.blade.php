@@ -5,7 +5,7 @@
 @section('page-title', 'Sedes')
 
 @section('page-actions')
-    <a href="{{ route('sedes.create') }}" class="btn btn-primary">Nueva sede</a>
+    <a href="{{ route('sedes.create') }}" class="btn btn-primary">{{ __('interfaz.nueva_sede') }}</a>
 @endsection
 
 @section('content')

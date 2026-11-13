@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="callout callout-info py-2 px-3 mb-3">
-    <small>Estos miembros pidieron una clave nueva desde el inicio de sesión. <strong>Paso 1:</strong> pulsa <strong>Generar clave</strong>. <strong>Paso 2:</strong> en la pantalla siguiente pulsa el botón verde <strong>Enviar por WhatsApp</strong>, que abre el chat con el mensaje listo. <strong>Paso 3:</strong> en WhatsApp pulsa enviar. El sistema no envía el mensaje por sí solo.</small>
+    <small>{{ __('interfaz.estos_miembros_pidieron_una_clave_nueva_') }} <strong>{{ __('interfaz.paso_1') }}</strong> {{ __('interfaz.pulsa') }} <strong>{{ __('interfaz.generar_clave') }}</strong>. <strong>{{ __('interfaz.paso_2') }}</strong> {{ __('interfaz.en_la_pantalla_siguiente_pulsa_el_boton_') }} <strong>{{ __('interfaz.enviar_por_whatsapp') }}</strong>{{ __('interfaz.que_abre_el_chat_con_el_mensaje_listo') }} <strong>{{ __('interfaz.paso_3') }}</strong> {{ __('interfaz.en_whatsapp_pulsa_enviar_el_sistema_no_e') }}</small>
 </div>
 
 <x-ui.grilla :grilla="$grilla" :pagina="$pagina" :estado="$estado" :por-pagina="$porPagina" :total="$total" titulo="Solicitudes" icono="fa-key">

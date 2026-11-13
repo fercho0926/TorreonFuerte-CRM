@@ -5,7 +5,7 @@
 @section('content')
 <div class="card card-outline card-primary">
     <div class="card-body login-card-body">
-        <p class="login-box-msg">Ingresa tus credenciales para iniciar sesión</p>
+        <p class="login-box-msg">{{ __('interfaz.ingresa_tus_credenciales_para_iniciar_se') }}</p>
 
         @if(session('status'))
             <div class="alert alert-success" role="status">{{ session('status') }}</div>
@@ -18,7 +18,7 @@
             </x-form.section>
         </x-form.layout>
 
-        <p class="mt-3 mb-1 text-center"><a href="{{ route('recuperacion.create') }}">¿Olvidaste tu contraseña?</a></p>
+        <p class="mt-3 mb-1 text-center"><a href="{{ route('recuperacion.create') }}">{{ __('interfaz.olvidaste_tu_contrasena') }}</a></p>
     </div>
 </div>
 @endsection

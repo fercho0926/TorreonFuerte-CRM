@@ -28,7 +28,7 @@
         </span>
         @break
     @case('detalle')
-        <details class="historial-largo"><summary>Ver detalle</summary>
+        <details class="historial-largo"><summary>{{ __('interfaz.ver_detalle') }}</summary>
             <x-historial.entrada :cambio="$cambio" />
         </details>
         @break

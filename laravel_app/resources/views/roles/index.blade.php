@@ -6,7 +6,7 @@
 
 @section('page-actions')
     @if(Route::has('roles.create'))
-        <a href="{{ route('roles.create') }}" class="btn btn-primary">Crear rol</a>
+        <a href="{{ route('roles.create') }}" class="btn btn-primary">{{ __('interfaz.crear_rol') }}</a>
     @endif
 @endsection
 

@@ -19,7 +19,7 @@
     @case('acciones')
         <x-ui.acciones-fila :ver="route('lideres.show', $lider)" :editar="route('personas.edit', $lider)" :puede-editar="\App\Support\Permisos::puede('designarLider')" :nombre="$lider->nombre_completo">
             @puede('designarLider')
-                <a href="{{ route('lideres.quitar', $lider) }}" class="btn btn-sm btn-outline-danger" title="Quitar rol" aria-label="Quitar rol de {{ $lider->nombre_completo }}"><i class="fas fa-user-minus" aria-hidden="true"></i></a>
+                <a href="{{ route('lideres.quitar', $lider) }}" class="btn btn-sm btn-outline-danger" title="{{ __('interfaz.quitar_rol') }}" aria-label="Quitar rol de {{ $lider->nombre_completo }}"><i class="fas fa-user-minus" aria-hidden="true"></i></a>
             @endpuede
         </x-ui.acciones-fila>
         @break

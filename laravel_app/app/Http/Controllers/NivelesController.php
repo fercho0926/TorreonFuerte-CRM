@@ -77,7 +77,7 @@ class NivelesController extends Controller
 
         $nivel = $this->niveles->crear($request->validated(), $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', "Nivel «{$nivel->nombre}» creado al final del plan.");
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_creado_final_plan', ['nombre' => $nivel->nombre]));
     }
 
     public function edit(Request $request, NivelFormacion $nivel)
@@ -103,7 +103,7 @@ class NivelesController extends Controller
 
         $this->niveles->actualizar($nivel, $request->validated(), $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', 'Nivel actualizado.');
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_actualizado'));
     }
 
     public function subir(NivelFormacion $nivel)
@@ -114,7 +114,7 @@ class NivelesController extends Controller
 
         $this->niveles->subir($nivel, $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', "«{$nivel->nombre}» subió una posición.");
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_subio_posicion', ['nombre' => $nivel->nombre]));
     }
 
     public function bajar(NivelFormacion $nivel)
@@ -125,7 +125,7 @@ class NivelesController extends Controller
 
         $this->niveles->bajar($nivel, $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', "«{$nivel->nombre}» bajó una posición.");
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_bajo_posicion', ['nombre' => $nivel->nombre]));
     }
 
     public function desactivar(NivelFormacion $nivel)
@@ -136,7 +136,7 @@ class NivelesController extends Controller
 
         $this->niveles->desactivar($nivel, $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', "Nivel «{$nivel->nombre}» desactivado: ya no aparece en el camino.");
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_desactivado', ['nombre' => $nivel->nombre]));
     }
 
     public function reactivar(NivelFormacion $nivel)
@@ -147,7 +147,7 @@ class NivelesController extends Controller
 
         $this->niveles->reactivar($nivel, $this->usuarioActual());
 
-        return redirect()->route('niveles.index')->with('success', "Nivel «{$nivel->nombre}» reactivado.");
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_reactivado', ['nombre' => $nivel->nombre]));
     }
 
     public function destroy(NivelFormacion $nivel)
@@ -162,6 +162,6 @@ class NivelesController extends Controller
             return redirect()->route('niveles.index')->with('error', $e->errors()['nivel'][0]);
         }
 
-        return redirect()->route('niveles.index')->with('success', 'Nivel eliminado.');
+        return redirect()->route('niveles.index')->with('success', __('mensajes.nivel_eliminado'));
     }
 }

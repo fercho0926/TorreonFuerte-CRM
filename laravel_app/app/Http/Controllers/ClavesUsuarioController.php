@@ -41,6 +41,6 @@ class ClavesUsuarioController extends Controller
             });
         }
 
-        return redirect()->route('users.index')->with('success', 'Clave marcada como enviada.');
+        return redirect()->route('users.index')->with('success', __('mensajes.clave_marcada_enviada'));
     }
 }

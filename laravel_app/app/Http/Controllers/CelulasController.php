@@ -70,7 +70,7 @@ class CelulasController extends Controller
             $this->sincronizarIntegrantes($celula, $integrantes);
         });
 
-        return redirect()->route('celulas.index')->with('success', 'Célula creada correctamente.');
+        return redirect()->route('celulas.index')->with('success', __('mensajes.celula_creada'));
     }
 
     public function show(Request $request, Celula $celula)
@@ -143,7 +143,7 @@ class CelulasController extends Controller
             }
         });
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Célula actualizada correctamente.');
+        return redirect()->route('celulas.show', $celula)->with('success', __('mensajes.celula_actualizada'));
     }
 
     public function destroy(Celula $celula)
@@ -158,7 +158,7 @@ class CelulasController extends Controller
 
         $celula->delete();
 
-        return redirect()->route('celulas.index')->with('success', 'Célula eliminada correctamente.');
+        return redirect()->route('celulas.index')->with('success', __('mensajes.celula_eliminada'));
     }
 
     public function agregarMiembro(Request $request, Celula $celula)
@@ -196,7 +196,7 @@ class CelulasController extends Controller
 
         $agregadas = count(array_diff($data['personas'], $anteriores));
 
-        return redirect()->route('celulas.show', $celula)->with('success', $agregadas === 1 ? 'Miembro agregado a la célula.' : "{$agregadas} miembros agregados a la célula.");
+        return redirect()->route('celulas.show', $celula)->with('success', $agregadas === 1 ? __('mensajes.miembro_agregado_celula') : __('mensajes.miembros_agregados_celula', ['n' => $agregadas]));
     }
 
     public function quitarMiembro(Celula $celula, Persona $persona)
@@ -216,7 +216,7 @@ class CelulasController extends Controller
             }
         });
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Miembro retirado de la célula.');
+        return redirect()->route('celulas.show', $celula)->with('success', __('mensajes.miembro_retirado_celula'));
     }
 
     public function registrarReunion(Request $request, Celula $celula)
@@ -269,7 +269,7 @@ class CelulasController extends Controller
             }
         });
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Reunión registrada correctamente.');
+        return redirect()->route('celulas.show', $celula)->with('success', __('mensajes.reunion_registrada'));
     }
 
     public function eliminarReunion(Celula $celula, CelulaReunion $reunion)
@@ -292,13 +292,13 @@ class CelulasController extends Controller
             $reunion->delete();
         });
 
-        return redirect()->route('celulas.show', $celula)->with('success', 'Reunión eliminada.');
+        return redirect()->route('celulas.show', $celula)->with('success', __('mensajes.reunion_eliminada'));
     }
 
     private function ensurePuedeVerCelula(Celula $celula)
     {
         if (!$this->alcance()->celulasVisibles($this->usuarioActual())->whereKey($celula->id)->exists()) {
-            return redirect()->route('dashboard')->with('error', 'No tienes acceso a esta célula.');
+            return redirect()->route('dashboard')->with('error', __('mensajes.sin_acceso_celula'));
         }
 
         return null;

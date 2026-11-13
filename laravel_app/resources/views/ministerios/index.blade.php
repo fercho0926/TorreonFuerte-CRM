@@ -6,7 +6,7 @@
 
 @section('page-actions')
     @puedeModulo('ministerios', 'escritura')
-    <a href="{{ route('ministerios.create') }}" class="btn btn-primary">Crear ministerio</a>
+    <a href="{{ route('ministerios.create') }}" class="btn btn-primary">{{ __('interfaz.crear_ministerio') }}</a>
     @endpuedeModulo
 @endsection
 

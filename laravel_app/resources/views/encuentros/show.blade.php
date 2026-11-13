@@ -6,9 +6,9 @@
 
 @section('page-actions')
     @puedeModulo('encuentros', 'escritura')
-        <a href="{{ route('encuentros.edit', $encuentro) }}" class="btn btn-primary">Editar</a>
+        <a href="{{ route('encuentros.edit', $encuentro) }}" class="btn btn-primary">{{ __('interfaz.editar') }}</a>
     @endpuedeModulo
-    <a href="{{ route('encuentros.index') }}" class="btn btn-outline-secondary">Volver</a>
+    <a href="{{ route('encuentros.index') }}" class="btn btn-outline-secondary">{{ __('interfaz.volver') }}</a>
 @endsection
 
 @section('content')
@@ -23,27 +23,27 @@
     </div>
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Fecha de realización</dt>
+            <dt class="col-sm-3">{{ __('interfaz.fecha_de_realizacion') }}</dt>
             <dd class="col-sm-9">{{ $encuentro->fecha_realizacion->format('Y-m-d') }}</dd>
 
-            <dt class="col-sm-3">Lugar</dt>
+            <dt class="col-sm-3">{{ __('interfaz.lugar') }}</dt>
             <dd class="col-sm-9">{{ $encuentro->lugar ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Nivel del plan</dt>
+            <dt class="col-sm-3">{{ __('interfaz.nivel_del_plan') }}</dt>
             <dd class="col-sm-9">{{ $encuentro->nivel ? $encuentro->nivel->posicion.' · '.$encuentro->nivel->nombre : '—' }}</dd>
 
-            <dt class="col-sm-3">Valor</dt>
+            <dt class="col-sm-3">{{ __('interfaz.valor') }}</dt>
             <dd class="col-sm-9">${{ number_format($encuentro->valor, 2) }}</dd>
 
-            <dt class="col-sm-3">Estado</dt>
+            <dt class="col-sm-3">{{ __('interfaz.estado') }}</dt>
             <dd class="col-sm-9">
                 <x-ui.estado :valor="$encuentro->estado" />
             </dd>
 
-            <dt class="col-sm-3">Notas</dt>
+            <dt class="col-sm-3">{{ __('interfaz.notas') }}</dt>
             <dd class="col-sm-9">{{ $encuentro->notas ?? '—' }}</dd>
 
-            <dt class="col-sm-3">Total recaudado</dt>
+            <dt class="col-sm-3">{{ __('interfaz.total_recaudado') }}</dt>
             <dd class="col-sm-9">${{ number_format($encuentro->totalRecaudado(), 2) }}</dd>
         </dl>
     </div>

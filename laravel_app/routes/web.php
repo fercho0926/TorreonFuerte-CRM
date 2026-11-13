@@ -4,7 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AvancesNivelController;
 use App\Http\Controllers\CelulasController;
 use App\Http\Controllers\EncuentrosController;
+use App\Http\Controllers\EventoInscripcionesController;
 use App\Http\Controllers\EventosController;
+use App\Http\Controllers\IdiomaController;
 use App\Http\Controllers\LideresController;
 use App\Http\Controllers\MinisteriosController;
 use App\Http\Controllers\NivelesController;
@@ -43,6 +45,7 @@ Route::get('/cambiar-clave', [CuentaController::class, 'editarClave'])->name('ca
 Route::put('/cambiar-clave', [CuentaController::class, 'actualizarClave'])->name('cambiar-clave.update');
 Route::get('/mi-cuenta', [CuentaController::class, 'mostrar'])->name('cuenta.edit');
 Route::put('/mi-cuenta/clave', [CuentaController::class, 'cambiarClave'])->name('cuenta.clave.update');
+Route::post('/idioma', [IdiomaController::class, 'update'])->name('idioma.update');
 
 Route::middleware('modulo:tablero')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
@@ -187,6 +190,10 @@ Route::middleware('modulo:eventos')->group(function () {
 
     Route::post('/eventos/{evento}/personas/{inscripcion}/pagos', [EventosController::class, 'registrarPago'])->name('eventos.pagos.store');
     Route::delete('/eventos/{evento}/personas/{inscripcion}/pagos/{pago}', [EventosController::class, 'eliminarPago'])->name('eventos.pagos.destroy');
+
+    Route::get('/eventos/{evento}/inscripciones', [EventoInscripcionesController::class, 'index'])->name('eventos.inscripciones.index');
+    Route::get('/eventos/{evento}/inscripciones/datos', [EventoInscripcionesController::class, 'datos'])->name('eventos.inscripciones.datos');
+    Route::get('/eventos/{evento}/inscripciones/exportar', [EventoInscripcionesController::class, 'exportar'])->name('eventos.inscripciones.exportar');
 });
 
 Route::middleware('modulo:ministerios')->group(function () {

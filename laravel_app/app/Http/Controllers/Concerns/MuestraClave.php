@@ -23,7 +23,7 @@ trait MuestraClave
         // completar el celular en la ficha del miembro, que es su único dueño (spec 016).
         if (Celular::limpio($objetivo->celular) === null) {
             return redirect()->route('personas.edit', $objetivo->persona_id)
-                ->with('error', "{$objetivo->name} no tiene celular de WhatsApp. Escríbelo en su ficha de miembro, guarda y vuelve a generar la clave.");
+                ->with('error', __('mensajes.sin_celular_whatsapp_generar_clave', ['nombre' => $objetivo->name]));
         }
 
         $generada = $servicio->generar($objetivo, $motivo, $preparadaPor, $solicitud, $solicitadaPor);

@@ -7,12 +7,12 @@
 @section('page-title', 'Miembros · '.$titulo)
 
 @section('page-actions')
-    <a href="{{ route('niveles.index') }}" class="btn btn-outline-secondary"><i class="fas fa-route me-1" aria-hidden="true"></i>Volver a Niveles</a>
+    <a href="{{ route('niveles.index') }}" class="btn btn-outline-secondary"><i class="fas fa-route me-1" aria-hidden="true"></i>{{ __('interfaz.volver_a_niveles') }}</a>
 @endsection
 
 @section('content')
 @if($nivel)
-    <nav class="niveles-vistas mb-3" aria-label="Qué lista ver">
+    <nav class="niveles-vistas mb-3" aria-label="{{ __('interfaz.que_lista_ver') }}">
         <ul class="nav nav-pills">
             @foreach($vistas as $clave => $etiqueta)
                 <li class="nav-item">

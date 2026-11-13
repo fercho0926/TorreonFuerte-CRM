@@ -5,7 +5,7 @@
         {{ $solicitud->user->name }}
         <small class="text-muted d-block">{{ $solicitud->user->email }}</small>
         @unless($solicitud->user->celular)
-            <small class="text-danger d-block"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Sin celular de WhatsApp: <a href="{{ route('users.edit', $solicitud->user) }}">complétalo</a> antes de generar la clave</small>
+            <small class="text-danger d-block"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> {{ __('interfaz.sin_celular_de_whatsapp') }} <a href="{{ route('users.edit', $solicitud->user) }}">{{ __('interfaz.completalo') }}</a> {{ __('interfaz.antes_de_generar_la_clave') }}</small>
         @endunless
         @break
     @case('rol')
@@ -27,7 +27,7 @@
                 :mensaje="'La contraseña actual de '.$solicitud->user->name.' dejará de servir. Se abrirá la clave para enviarla por WhatsApp.'" boton="Generar clave" variante="success" tamano="sm">
                 <i class="fab fa-whatsapp me-1" aria-hidden="true"></i>Generar clave
             </x-form.confirm>
-            <x-form.confirm :action="route('solicitudes-clave.descartar', $solicitud)" titulo="¿Descartar la solicitud?" mensaje="No se generará ninguna clave." boton="Descartar" variante="outline-secondary" tamano="sm">Descartar</x-form.confirm>
+            <x-form.confirm :action="route('solicitudes-clave.descartar', $solicitud)" titulo="¿Descartar la solicitud?" mensaje="No se generará ninguna clave." boton="Descartar" variante="outline-secondary" tamano="sm">{{ __('interfaz.descartar') }}</x-form.confirm>
         @endif
         @break
 @endswitch

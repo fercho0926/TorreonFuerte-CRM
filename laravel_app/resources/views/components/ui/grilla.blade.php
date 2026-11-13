@@ -25,7 +25,7 @@
             <x-form.input name="q" label="Buscar" icono="fa-search" :value="$estado['q'] ?? ''" ejemplo="Escribe para buscar" col="col-md-5" />
         @endif
         {{ $filtros ?? '' }}
-        <div class="col-auto fm-campo"><a href="{{ route($id.'.index') }}" class="btn btn-outline-secondary" data-grilla-limpiar>Limpiar</a></div>
+        <div class="col-auto fm-campo"><a href="{{ route($id.'.index') }}" class="btn btn-outline-secondary" data-grilla-limpiar>{{ __('interfaz.limpiar') }}</a></div>
     </x-form.layout>
 @endif
 
@@ -37,10 +37,10 @@
         </span>
         <div class="grilla-acciones">
             {{-- Solo teléfono con JavaScript: panel de filtros y orden (la tabla se ve como tarjetas). --}}
-            <button type="button" class="btn btn-outline-secondary btn-sm grilla-filtros-btn" data-grilla-filtros aria-expanded="false"><i class="fas fa-filter me-1" aria-hidden="true"></i>Filtros <span class="badge text-bg-primary" data-grilla-filtros-n>0</span></button>
-            <select class="form-select form-select-sm grilla-orden" data-grilla-orden aria-label="Ordenar por"></select>
+            <button type="button" class="btn btn-outline-secondary btn-sm grilla-filtros-btn" data-grilla-filtros aria-expanded="false"><i class="fas fa-filter me-1" aria-hidden="true"></i>{{ __('interfaz.filtros') }} <span class="badge text-bg-primary" data-grilla-filtros-n>0</span></button>
+            <select class="form-select form-select-sm grilla-orden" data-grilla-orden aria-label="{{ __('interfaz.ordenar_por') }}"></select>
             @if($exportable)
-                <a href="{{ route($id.'.exportar', $consulta) }}" class="btn btn-outline-success btn-sm" data-grilla-exportar><i class="fas fa-file-csv me-1" aria-hidden="true"></i>Exportar CSV</a>
+                <a href="{{ route($id.'.exportar', $consulta) }}" class="btn btn-outline-success btn-sm" data-grilla-exportar><i class="fas fa-file-csv me-1" aria-hidden="true"></i>{{ __('interfaz.exportar_csv') }}</a>
             @endif
         </div>
     </div>
@@ -68,13 +68,13 @@
                         <th>
                             @if($columna->filtro === \App\Grillas\Columna::FILTRO_LISTA)
                                 <select class="form-select form-select-sm" aria-label="Filtrar por {{ mb_strtolower($columna->titulo) }}" data-filtro="{{ $columna->clave }}">
-                                    <option value="">Todos</option>
+                                    <option value="">{{ __('interfaz.todos') }}</option>
                                     @foreach($columna->opciones as $valor => $texto)
                                         <option value="{{ $valor }}" @selected(($estado[$columna->clave] ?? '') === (string) $valor)>{{ $texto }}</option>
                                     @endforeach
                                 </select>
                             @elseif($columna->filtro === \App\Grillas\Columna::FILTRO_TEXTO)
-                                <input type="search" class="form-control form-control-sm" placeholder="Filtrar…" value="{{ $estado[$columna->clave] ?? '' }}" aria-label="Filtrar por {{ mb_strtolower($columna->titulo) }}" data-filtro="{{ $columna->clave }}">
+                                <input type="search" class="form-control form-control-sm" placeholder="{{ __('interfaz.filtrar') }}" value="{{ $estado[$columna->clave] ?? '' }}" aria-label="Filtrar por {{ mb_strtolower($columna->titulo) }}" data-filtro="{{ $columna->clave }}">
                             @endif
                         </th>
                     @endforeach

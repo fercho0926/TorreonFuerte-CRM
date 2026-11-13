@@ -51,7 +51,7 @@ class RegistroMiembrosQrController extends Controller
             app(\App\Services\Historial::class)->registrar($sede, $sede->registro_abierto ? 'registro_abierto' : 'registro_cerrado');
         });
 
-        return back()->with('success', $sede->registro_abierto ? 'Registro de miembros abierto.' : 'Registro de miembros cerrado.');
+        return back()->with('success', $sede->registro_abierto ? __('mensajes.registro_miembros_abierto') : __('mensajes.registro_miembros_cerrado'));
     }
 
     public function regenerar(Sede $sede)
@@ -65,7 +65,7 @@ class RegistroMiembrosQrController extends Controller
             app(\App\Services\Historial::class)->registrar($sede, 'registro_regenerado');
         });
 
-        return back()->with('success', 'Se generó un enlace nuevo; el anterior ya no funciona.');
+        return back()->with('success', __('mensajes.enlace_nuevo_generado'));
     }
 
     private function sede(Sede $sede): Sede
